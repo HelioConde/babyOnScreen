@@ -1,23 +1,32 @@
 
 const { app, BrowserWindow, ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
+
+
 let mainWindow;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1280,
+        height: 720,
         webPreferences: {
             nodeIntegration: true,
         },
+        transparent: true,
+        frame: false,
+        resizable: false
     });
+    mainWindow.maximize()
+    mainWindow.setAlwaysOnTop(true, 'screen');
+    mainWindow.setResizable(false);
     mainWindow.loadFile('index.html');
     mainWindow.on('closed', function () {
         mainWindow = null;
     });
-    mainWindow.once('ready-to-show', () => {
-        autoUpdater.checkForUpdatesAndNotify();
-    });
+    setTimeout(() => {
+        autoUpdater.checkForUpdates();
+    }, 5000);
+
 }
 
 app.on('ready', () => {

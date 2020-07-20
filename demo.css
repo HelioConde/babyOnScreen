@@ -1,0 +1,314 @@
+.ptr    {pointer-events: all}
+.no-ptr {pointer-events: none}
+
+body, div {
+  display: flex;
+  box-sizing: border-box;
+  user-select: none;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+main {
+  display: inline-block;
+  position: relative;
+}
+
+#developer{
+  position: fixed;
+  font-size: 14px;
+  display: inline-block;
+  width: 45px;
+  height: 17px;
+}
+
+.widget {
+  margin: 15vw 20vh;
+  width: 30em;
+  height: 20em;
+  align-items: center;
+  border-radius: 1em;
+  background-color: #ffffff;
+}
+
+.handle {
+  margin: 1em 0;
+  width: 1.5em;
+  height: 15em;
+  border-width: 1px;
+  border-left-width: 0;
+
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+
+  border-style: solid;
+  border-top-right-radius: 1.5em;
+  border-bottom-right-radius: 1.5em;
+  background-color: #456296;
+  color: white;
+}
+
+.widget:hover {
+  color: red;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+#char {
+  pointer-events: all;
+}
+.front1 {
+  display: inline-block;
+  background: url('./sprits/char1.png') no-repeat;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  background-position-x: 0px;
+  background-position-y: 0px;
+}
+
+.front2 {
+  display: inline-block;
+  background: url('./sprits/char1.png') no-repeat;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  background-position-x: -54px;
+  background-position-y: -2px;
+}
+
+.front3 {
+  display: inline-block;
+  background: url('./sprits/char1.png') no-repeat;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  background-position-x: -108px;
+  background-position-y: -0px;
+}
+
+.left1 {
+  display: inline-block;
+  background: url('./sprits/char1.png') no-repeat;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  background-position-x: -0px;
+  background-position-y: -52px;
+}
+
+.left2 {
+  display: inline-block;
+  background: url('./sprits/char1.png') no-repeat;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  background-position-x: -54px;
+  background-position-y: -52px;
+}
+
+.left3 {
+  display: inline-block;
+  background: url('./sprits/char1.png') no-repeat;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  background-position-x: -108px;
+  background-position-y: -52px;
+}
+
+.right1 {
+  display: inline-block;
+  background: url('./sprits/char1.png') no-repeat;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  background-position-x: -2px;
+  background-position-y: -104px;
+}
+
+.right2 {
+  display: inline-block;
+  background: url('./sprits/char1.png') no-repeat;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  background-position-x: -54px;
+  background-position-y: -104px;
+}
+
+.right3 {
+  display: inline-block;
+  background: url('./sprits/char1.png') no-repeat;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  background-position-x: -106px;
+  background-position-y: -104px;
+}
+
+.back1 {
+  display: inline-block;
+  background: url('./sprits/char1.png') no-repeat;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  background-position-x: -0px;
+  background-position-y: -156px;
+}
+
+.back2 {
+  display: inline-block;
+  background: url('./sprits/char1.png') no-repeat;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  background-position-x: -54px;
+  background-position-y: -156px;
+}
+
+.back3 {
+  display: inline-block;
+  background: url('./sprits/char1.png') no-repeat;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  background-position-x: -108px;
+  background-position-y: -156px;
+}
+
+.mamadeira {
+  display: inline-block;
+  background: url('./sprits/mamadeira.png') no-repeat;
+  overflow: hidden;
+  width: 18px;
+  height: 34px;
+  background-position-x: -0px;
+  background-position-y: -0px;
+  right: 20px;
+  bottom: 100px;
+}
+.mamadeira2 {
+  display: inline-block;
+  background: url('./sprits/mamadeira.png') no-repeat;
+  overflow: hidden;
+  width: 18px;
+  height: 34px;
+  background-position-x: -0px;
+  background-position-y: -0px;
+}
+#status {
+  position: fixed;
+  padding: 10px 11px;
+  background: white;
+  text-align: center;
+  border: 1px solid black;
+  border-top-left-radius: 100px;
+  border-top-right-radius: 100px;
+  border-bottom-right-radius: 100px;
+  display: none;
+}
+.eating {
+  display: inline-block;
+  background: url('./sprits/eating.png') no-repeat;
+  overflow: hidden;
+  width: 24px;
+  height: 34px;
+  background-position-x: -0px;
+  background-position-y: -0px;
+}
+
+.berco {
+  display: inline-block;
+  background: url('./sprits/berco.png') no-repeat;
+  overflow: hidden;
+  width: 48px;
+  height: 84px;
+  background-position-x: -0px;
+  background-position-y: -0px;
+  right: 20px;
+  bottom: 100px;
+}
+.berco2 {
+  display: inline-block;
+  background: url('./sprits/berco2.png') no-repeat;
+  overflow: hidden;
+  width: 35px;
+  height: 35px;
+  background-position-x: -0px;
+  background-position-y: -0px;
+}
+.sleep2 {
+  display: inline-block;
+  background: url('./sprits/sleep.png') no-repeat;
+  overflow: hidden;
+  width: 48px;
+  height: 84px;
+  background-position-x: -0px;
+  background-position-y: -0px;
+}
+
+.flauda {
+  display: inline-block;
+  background: url('./sprits/flauda.png') no-repeat;
+  overflow: hidden;
+  width: 35px;
+  height: 35px;
+  background-position-x: -0px;
+  background-position-y: -0px;
+  right: 20px;
+  bottom: 100px;
+}
+.flauda2 {
+  display: inline-block;
+  background: url('./sprits/flauda.png') no-repeat;
+  overflow: hidden;
+  width: 35px;
+  height: 35px;
+  background-position-x: -0px;
+  background-position-y: -0px;
+}
+#char {
+  position: fixed;
+}
+
+.button {
+  width: 80px;
+  display: inline-block;
+  background: purple;
+  transition: right 1s;
+  text-align: center;
+  color:white;
+  padding: 10px 0;
+  cursor: pointer;
+  border-top-left-radius: 100px;
+  border-bottom-left-radius: 100px;
+  border: 2px solid rgb(23, 19, 128);
+  border-right:none;
+}
+.bar {
+  position: fixed;
+  right: -65px;
+  bottom: 40px;
+  z-index: -1;
+}
+
+.bar:hover {
+  right: 0px;
+}
+
+.navBar {
+  position: fixed;
+  width: 80px;
+  display: inline-block;
+  right: 0px;
+  bottom: 85px;
+  font-size: 14px;
+  display: none;
+}

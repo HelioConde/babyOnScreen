@@ -1,7 +1,7 @@
 {
-  "name": "electron-auto-update-example",
-  "version": "1.0.1",
-  "description": "",
+  "name": "baby_on_screen",
+  "version": "0.0.0",
+  "description": "A baby passing by on your computer screen, based on the game Desktop goose",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -13,13 +13,15 @@
     "type": "git",
     "url": "https://github.com/HelioConde/GameBebe.git"
   },
-  "author": "",
+  "author": "Hélio Conde: helio.conde.contato@gmail.com",
   "license": "ISC",
   "devDependencies": {
     "electron": "^9.1.0",
     "electron-builder": "^22.7.0"
   },
   "dependencies": {
-    "electron-updater": "^4.3.1"
+    "electron-log": "^4.2.2",
+    "electron-updater": "^4.3.1",
+    "jquery": "^3.5.1"
   }
 }
