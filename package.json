@@ -1,6 +1,6 @@
 {
   "name": "baby_on_screen",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A baby passing by on your computer screen, based on the game Desktop goose",
   "main": "main.js",
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/HelioConde/GameBebe.git"
+    "url": "https://github.com/HelioConde/babyOnScreen.git"
   },
   "author": "Hélio Conde: helio.conde.contato@gmail.com",
   "license": "ISC",
