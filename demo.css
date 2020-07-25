@@ -274,6 +274,27 @@ main {
   background-position-x: -0px;
   background-position-y: -0px;
 }
+
+.remedio {
+  display: inline-block;
+  background: url('./sprits/remedio.png') no-repeat;
+  overflow: hidden;
+  width: 35px;
+  height: 35px;
+  background-position-x: -0px;
+  background-position-y: -0px;
+  right: 20px;
+  bottom: 100px;
+}
+.remedio2 {
+  display: inline-block;
+  background: url('./sprits/remedio.png') no-repeat;
+  overflow: hidden;
+  width: 35px;
+  height: 35px;
+  background-position-x: -0px;
+  background-position-y: -0px;
+}
 #char {
   position: fixed;
 }

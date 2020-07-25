@@ -1,6 +1,6 @@
 {
   "name": "baby_on_screen",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A baby passing by on your computer screen, based on the game Desktop goose",
   "main": "main.js",
   "scripts": {

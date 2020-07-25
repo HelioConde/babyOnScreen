@@ -23,7 +23,7 @@ var random = Math.floor((Math.random() * 8) + 1);
 // speed = Velocidade de animação
 let speed = 1;
 
-let timeValor = 10000;
+let timeValor = 2000;
 let timeAction = timeValor;
 // score = Log do tempo de animação para quando da Score X ele fazer uma ação
 let score = 0;
@@ -74,6 +74,10 @@ function clicks() {
   $('.diaper').mouseup(() => {
     navBar();
     diaper();
+  })
+  $('.medicine').mouseup(() => {
+    navBar();
+    medicine();
   })
   // Define o tamanho do main do tamanho da tela
   $("main").css({
@@ -291,8 +295,6 @@ function clickB() {
   });
 }
 
-
-
 function clickF() {
   $(".flauda").mousedown(() => {
     $("main").removeClass()
@@ -347,6 +349,61 @@ function clickF() {
   });
 }
 
+
+function clickME() {
+  $(".remedio").mousedown(() => {
+    $("main").removeClass()
+    $("main").addClass("ptr")
+    $("main").css({
+      'z-index': 2,
+    })
+
+    // Arrasta o char pela tela
+    $("main").mousemove((e) => {
+      $(".remedio").css({
+        'left': e.pageX - 6,
+        'top': e.pageY - 17
+      })
+    })
+    // Soltar o char na tela
+    $("main").mouseup(() => {
+      $("main").css({
+        'z-index': -1,
+      })
+
+      $("main").off("mousemove");
+      $("main").off("mouseup");
+      $("main").removeClass()
+      $("main").addClass("no-ptr")
+      if (condition == "remedio") {
+        let topChar = $("#char").offset().top
+        let leftChar = $("#char").offset().left
+
+        let topFlauda = $(".remedio").offset().top
+        let leftFlauda = $(".remedio").offset().left
+
+        if (parseFloat(topChar) <= parseFloat(topFlauda)) {
+          if (parseFloat(topChar) + 45 >= parseFloat(topFlauda)) {
+            if (parseFloat(leftChar) <= parseFloat(leftFlauda)) {
+              if (parseFloat(leftChar) + 45 >= parseFloat(leftFlauda)) {
+                $("#status").css('display', 'none');
+                score = 0;
+                $(".remedio").off("mousedown");
+                diaper();
+                var audioElement = new Audio('./som/rindo.mp3');
+                audioElement.play();
+                condition = null;
+                stateStatus = false;
+                timeAction = timeValor;
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+}
+
 function action() {
   score++
   let top = $("#char").offset().top
@@ -372,9 +429,17 @@ function action() {
     var audioElement = new Audio('./som/feliz.mp3');
     audioElement.play();
   }
+  if (score == parseFloat(timeAction) * 3) {
+    var audioElement = new Audio('./som/rindo2.mp3');
+    audioElement.play();
+  }
+  if (score == parseFloat(timeAction) * 4) {
+    var audioElement = new Audio('./som/rindo2.mp3');
+    audioElement.play();
+  }
 
-  if (score >= parseFloat(timeAction) * 3) {
-    timeAction = timeAction + 500;
+  if (score >= parseFloat(timeAction) * 5) {
+    timeAction = timeAction + 100;
     var audioElement = new Audio('./som/chorando.mp3');
     audioElement.play();
     if (stateStatus == false) {
@@ -636,6 +701,17 @@ function diaper() {
   }
 }
 
+function medicine() {
+  if (dirty != false) {
+    $("#obj").html("")
+    dirty = false;
+  } else {
+    $("#obj").html("<div style='position:fixed;' class='remedio ptr'></div>")
+    dirty = true;
+    clickME();
+  }
+}
+
 function navBar() {
   if (bar != false) {
     bar = false;
@@ -648,7 +724,7 @@ function navBar() {
 let condition = null;
 let stateStatus = false;
 function state() {
-  let status = Math.floor((Math.random() * 3) + 1);
+  let status = Math.floor((Math.random() * 4) + 1);
   if (status == 1) {
     $("#status").html("<div style='position:null;' class='status mamadeira2'></div>")
     $("#status").css('display', 'inline-block');
@@ -661,6 +737,10 @@ function state() {
     $("#status").html("<div style='position:null;' class='status flauda2'></div>")
     $("#status").css('display', 'inline-block');
     condition = 'flauda';
+  } else if (status == 4) {
+    $("#status").html("<div style='position:null;' class='status remedio2'></div>")
+    $("#status").css('display', 'inline-block');
+    condition = 'remedio';
   } else {
     $("#status").html("");
     condition = null;
@@ -681,6 +761,11 @@ function stateAnimation() {
       'left': left + 50,
     })
   } else if (condition == 'flauda') {
+    $("#status").css({
+      'top': top - 50,
+      'left': left + 50,
+    })
+  } else if (condition == 'remedio'){
     $("#status").css({
       'top': top - 50,
       'left': left + 50,
