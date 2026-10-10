@@ -153,6 +153,38 @@ async function drag(page, source, target) {
     await mobile.locator('#baby').tap();
     assert.match(await mobile.locator('#feedback').textContent(), /cartinha/i);
     await mobileContext.close();
+
+    // A reopened tab must credit wall time, even with no animation frames rendered.
+    const clockContext = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+    const background = await clockContext.newPage();
+    background.on('pageerror', error => errors.push(error.message));
+    await background.addInitScript(() => {
+      localStorage.setItem('baby-on-screen-web-v1', JSON.stringify({
+        activeSeconds: 60, savedAt: Date.now() - 120000
+      }));
+    });
+    await background.goto(BASE, { waitUntil: 'domcontentloaded' });
+    await background.waitForFunction(() => {
+      const label = document.getElementById('game-time')?.textContent || '';
+      return Number.parseInt(label, 10) >= 7;
+    }, null, { timeout: 10000 });
+    const advancing = await background.locator('#game-time').textContent();
+    assert.ok(Number.parseInt(advancing, 10) >= 7, 'two real minutes must count as six game minutes');
+    await clockContext.close();
+
+    const pausedContext = await browser.newContext();
+    const paused = await pausedContext.newPage();
+    paused.on('pageerror', error => errors.push(error.message));
+    await paused.addInitScript(() => {
+      localStorage.setItem('baby-on-screen-web-v1', JSON.stringify({
+        activeSeconds: 60, savedAt: Date.now() - 120000
+      }));
+      localStorage.setItem('baby-on-screen-web-preferences-v1', JSON.stringify({ paused: true }));
+    });
+    await paused.goto(BASE, { waitUntil: 'domcontentloaded' });
+    assert.equal(Number.parseInt(await paused.locator('#game-time').textContent(), 10), 1,
+      'paused games must not advance on resume');
+    await pausedContext.close();
     assert.deepEqual(errors, [], 'browser JS errors');
     await context.close();
     console.log('Web smoke passed. Screenshots at ' + OUT);

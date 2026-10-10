@@ -33,16 +33,20 @@
     } catch { return fallback; }
   }
   const newWebGame = () => { const baby = E.initial(); baby.needs.food = 69; return baby; };
-  let game = E.sanitize(read(stateKey, newWebGame()));
-  // Offline doesn't grow the baby: the next session resumes from the last saved age.
-  const offline = Math.max(0, Math.min(180, (Date.now() - game.savedAt) / 1000));
-  game = E.tick(game, offline, { active: false });
   const oldOptions = read(optionsKey, {});
   let options = {
     sound: oldOptions.sound === true,
     paused: oldOptions.paused === true,
     speed: E.clamp(Number(oldOptions.speed) || 1, .5, 2)
   };
+  const startedAt = Date.now();
+  const storedGame = E.sanitize(read(stateKey, newWebGame()));
+  // Restore at most 2 real hours after a closed tab. Longer gaps are bounded
+  // to avoid abrupt growth or depleted needs when returning much later.
+  let game = E.advanceClock(storedGame, (startedAt - storedGame.savedAt) / 1000,
+    { paused: options.paused });
+  game.savedAt = startedAt;
+  let lastClockAt = startedAt;
   let x = Math.round(stage.clientWidth / 2 - 48), y = Math.round(stage.clientHeight - 120);
   let vx = 0.88, vy = .48, facing = 'front';
   let draggingBaby = false, itemDrag = null, selectedItem = null;
@@ -75,7 +79,15 @@
     }
   }
 
+  function syncClock(now = Date.now()) {
+    const elapsed = Math.max(0, (now - lastClockAt) / 1000);
+    lastClockAt = Math.max(lastClockAt, now);
+    if (!options.paused && elapsed > 0) game = E.advanceClock(game, elapsed);
+    return elapsed;
+  }
+
   function save() {
+    syncClock();
     game.savedAt = Date.now();
     try {
       localStorage.setItem(stateKey, JSON.stringify(game));
@@ -450,6 +462,7 @@
   $('scene-sound').addEventListener('click', toggleSound);
   syncSoundControls();
   $('pause').addEventListener('click', () => {
+    syncClock(); // Credit the elapsed time before changing pause mode.
     options.paused = !options.paused;
     $('pause').textContent = options.paused ? '▶ Continuar' : '⏸ Pausar';
     $('pause').setAttribute('aria-pressed', String(options.paused));
@@ -475,14 +488,15 @@
     try {
       const loaded = E.importSave(await file.text());
       if (!window.confirm('Substituir o progresso atual pelo progresso deste arquivo?')) return;
-      game = loaded; animationStage = ''; memoryCount = -1; lastUrgency = 'calm';
+      game = loaded; lastClockAt = Date.now(); game.savedAt = lastClockAt;
+      animationStage = ''; memoryCount = -1; lastUrgency = 'calm';
       speak('return'); updateUI(); save();
       setFeedback('Progresso importado! Bem-vinda de volta, amiguinha! 💕');
     } catch (err) { setFeedback('Não foi possível importar: ' + err.message); }
   });
   $('reset').addEventListener('click', () => {
     if (!window.confirm('Apagar o progresso desta bebê e começar uma nova história?')) return;
-    game = newWebGame();
+    game = newWebGame(); lastClockAt = Date.now(); game.savedAt = lastClockAt;
     animationStage = ''; memoryCount = -1; lastUrgency = 'calm';
     clearSelected(); updateUI(); speak('return'); save();
     setFeedback('Uma nova vida começou! Gugu dada! 💕');
@@ -490,18 +504,31 @@
 
   window.addEventListener('resize', () => { bounds(); place(); });
   document.addEventListener('visibilitychange', () => {
+    syncClock(); // Background tabs stop rendering, but their clock keeps running.
     lastTime = performance.now();
     if (document.hidden) save();
-    else { speak('return'); lastTime = performance.now(); }
+    else { updateUI(); save(); speak('return'); }
+  });
+  window.addEventListener('focus', () => {
+    syncClock();
+    if (!document.hidden) { updateUI(); save(); }
+  });
+  window.addEventListener('pageshow', event => {
+    if (!event.persisted) return;
+    syncClock(); // bfcache restores without running the normal startup path.
+    updateUI(); save();
   });
   window.addEventListener('pagehide', save);
-  setInterval(save, 15000);
+  setInterval(() => {
+    save(); // Timers may throttle; syncClock settles any missed wall time.
+    if (!document.hidden) updateUI();
+  }, 15000);
 
   function loop(now) {
     const dt = Math.min(.11, Math.max(0, (now - lastTime) / 1000));
     lastTime = now;
+    syncClock(); // Real timestamps, independent of throttled requestAnimationFrame.
     if (!options.paused) {
-      game = E.tick(game, dt * 3);
       if (!draggingBaby && !itemDrag && now > busyUntil && !reducedMotion.matches) {
         if (now > nextTurn) {
           const heading = Math.random() * Math.PI * 2;

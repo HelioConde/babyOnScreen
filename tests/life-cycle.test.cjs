@@ -130,3 +130,30 @@ test('album migra lembranças antigas e ignora contadores inválidos', () => {
   assert.equal(E.memorySummary(sanitized).total, 6);
   assert.equal(E.memorySummary(sanitized).groups.length, 1);
 });
+
+test('o relógio real avança a idade mesmo quando a aba não renderiza quadros', () => {
+  const initial = E.initial(1000);
+  const progressed = E.advanceClock(initial, 120);
+  assert.equal(progressed.activeSeconds, 360); // Same 3× speed as normal gameplay
+  assert.equal(progressed.lifeSeconds, 360);
+  assert.equal(initial.activeSeconds, 0, 'original state is immutable');
+  assert.ok(progressed.needs.food < initial.needs.food);
+});
+test('o relógio limita ausência longa, não conta tempo negativo e respeita pausa', () => {
+  const state = E.initial(1000);
+  const gap = E.advanceClock(state, 7200);
+  assert.equal(gap.activeSeconds, 21600);
+  assert.ok(gap.needs.food > 60, 'needs decay capped to three game minutes on one long gap');
+  assert.equal(E.advanceClock(state, 86400).activeSeconds, gap.activeSeconds);
+  assert.equal(E.advanceClock(state, -100).activeSeconds, 0);
+  assert.equal(E.advanceClock(state, 120, { paused: true }).activeSeconds, 0);
+});
+test('relógio offline preserva progresso no arquivo exportado e novas conquistas', () => {
+  const state = E.initial(1000);
+  state.careCount = 65;
+  const next = E.advanceClock(state, 1800);
+  assert.equal(E.ageStage(next).id, 'toddler');
+  const copy = E.importSave(E.exportSave(next));
+  assert.equal(copy.activeSeconds, next.activeSeconds);
+  assert.ok(copy.achievements.includes('first-steps'));
+});

@@ -222,6 +222,20 @@
     unlock(s);
     return s;
   }
+  // Clock reconciliation when browsers throttle or suspend animation frames.
+  // Progress uses elapsed wall time; needs decay is capped for a single long gap.
+  function advanceClock(input, elapsedSeconds, opts = {}) {
+    const seconds = clamp(Number(elapsedSeconds) || 0, 0, 7200);
+    const state = sanitize(input);
+    if (!seconds || opts.paused === true) return state;
+    const scaled = seconds * 3; // Preserve the web game's current 3x game-time rate.
+    const needsSeconds = Math.min(scaled, 180);
+    const next = tick(state, needsSeconds, { active: false });
+    next.activeSeconds = clamp(next.activeSeconds + scaled, 0, 100000000);
+    next.lifeSeconds = clamp(next.lifeSeconds + scaled, 0, 100000000);
+    unlock(next);
+    return next;
+  }
   function ready(input, key, now) {
     const s = sanitize(input);
     return finite(now, Date.now(), 0, 9999999999999) >= (s.cooldowns[key] || 0);
@@ -298,7 +312,7 @@
   }
   return Object.freeze({
     VERSION, defaults, stages, actions, activities, schoolSubjects, speech,
-    initial, sanitize, tick, care, interact, school, ageStage, ageDays, level, concern, urgency,
+    initial, sanitize, tick, advanceClock, care, interact, school, ageStage, ageDays, level, concern, urgency,
     speak, ready, exportSave, importSave, memorySummary, clamp
   });
 });
