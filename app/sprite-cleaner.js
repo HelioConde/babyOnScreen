@@ -7,7 +7,11 @@
   const SIZE = 224;
 
   function isRedMatte(r, g, b) {
-    return r >= 155 && g <= 108 && b <= 105 && r > g * 1.7 && r > b * 1.55;
+    // Old test r>=155/g<=108 also matched auburn hair (e.g. 184,78,45)
+    // and punched transparent holes through the head. Only near-pure red
+    // extraction marks qualify. Brown hair, warm shadows and pink bows do not.
+    return r >= 190 && g <= 54 && b <= 58 &&
+      r - g >= 145 && r - b >= 145;
   }
 
   function cleanPixels(w, h, data, { isolate = true } = {}) {
@@ -15,6 +19,7 @@
         !data || data.length !== w * h * 4) throw new Error("Invalid sprite pixels");
     const size = w * h, labels = new Int32Array(size), queue = new Int32Array(size);
     let removedMatte = 0, removedLoose = 0, best = 0, bestSize = 0, components = 0;
+    const regions = [null];
     for (let i = 0; i < size; i++) {
       const p = i * 4;
       if (data[p + 3] && isRedMatte(data[p], data[p + 1], data[p + 2])) {
@@ -26,9 +31,12 @@
         if (labels[i] || data[i * 4 + 3] < 20) continue;
         const id = ++components;
         let head = 0, tail = 1;
+        let xMin = w, yMin = h, xMax = 0, yMax = 0;
         queue[0] = i; labels[i] = id;
         while (head < tail) {
           const pos = queue[head++], x = pos % w, y = Math.floor(pos / w);
+          xMin = Math.min(xMin, x); yMin = Math.min(yMin, y);
+          xMax = Math.max(xMax, x); yMax = Math.max(yMax, y);
           for (let dy = -1; dy <= 1; dy++) {
             const yy = y + dy; if (yy < 0 || yy >= h) continue;
             for (let dx = -1; dx <= 1; dx++) {
@@ -41,11 +49,28 @@
             }
           }
         }
+        regions[id] = { xMin, yMin, xMax, yMax, count: tail };
         if (tail > bestSize) { bestSize = tail; best = id; }
       }
       if (bestSize > 30) {
+        const body = regions[best];
+        // Nearby detached details may be hair strands, bow highlights, fingers
+        // or toes. Keep those instead of blindly deleting every smaller island.
+        // Remote disconnected scraps from neighboring sprites are removed.
+        const margin = Math.max(1, Math.round(Math.min(w, h) * 0.045));
+        const keep = new Uint8Array(components + 1);
+        keep[best] = 1;
+        for (let id = 1; id <= components; id++) {
+          if (id === best) continue;
+          const region = regions[id];
+          if (region.xMin <= body.xMax + margin &&
+              region.xMax >= body.xMin - margin &&
+              region.yMin <= body.yMax + margin &&
+              region.yMax >= body.yMin - margin) keep[id] = 1;
+        }
         for (let i = 0; i < size; i++) {
-          if (data[i * 4 + 3] && labels[i] !== best) {
+          const label = labels[i];
+          if (label && !keep[label] && data[i * 4 + 3]) {
             data[i * 4 + 3] = 0; removedLoose++;
           }
         }

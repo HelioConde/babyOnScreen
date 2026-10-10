@@ -111,6 +111,48 @@ async function drag(page, source, target) {
       assert.ok(result.opaque > 1200, result.file + ': baby should remain visible');
       assert.equal(result.red, 0, result.file + ': red background artifacts removed');
     }
+    // Real assets regression: previously the broad red mask erased auburn hair.
+    // Compare the alpha channel before/after cleanup using the SAME coordinates.
+    const hair = await page.evaluate(async () => {
+      const files = [
+        'crescimento/element_001.png',
+        'crescimento/element_009.png',
+        'crescimento/element_030.png',
+        'alimentacao/element_002.png',
+        'sono/element_007.png'
+      ];
+      const results = [];
+      for (const filename of files) {
+        const image = new Image();
+        image.src = '../assets/sprites/generated/' + filename;
+        await image.decode();
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth; canvas.height = image.naturalHeight;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(image, 0, 0);
+        const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const raw = new Uint8ClampedArray(pixels.data);
+        window.BabySpriteCleaner.cleanPixels(canvas.width, canvas.height, pixels.data);
+        let brown = 0, preserved = 0;
+        for (let i = 0; i < raw.length; i += 4) {
+          const r = raw[i], g = raw[i + 1], b = raw[i + 2];
+          if (raw[i + 3] > 150 && r >= 105 && r <= 235 &&
+            g >= 57 && g <= 135 && b <= 105 &&
+            r > g * 1.18 && r > b * 1.24) {
+            brown++;
+            if (pixels.data[i + 3] > 150) preserved++;
+          }
+        }
+        results.push({ filename, brown, preserved });
+      }
+      return results;
+    });
+    for (const result of hair) {
+      assert.ok(result.brown > 120, result.filename + ': brown hair reference pixels found');
+      assert.ok(result.preserved / result.brown >= 0.96,
+        result.filename + ': brown hair must stay opaque after cleanup ' +
+        JSON.stringify(result));
+    }
     const manifest = await page.evaluate(() => window.BabySpriteManifest.newborn);
     for (const item of ['letter', 'drawing', 'medicine']) {
       assert.equal(manifest[item]?.down?.filename, 'crawl_sheet.webp',

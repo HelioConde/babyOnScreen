@@ -46,3 +46,45 @@ test('legacy fallback with hand-curated frame coordinates retains its original l
   assert.equal(result.components,0);
   assert.equal(isRedMatte(250,90,160),false);
 });
+
+test('cabelo castanho-avermelhado continua opaco após retirar vermelho puro', () => {
+  const width = 24, height = 24;
+  const data = new Uint8ClampedArray(width * height * 4);
+  for (let y = 4; y <= 18; y++) {
+    for (let x = 4; x <= 18; x++) {
+      setPixel(data, width, x, y, [185, 78, 43, 255]); // tom de cabelo confundido antes
+    }
+  }
+  setPixel(data, width, 8, 8, [210, 88, 53, 255]); // reflexo avermelhado natural
+  setPixel(data, width, 9, 8, [169, 65, 38, 255]); // sombra castanha
+  setPixel(data, width, 3, 7, [239, 14, 20, 255]); // resíduo vermelho conectado ao cabelo
+  setPixel(data, width, 23, 23, [239, 14, 20, 255]); // resíduo vermelho distante
+  const result = cleanPixels(width, height, data);
+  assert.equal(result.removedMatte, 2);
+  assert.equal(alpha(data, width, 3, 7), 0);
+  assert.equal(alpha(data, width, 23, 23), 0);
+  assert.equal(alpha(data, width, 8, 8), 255);
+  assert.equal(alpha(data, width, 9, 8), 255);
+  assert.equal(alpha(data, width, 13, 11), 255);
+  assert.equal(isRedMatte(185, 78, 43), false);
+  assert.equal(isRedMatte(210, 88, 53), false);
+  assert.equal(isRedMatte(239, 14, 20), true);
+});
+
+test('mantém mechas próximas ao cabelo, removendo fragmentos distantes', () => {
+  const width = 80, height = 80;
+  const data = new Uint8ClampedArray(width * height * 4);
+  for (let y = 25; y < 51; y++) {
+    for (let x = 26; x < 52; x++) setPixel(data, width, x, y, [177, 92, 56, 255]);
+  }
+  // Real hair curls may be disconnected by antialiasing; both strands stay.
+  setPixel(data, width, 24, 30, [166, 80, 43, 255]);
+  setPixel(data, width, 25, 30, [171, 86, 47, 255]);
+  setPixel(data, width, 54, 45, [157, 78, 45, 255]);
+  setPixel(data, width, 3, 5, [40, 70, 210, 255]); // unrelated sprite fragment
+  const r = cleanPixels(width, height, data);
+  assert.equal(alpha(data, width, 24, 30), 255);
+  assert.equal(alpha(data, width, 54, 45), 255);
+  assert.equal(alpha(data, width, 3, 5), 0);
+  assert.equal(r.removedLoose, 1);
+});
