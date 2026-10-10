@@ -30,6 +30,13 @@
   const crawlingLeft = Object.freeze({ ...sequence("crescimento", [15, 16, 17], 5), frames: crawlingFrames });
   const crawlingRight = Object.freeze({ ...sequence("crescimento", [15, 16, 17], 5, true), frames: crawlingFrames });
   const crawlingFront = Object.freeze({ ...sequence("crescimento", [18, 19, 21], 5), frames: crawlFrontFrames });
+  // Calm, stationary pose during reading, drawing and medical care.
+  // Without an explicit entry, the newborn would abruptly revert to its swaddle.
+  const calmCrawl = Object.freeze({
+    ...sequence("crescimento", [19], 1),
+    frames: [{ imageIndex: 0, x: 16, y: 0, w: 144, h: 171 }]
+  });
+  const calmToddler = sequence("crescimento", [11], 1);
   const walkingRight = sequence("crescimento", [30, 31, 30, 32], 5);
   const walkingLeft = sequence("crescimento", [30, 31, 30, 32], 5, true);
 
@@ -46,6 +53,9 @@
       sleep: { down: sleeping },
       diaper: { down: diaper },
       toy: { down: playing },
+      letter: { down: calmCrawl },
+      drawing: { down: calmCrawl },
+      medicine: { down: calmCrawl },
       pet: { down: petting }
     },
     baby: {
@@ -60,6 +70,9 @@
       sleep: { down: sleeping },
       diaper: { down: diaper },
       toy: { down: playing },
+      letter: { down: calmCrawl },
+      drawing: { down: calmCrawl },
+      medicine: { down: calmCrawl },
       pet: { down: petting }
     },
     toddler: {
@@ -73,6 +86,9 @@
       sleep: { down: sleeping },
       diaper: { down: diaper },
       toy: { down: playing },
+      letter: { down: calmToddler },
+      drawing: { down: calmToddler },
+      medicine: { down: calmToddler },
       pet: { down: petting }
     }
   });
