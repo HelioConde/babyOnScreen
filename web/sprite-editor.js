@@ -44,6 +44,16 @@
     });
     return database;
   }
+  async function listDrafts() {
+    const db = await openDatabase();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction("sprites", "readonly");
+      const req = tx.objectStore("sprites").getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error || new Error("Falha ao listar edições"));
+    });
+  }
+
   async function getDraft(key) {
     try {
       const db = await openDatabase();
@@ -374,6 +384,82 @@
     document.body.style.overflow = "";
   }
 
+  async function exportAll() {
+    const status = $("export-status");
+    const button = $("export-edits");
+    if (!global.BabySpriteZip) throw new Error("Exportador ZIP não carregado");
+    button.disabled = true;
+    try {
+      status.textContent = "Lendo todas as edições salvas…";
+      const drafts = await listDrafts();
+      if (!drafts.length) {
+        status.textContent = "Ainda não há sprites editados salvos neste navegador.";
+        return;
+      }
+      const files = [], changes = [];
+      const ordered = drafts.slice().sort((a, b) => String(a.path).localeCompare(String(b.path)));
+      for (const draft of ordered) {
+        if (!draft?.blob || typeof draft.path !== "string")
+          throw new Error("Rascunho incompleto: confira o armazenamento");
+        const { sourcePath, exportPath, requiresManifestUpdate } = global.BabySpriteZip.entryInfo(draft.path);
+        if (draft.blob.type !== "image/png")
+          throw new Error("A edição precisa estar salva como PNG: " + sourcePath);
+        const pngHead = new Uint8Array(await draft.blob.slice(0, 8).arrayBuffer());
+        if (pngHead.length < 8 || pngHead.some((b, i) => b !== [137,80,78,71,13,10,26,10][i]))
+          throw new Error("PNG inválido no rascunho: " + sourcePath);
+        files.push({ name: exportPath, blob: draft.blob });
+        changes.push({
+          original: sourcePath, file: exportPath, width: draft.width, height: draft.height,
+          savedAt: new Date(draft.updatedAt || Date.now()).toISOString(),
+          needsManifestChange: requiresManifestUpdate
+        });
+      }
+      const manifest = {
+        format: "baby-on-screen-sprite-edits-v1",
+        exportedAt: new Date().toISOString(),
+        total: changes.length,
+        note: "Edições locais do navegador. PNGs preservam os caminhos do GitHub; arquivos WebP editados precisam de ajuste no manifesto.",
+        changes
+      };
+      files.push({ name: "sprite-edits-manifest.json", text: JSON.stringify(manifest, null, 2) + "\n" });
+      status.textContent = "Montando " + drafts.length + " PNGs em um único ZIP…";
+      const archive = await global.BabySpriteZip.createZip(files);
+      const filename = "babyonscreen-sprites-editados-" + new Date().toISOString().slice(0, 10) + ".zip";
+      const url = URL.createObjectURL(archive);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 30000);
+      status.textContent = "✓ " + drafts.length + " PNGs reunidos em " + filename +
+        " (" + (archive.size / 1024 / 1024).toFixed(1) + " MB). Envie este único ZIP aqui no ChatGPT.";
+    } catch (error) {
+      status.textContent = "⚠ Não foi possível exportar: " + (error?.message || "erro inesperado");
+    } finally {
+      button.disabled = false;
+    }
+  }
+  async function refreshDraftCount() {
+    const status = $("export-status"), button = $("export-edits");
+    try {
+      const drafts = await listDrafts();
+      $("edited-count").textContent = String(drafts.length);
+      button.disabled = drafts.length === 0;
+      if (!status.textContent.startsWith("✓") && !status.textContent.startsWith("⚠"))
+        status.textContent = drafts.length
+          ? "Pronto: suas edições estão salvas no navegador."
+          : "Nenhuma edição salva ainda. Use ✎ Editar sprite.";
+      return drafts.length;
+    } catch {
+      $("edited-count").textContent = "—";
+      button.disabled = true;
+      status.textContent = "Armazenamento indisponível neste navegador.";
+      return 0;
+    }
+  }
+
   for (const btn of modal.querySelectorAll("[data-edit-tool]")) {
     btn.addEventListener("click", () => setTool(btn.dataset.editTool));
   }
@@ -395,6 +481,9 @@
   controls.download.addEventListener("click", download);
   controls.reset.addEventListener("click", reset);
   controls.close.addEventListener("click", close);
+  $("export-edits").addEventListener("click", exportAll);
+  global.addEventListener("baby:sprite-edited", () => { void refreshDraftCount(); });
+  global.addEventListener("focus", () => { void refreshDraftCount(); });
   modal.addEventListener("keydown", event => {
     if (event.key === "Escape") { event.preventDefault(); void close(); }
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
@@ -408,8 +497,9 @@
   setTool("erase");
   updateHistory();
   global.BabySpriteEditor = Object.freeze({
-    open: edit, getDraft, isOpen,
+    open: edit, getDraft, listDrafts, exportAll, refreshDraftCount, isOpen,
     // Exposed for automated tests; no mutations on GitHub.
     currentPath: () => path
   });
+  void refreshDraftCount();
 })(window);

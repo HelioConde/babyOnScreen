@@ -16,3 +16,17 @@ h1,h2,h3,p{margin:0}h1,h2,h3{font-family:Nunito,system-ui,sans-serif;letter-spac
 @media(max-width:980px){.workspace{display:block}.sidebar{position:static;min-height:0;border-bottom:1px solid var(--border);border-right:0;display:grid;grid-template-columns:minmax(180px,1.3fr) repeat(2,minmax(120px,1fr));gap:8px 18px;align-items:end}.sidebar-intro{grid-row:span 3;align-self:start}.summary-cards{margin:4px 0;grid-column:2/4}.filter-block{margin:0}.filter-pair{gap:8px}.sidebar-note{grid-column:1/-1;margin-top:2px;padding-top:10px}.reset-filters{margin:0}.content-layout{grid-template-columns:minmax(0,1fr) minmax(290px,340px)}.inspector{position:static}}
 @media(max-width:760px){.read-only{display:none}.workspace{display:block}.sidebar{display:block;padding:18px}.sidebar-intro{margin-bottom:13px}.sidebar-intro h1{font-size:21px}.summary-cards{margin:12px 0}.sidebar-note{margin-top:14px}.main-content{padding:19px 12px}.content-header{display:block;margin-bottom:14px}.view-switch{margin-top:13px}.content-layout{display:flex;flex-direction:column;gap:13px}.inspector{order:0;width:100%}.library-pane{order:1;width:100%}.sprite-grid{grid-template-columns:repeat(auto-fill,minmax(125px,1fr))}.preview-stage{min-height:225px}.inspector h3{margin-top:9px}}
 @media(max-width:410px){.brand{font-size:17px}.brand small{font-size:11px}.topbar{padding:10px}.back-link{font-size:11px}.inspector{padding:12px}.playback{gap:4px}.playback #fps{width:45px}.sprite-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Bulk export box: show the true number of browser-saved edits, not the 566 source files. */
+.bulk-export{margin:15px 0 18px;padding:13px 12px;border-radius:14px;border:1px solid #d9c5ed;
+background:linear-gradient(155deg,#f7eeff,#fffbff);box-shadow:0 7px 24px #8f67c016}
+.bulk-export-title{display:flex;gap:9px;align-items:center;margin-bottom:11px}
+.bulk-export-icon{display:grid;place-items:center;flex:none;width:34px;height:34px;background:#ead9fa;border-radius:10px;font-size:19px}
+.bulk-export-title strong{display:block;font-size:12px;color:#664b85}
+.bulk-export-title span:not(.bulk-export-icon){display:block;font-size:10px;color:#8c729b;margin-top:2px}
+.bulk-export-title b{color:#754da3;font-weight:900}
+#export-edits{width:100%;min-height:38px;background:#8c5dca;border:1px solid #8c5dca;color:#fff;border-radius:10px;padding:8px 9px;font-weight:900;font-size:11px;cursor:pointer}
+#export-edits:disabled{opacity:.52;cursor:not-allowed}
+#export-edits:focus-visible{outline:3px solid #b992e9;outline-offset:2px}
+#export-status{font-size:10px;line-height:1.55;color:#806a93;margin:9px 0 5px;overflow-wrap:anywhere}
+.bulk-help{font-size:10px;line-height:1.6;color:#9c87aa}

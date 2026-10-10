@@ -14,6 +14,7 @@
   <script defer src="../app/sprite-cleaner.js"></script>
   <script defer src="../app/sprite-manifest.js"></script>
   <script defer src="../app/sprite-admin-catalog.js"></script>
+  <script defer src="./sprite-zip.js"></script>
   <script defer src="./sprite-editor.js"></script>
   <script defer src="./admin-sprites.js"></script>
 </head>
@@ -37,6 +38,15 @@
         <div><strong id="animation-total">0</strong><span>Animações</span></div>
         <div><strong id="category-total">0</strong><span>Categorias</span></div>
       </div>
+      <section class="bulk-export" aria-label="Exportar todas as edições salvas">
+        <div class="bulk-export-title">
+          <span class="bulk-export-icon">📦</span>
+          <div><strong>Minhas edições</strong><span><b id="edited-count">—</b> sprites salvos neste navegador</span></div>
+        </div>
+        <button type="button" id="export-edits" disabled>↓ Baixar todas em um ZIP</button>
+        <p id="export-status" role="status">Buscando rascunhos salvos…</p>
+        <p class="bulk-help">Um único arquivo com todas as suas correções, preservando os nomes e pastas. Envie o ZIP aqui no ChatGPT para aplicarmos no GitHub.</p>
+      </section>
       <div class="filter-block">
         <label for="search">Buscar sprite</label>
         <input id="search" type="search" placeholder="Ex.: engatinhar, 030, fralda…" autocomplete="off">
@@ -54,7 +64,7 @@
       <div class="sidebar-note">
         <strong>Como funciona?</strong>
         <p><b>Biblioteca</b> mostra todos os arquivos do GitHub. <b>Animações</b> mostra somente as sequências usadas pelo jogo.</p>
-        <p>Abra <b>Editar sprite</b> para apagar resíduos, restaurar pixels e baixar o PNG. Rascunhos são salvos somente no seu navegador; enviar ao GitHub requer substituir o arquivo exportado.</p>
+        <p>Abra <b>Editar sprite</b> para apagar resíduos e restaurar pixels. As correções ficam neste navegador. Para publicar todas de uma vez, use <b>Minhas edições → Baixar todas em um ZIP</b>.</p>
       </div>
     </aside>
     <section class="main-content">
@@ -161,7 +171,7 @@
           </div>
           <p id="editor-save-status" class="editor-save-status" role="status">Selecione um sprite para começar.</p>
           <div class="editor-notice"><strong>Onde ficam as alterações?</strong>
-            <p>O rascunho fica salvo neste navegador (IndexedDB). Para atualizar o jogo no GitHub, baixe o PNG e substitua o arquivo original no mesmo caminho.</p>
+            <p>O rascunho fica salvo neste navegador (IndexedDB). Você também pode exportar todas as edições de uma vez em um ZIP na barra lateral, sem baixar cada PNG separadamente.</p>
             <p id="editor-info">Os arquivos originais nunca são modificados por esta página.</p>
           </div>
         </aside>
