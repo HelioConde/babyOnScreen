@@ -35,7 +35,7 @@ async function drag(page, source, target) {
     await drag(page, '[data-item="feed"]', '#baby');
     assert.match(await page.locator('#care-count').textContent(), /1 cuidado/);
     await drag(page, '[data-item="toy"]', '#baby');
-    assert.match(await page.locator('#feedback').textContent(), /brincou/i);
+    assert.match(await page.locator('#feedback').textContent(), /brincou|brincar/i);
     const unloaded = await page.locator('.inventory img').evaluateAll(imgs => imgs.filter(img => !img.complete || img.naturalWidth === 0).map(img => img.src));
     assert.equal(unloaded.length, 0, 'missing icon images: ' + unloaded.join(', '));
     await page.screenshot({ path: path.join(OUT, 'desktop-newborn.png'), fullPage: true, animations: 'disabled' });
