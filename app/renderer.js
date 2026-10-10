@@ -63,13 +63,17 @@
   const sounds = new Map();
   let spriteState = '';
   let spriteRefreshAt = 0;
+  let lastHorizontalDirection = dx >= 0 ? 'right' : 'left';
   function syncSprite(now = performance.now()) {
     if (!spriteLayer || now < spriteRefreshAt) return;
     spriteRefreshAt = now + 180;
     const stage = E.ageStage(game).id;
-    const direction = ({front:'down',back:'up',left:'left',right:'right'})[dir] || 'down';
-    const action = now < busyUntil ? careAction :
-      (draggingBaby || options.paused || reduced.matches ? 'idle' : 'walk');
+    const moving = !draggingBaby && !options.paused && !reduced.matches && now >= busyUntil;
+    if (moving && Math.abs(dx) > .08) lastHorizontalDirection = dx > 0 ? 'right' : 'left';
+    const direction = stage === 'child'
+      ? (({front:'down',back:'up',left:'left',right:'right'})[dir] || 'down')
+      : lastHorizontalDirection;
+    const action = now < busyUntil ? careAction : (moving ? 'walk' : 'idle');
     const key = [stage,direction,action].join(':');
     if (key !== spriteState) {
       spriteState = key;

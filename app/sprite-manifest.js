@@ -11,9 +11,10 @@
   });
 
   const feeding = sequence("alimentacao", [1, 2, 3, 4, 5], 5);
-  const sleeping = sequence("sono", [6, 7, 8], 2.5);
+  // Use isolated single poses: neighboring frames were contaminated by other sprites.
+  const sleeping = sequence("sono", [7], 1);
   const diaper = sequence("fralda", [9, 10, 11, 12], 3.5);
-  const playing = sequence("crescimento", [39, 40], 3);
+  const playing = sequence("crescimento", [39], 1);
   const petting = sequence("crescimento", [11, 28], 3);
   // The generated frames include stray pixels from neighboring poses.
   // Crop those edges so the baby stays visually centered when crawling.
@@ -48,20 +49,21 @@
     category: "crescimento", filename: "crawl_sheet.webp",
     frames: [crawlAtlasFrames[0]], fps: 1, fallback: oldCrawlingLeft
   });
-  const crawlingFront = Object.freeze({ ...sequence("crescimento", [18, 19, 21], 5), frames: crawlFrontFrames });
-  // Calm, stationary pose during reading, drawing and medical care.
-  // Without an explicit entry, the newborn would abruptly revert to its swaddle.
-  const calmCrawl = Object.freeze({
-    ...sequence("crescimento", [19], 1),
-    frames: [{ imageIndex: 0, x: 16, y: 0, w: 144, h: 171 }]
+  const crawlIdleRight = Object.freeze({
+    ...crawlIdle, flipX: true, fallback: oldCrawlingRight
   });
+  const calmSides = Object.freeze({
+    left: crawlIdle, right: crawlIdleRight, down: crawlIdle, up: crawlIdle
+  });
+  const crawlingFront = Object.freeze({ ...sequence("crescimento", [18, 19, 21], 5), frames: crawlFrontFrames });
+  // Care activities keep a clean crawling pose instead of contaminated cuts.
   const calmToddler = sequence("crescimento", [11], 1);
   const walkingRight = sequence("crescimento", [30, 31, 30, 32], 5);
   const walkingLeft = sequence("crescimento", [30, 31, 30, 32], 5, true);
 
   global.BabySpriteManifest = Object.freeze({
     newborn: {
-      idle: { down: crawlIdle },
+      idle: calmSides,
       walk: {
         left: crawlingLeft,
         right: crawlingRight,
@@ -74,13 +76,13 @@
       sleep: { down: sleeping },
       diaper: { down: diaper },
       toy: { down: playing },
-      letter: { down: calmCrawl },
-      drawing: { down: calmCrawl },
-      medicine: { down: calmCrawl },
+      letter: calmSides,
+      drawing: calmSides,
+      medicine: calmSides,
       pet: { down: petting }
     },
     baby: {
-      idle: { down: crawlIdle },
+      idle: calmSides,
       walk: {
         left: crawlingLeft,
         right: crawlingRight,
@@ -91,9 +93,9 @@
       sleep: { down: sleeping },
       diaper: { down: diaper },
       toy: { down: playing },
-      letter: { down: calmCrawl },
-      drawing: { down: calmCrawl },
-      medicine: { down: calmCrawl },
+      letter: calmSides,
+      drawing: calmSides,
+      medicine: calmSides,
       pet: { down: petting }
     },
     toddler: {

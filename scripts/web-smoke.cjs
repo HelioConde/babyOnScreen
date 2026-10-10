@@ -62,6 +62,11 @@ async function drag(page, source, target) {
     assert.match(await page.locator('#care-count').textContent(), /1 cuidado/);
     await drag(page, '[data-item="toy"]', '#baby');
     assert.match(await page.locator('#feedback').textContent(), /brincou|brincar/i);
+    await page.waitForFunction(() => {
+      const sprite = document.getElementById('baby-sprite');
+      const pixels = sprite.getContext('2d').getImageData(0, 0, sprite.width, sprite.height).data;
+      return !sprite.hidden && pixels.some((value, index) => index % 4 === 3 && value > 0);
+    });
     // Regression: the parent button's transform must never be animated.
     // Previously .stage-reaction animated transform, teleporting the baby
     // to the top-left when interacting with letters, drawings and toys.
@@ -84,9 +89,20 @@ async function drag(page, source, target) {
     }
     const manifest = await page.evaluate(() => window.BabySpriteManifest.newborn);
     for (const item of ['letter', 'drawing', 'medicine']) {
-      assert.ok(manifest[item]?.down?.files?.[0]?.includes('element_019.png'),
-        item + ': care must use the calm crawling pose rather than swaddled idle');
+      assert.equal(manifest[item]?.down?.filename, 'crawl_sheet.webp',
+        item + ': care must use a clean atlas frame');
     }
+    assert.deepEqual(manifest.toy.down.files, ['element_039.png'], 'toy avoids contaminated duplicate frame');
+    assert.deepEqual(manifest.sleep.down.files, ['element_007.png'], 'sleep avoids adjacent sprite fragments');
+    assert.equal(manifest.idle.right.flipX, true, 'idle must face in travel direction');
+    assert.equal(manifest.walk.right.flipX, true, 'crawling right must mirror the original left atlas');
+    const sceneSound = page.locator('#scene-sound');
+    assert.equal(await sceneSound.getAttribute('aria-pressed'), 'false');
+    await sceneSound.click();
+    assert.equal(await sceneSound.getAttribute('aria-pressed'), 'true');
+    assert.equal(await page.locator('#sound').getAttribute('aria-pressed'), 'true');
+    await page.locator('#sound').click();
+    assert.equal(await sceneSound.getAttribute('aria-pressed'), 'false');
     const unloaded = await page.locator('.inventory img').evaluateAll(imgs => imgs.filter(img => !img.complete || img.naturalWidth === 0).map(img => img.src));
     assert.equal(unloaded.length, 0, 'missing icon images: ' + unloaded.join(', '));
     await page.screenshot({ path: path.join(OUT, 'desktop-newborn.png'), fullPage: true, animations: 'disabled' });

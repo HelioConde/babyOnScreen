@@ -52,6 +52,7 @@
   let frameIndex = 1, animationStage = E.ageStage(game).id, memoryCount = -1;
   let lastUrgency = 'calm', toastTimer = null;
   let careAction = 'idle', spriteState = '', spriteRefreshAt = 0;
+  let lastHorizontalDirection = vx >= 0 ? 'right' : 'left';
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const audioCache = new Map();
 
@@ -59,8 +60,13 @@
     if (!spriteLayer || now < spriteRefreshAt) return;
     spriteRefreshAt = now + 180;
     const age = E.ageStage(game).id;
-    const direction = ({ front: 'down', back: 'up', left: 'left', right: 'right' })[facing] || 'down';
-    const moving = !options.paused && !draggingBaby && !itemDrag && !reducedMotion.matches;
+    const moving = !options.paused && !draggingBaby && !itemDrag && !reducedMotion.matches && now >= busyUntil;
+    // A diagonal path still moves horizontally. Using the old facing=front/back
+    // chose the LEFT sprite even when the baby was traveling right.
+    if (moving && Math.abs(vx) > 0.08) lastHorizontalDirection = vx > 0 ? 'right' : 'left';
+    const direction = age === 'child'
+      ? (({ front: 'down', back: 'up', left: 'left', right: 'right' })[facing] || 'down')
+      : lastHorizontalDirection;
     const action = now < busyUntil ? careAction : (moving ? 'walk' : 'idle');
     const key = [age, direction, action].join(':');
     if (key !== spriteState) {
@@ -393,13 +399,28 @@
     renderMemories();
   }
 
-  $('sound').addEventListener('click', () => {
+  function syncSoundControls() {
+    const enabled = options.sound;
+    $('sound').textContent = enabled ? '🔊 Som ligado' : '🔇 Som desligado';
+    $('sound').setAttribute('aria-pressed', String(enabled));
+    const button = $('scene-sound');
+    button.textContent = enabled ? '🔊' : '🔇';
+    button.title = enabled ? 'Som ligado' : 'Som desligado';
+    button.setAttribute('aria-label', enabled ? 'Desligar som' : 'Ligar som');
+    button.setAttribute('aria-pressed', String(enabled));
+  }
+  function toggleSound() {
     options.sound = !options.sound;
-    $('sound').textContent = options.sound ? '🔊 Som ligado' : '🔇 Som desligado';
-    $('sound').setAttribute('aria-pressed', String(options.sound));
+    if (!options.sound) {
+      for (const audio of audioCache.values()) audio.pause();
+    }
+    syncSoundControls();
     if (options.sound) play('rindo');
     save();
-  });
+  }
+  $('sound').addEventListener('click', toggleSound);
+  $('scene-sound').addEventListener('click', toggleSound);
+  syncSoundControls();
   $('pause').addEventListener('click', () => {
     options.paused = !options.paused;
     $('pause').textContent = options.paused ? '▶ Continuar' : '⏸ Pausar';
