@@ -299,7 +299,7 @@
       spriteState = ''; spriteRefreshAt = 0;
       baby.classList.remove('newborn', 'baby-stage', 'toddler', 'child');
       baby.classList.add(stageInfo.id === 'baby' ? 'baby-stage' : stageInfo.id);
-      $('hero-character').className = 'hero-character ' + (stageInfo.id === 'newborn' ? '' : stageInfo.id);
+      $('hero-character').className = 'hero-character ' + (stageInfo.id === 'newborn' ? '' : stageInfo.id) + (stageInfo.id === 'child' ? '' : ' sprite-preview');
       $('stage').classList.toggle('child-stage', stageInfo.id === 'child');
       $('stage').classList.toggle('toddler-stage', stageInfo.id === 'toddler');
       $('scene-name').textContent = stageInfo.id === 'child' ? 'Meu cantinho criativo' :
