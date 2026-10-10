@@ -57,6 +57,7 @@
   let nextSpeech = 8000, lastCry = 0, busyUntil = 0, draggingBaby = false;
   let pressX = 0, pressY = 0, offsetX = 0, offsetY = 0;
   let draggingItem = null, selectedItem = null, lastStage = '', lastUrgency = 'calm';
+  let careAction = 'idle';
   let schoolQuestion = null, schoolVisible = false, lastMemoryCount = -1;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const sounds = new Map();
@@ -67,8 +68,7 @@
     spriteRefreshAt = now + 180;
     const stage = E.ageStage(game).id;
     const direction = ({front:'down',back:'up',left:'left',right:'right'})[dir] || 'down';
-    const action = now < busyUntil ? (baby.classList.contains('sleeping') ? 'sleep' :
-      baby.classList.contains('eating') ? 'feed' : 'idle') :
+    const action = now < busyUntil ? careAction :
       (draggingBaby || options.paused || reduced.matches ? 'idle' : 'walk');
     const key = [stage,direction,action].join(':');
     if (key !== spriteState) {
@@ -149,6 +149,7 @@
     }
     const previous = E.ageStage(game).id;
     game = result.state; busyUntil = performance.now() + (name === 'sleep' ? 3200 : 1600);
+    careAction = name;
     baby.classList.remove('sleeping', 'eating');
     if (name === 'sleep') baby.classList.add('sleeping');
     if (name === 'feed') baby.classList.add('eating');
@@ -165,6 +166,7 @@
     if (selectedItem) { interact(selectedItem); return; }
     game.happiness = E.clamp(game.happiness + 2, 0, 100);
     speak('happy'); voice('feliz'); busyUntil = performance.now() + 800;
+    careAction = 'pet'; spriteRefreshAt = 0; syncSprite();
     feedback(E.ageStage(game).id === 'newborn' ? 'Ela adora seu carinho. Gugu! 💕' : 'Carinho recebido, amiga feliz!');
     save();
   }
