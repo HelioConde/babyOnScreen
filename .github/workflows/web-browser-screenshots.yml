@@ -1,0 +1,36 @@
+name: Baby On Screen - Browser screenshots
+
+on:
+  push:
+    branches: [gh-pages, feat/revival-windows-2026]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test runtime
+        run: |
+          npm install --no-save --no-audit --no-fund playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Serve GitHub Pages assets locally
+        run: python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/baby-web.log 2>&1 &
+      - name: Browser smoke and screenshots
+        run: node scripts/web-smoke.cjs
+      - name: Upload visual snapshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: baby-web-screenshots
+          path: artifacts/screenshots/*.png
+          if-no-files-found: warn
