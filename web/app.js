@@ -10,6 +10,19 @@
     baby, canvas: $('baby-sprite'), manifest: window.BabySpriteManifest, base: '..'
   }) || null;
   const speechBubble = $('speech-bubble');
+  // Clean old evolution previews as well as the sprite frames inside the game.
+  if (window.BabySpriteCleaner) {
+    const hero = $('hero-character');
+    for (const [stage, id] of [['newborn', '002'], ['baby', '005'], ['toddler', '009']]) {
+      window.BabySpriteCleaner.load('../assets/sprites/generated/crescimento/element_' + id + '.png')
+        .then(canvas => {
+          if (hero && typeof canvas.toDataURL === 'function') {
+            hero.style.setProperty('--hero-clean-' + stage,
+              'url("' + canvas.toDataURL('image/png') + '")');
+          }
+        }).catch(() => { /* Preserve original art if processing fails. */ });
+    }
+  }
   const stateKey = 'baby-on-screen-web-v1';
   const optionsKey = 'baby-on-screen-web-preferences-v1';
   const iconsPath = '../assets/icons/';

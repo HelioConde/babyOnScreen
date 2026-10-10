@@ -4,81 +4,11 @@
   const Runtime = global.BabySpriteRuntime;
   if (!Runtime) return;
 
-  // Remove disconnected fragments from automatic sprite extraction.
-  // Main character stays intact; neighboring heads, fingers and edge scraps do not.
-  function isolateMainCharacter(image) {
-    if (typeof document === "undefined") return image;
-    const canvas = document.createElement("canvas");
-    const w = image.naturalWidth || image.width;
-    const h = image.naturalHeight || image.height;
-    canvas.width = w; canvas.height = h;
-    const ctx = canvas.getContext("2d", { willReadFrequently: true });
-    if (!ctx) return image;
-    ctx.drawImage(image, 0, 0);
-    const pixels = ctx.getImageData(0, 0, w, h);
-    const data = pixels.data;
-    const labels = new Int32Array(w * h);
-    const queue = new Int32Array(w * h);
-    let biggest = 0, biggestId = 0, group = 0;
-    for (let start = 0; start < labels.length; start++) {
-      if (labels[start] || data[start * 4 + 3] < 30) continue;
-      const id = ++group;
-      let head = 0, tail = 1;
-      queue[0] = start; labels[start] = id;
-      while (head < tail) {
-        const pos = queue[head++];
-        const col = pos % w;
-        const add = neighbor => {
-          if (!labels[neighbor] && data[neighbor * 4 + 3] >= 30) {
-            labels[neighbor] = id; queue[tail++] = neighbor;
-          }
-        };
-        if (col > 0) add(pos - 1);
-        if (col + 1 < w) add(pos + 1);
-        if (pos >= w) add(pos - w);
-        if (pos + w < labels.length) add(pos + w);
-      }
-      if (tail > biggest) { biggest = tail; biggestId = id; }
-    }
-    if (!biggestId) return image;
-    for (let i = 0; i < labels.length; i++) {
-      if (labels[i] !== biggestId) data[i * 4 + 3] = 0;
-    }
-    ctx.putImageData(pixels, 0, 0);
-    return canvas;
-  }
-
   function loadImage(src) {
+    if (global.BabySpriteCleaner) return global.BabySpriteCleaner.load(src);
     return new Promise((resolve, reject) => {
       const image = new Image();
-      image.onload = () => {
-        // The toy and sleeping PNGs contain disconnected fragments from neighboring
-        // poses; select the largest real character component before caching.
-        if (/\/(?:crescimento\/element_039|sono\/element_007)\.png(?:$|\?)/.test(src)) {
-          try { resolve(isolateMainCharacter(image)); }
-          catch { resolve(image); }
-          return;
-        }
-        // Automatic sprite extraction left a pure-red matte around crawling poses.
-        // Remove only that background color; preserve the pink outfit and skin.
-        if (!/\/crescimento\/element_0(?:15|16|17|18|19|21)\.png(?:$|\?)/.test(src) ||
-            typeof document === "undefined") { resolve(image); return; }
-        try {
-          const clean = document.createElement("canvas");
-          clean.width = image.naturalWidth; clean.height = image.naturalHeight;
-          const ctx = clean.getContext("2d", { willReadFrequently: true });
-          ctx.drawImage(image, 0, 0);
-          const pixels = ctx.getImageData(0, 0, clean.width, clean.height);
-          const data = pixels.data;
-          for (let i = 0; i < data.length; i += 4) {
-            const red = data[i], green = data[i + 1], blue = data[i + 2];
-            if (red >= 170 && green <= 80 && blue <= 90 &&
-                red > green * 2 && red > blue * 1.8) data[i + 3] = 0;
-          }
-          ctx.putImageData(pixels, 0, 0);
-          resolve(clean);
-        } catch { resolve(image); }
-      };
+      image.onload = () => resolve(image);
       image.onerror = () => reject(new Error("Sprite unavailable: " + src));
       image.src = src;
     });

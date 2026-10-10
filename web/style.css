@@ -51,11 +51,11 @@
 .baby.sprite-ready::after{display:none}
 .hero-character.sprite-preview::after{
   content:"";display:block;width:120px;height:120px;transform:none;
-  background:url('../assets/sprites/generated/crescimento/element_002.png') center / contain no-repeat;
+  background:var(--hero-clean-newborn, url('../assets/sprites/generated/crescimento/element_002.png')) center / contain no-repeat;
   image-rendering:auto
 }
-.hero-character.sprite-preview.baby::after{background-image:url('../assets/sprites/generated/crescimento/element_005.png')}
-.hero-character.sprite-preview.toddler::after{background-image:url('../assets/sprites/generated/crescimento/element_009.png')}
+.hero-character.sprite-preview.baby::after{background-image:var(--hero-clean-baby, url('../assets/sprites/generated/crescimento/element_005.png'))}
+.hero-character.sprite-preview.toddler::after{background-image:var(--hero-clean-toddler, url('../assets/sprites/generated/crescimento/element_009.png'))}
 
 /* Keep the larger crawling character readable and its click/drag area aligned. */
 .baby{width:96px;height:96px}

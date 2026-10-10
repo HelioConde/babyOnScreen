@@ -87,6 +87,30 @@ async function drag(page, source, target) {
       assert.ok(second && Math.abs(second.x - first.x) < 3 &&
         Math.abs(second.y - first.y) < 3, item + ': baby must stay in place during care');
     }
+    const legacy = await page.evaluate(async () => {
+      const cleaner = window.BabySpriteCleaner;
+      const files = ['alimentacao/element_002.png', 'fralda/element_010.png',
+        'sono/element_007.png', 'crescimento/element_031.png', 'crescimento/element_039.png'];
+      const checked = [];
+      for (const file of files) {
+        const canvas = await cleaner.load('../assets/sprites/generated/' + file);
+        const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+        let opaque = 0, red = 0;
+        for (let i = 0; i < pixels.length; i += 4) {
+          if (pixels[i + 3] < 20) continue;
+          opaque++;
+          if (cleaner.isRedMatte(pixels[i], pixels[i + 1], pixels[i + 2])) red++;
+        }
+        checked.push({ file, w: canvas.width, h: canvas.height, opaque, red });
+      }
+      return checked;
+    });
+    for (const result of legacy) {
+      assert.equal(result.w, 224, result.file + ': correct width');
+      assert.equal(result.h, 224, result.file + ': correct height');
+      assert.ok(result.opaque > 1200, result.file + ': baby should remain visible');
+      assert.equal(result.red, 0, result.file + ': red background artifacts removed');
+    }
     const manifest = await page.evaluate(() => window.BabySpriteManifest.newborn);
     for (const item of ['letter', 'drawing', 'medicine']) {
       assert.equal(manifest[item]?.down?.filename, 'crawl_sheet.webp',
