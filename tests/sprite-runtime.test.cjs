@@ -24,10 +24,19 @@ test('every configured sprite is present in the imported pack', () => {
   for (const [stage, actions] of Object.entries(manifest)) {
     for (const [action, directions] of Object.entries(actions)) {
       for (const [direction, entry] of Object.entries(directions)) {
-        assert.ok(entry.files?.length, stage + '/' + action + '/' + direction);
-        for (const file of entry.files) {
+        const files = entry.files ?? (entry.filename ? [entry.filename] : []);
+        assert.ok(files.length, stage + '/' + action + '/' + direction);
+        for (const file of files) {
           const relative = context.BabySpriteRuntime.spriteUrl(entry.category, file);
-          assert.ok(fs.existsSync(path.join(root, relative)), relative);
+          // Optional crawl atlas: old frames remain active until it is uploaded.
+          if (file === 'crawl_sheet.webp' && entry.fallback) {
+            for (const fallbackFile of entry.fallback.files) {
+              const fallbackPath = context.BabySpriteRuntime.spriteUrl(entry.fallback.category, fallbackFile);
+              assert.ok(fs.existsSync(path.join(root, fallbackPath)), fallbackPath);
+            }
+          } else {
+            assert.ok(fs.existsSync(path.join(root, relative)), relative);
+          }
         }
       }
     }
@@ -40,6 +49,8 @@ test('sprite paths reject unknown categories and unsafe names', () => {
     '../assets/sprites/generated/crescimento/element_001.png');
   assert.throws(() => runtime.spriteUrl('../', 'element_001.png'));
   assert.throws(() => runtime.spriteUrl('crescimento', '../../secrets.txt'));
+  assert.equal(runtime.spriteUrl('crescimento', 'crawl_sheet.webp', '..'),
+    '../assets/sprites/generated/crescimento/crawl_sheet.webp');
 });
 
 test('animation advances through independent images and can mirror', () => {
