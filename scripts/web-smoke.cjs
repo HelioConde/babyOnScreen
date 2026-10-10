@@ -101,8 +101,10 @@ async function drag(page, source, target) {
     await sceneSound.click();
     assert.equal(await sceneSound.getAttribute('aria-pressed'), 'true');
     assert.equal(await page.locator('#sound').getAttribute('aria-pressed'), 'true');
+    await page.locator('.tools-settings summary').click();
     await page.locator('#sound').click();
     assert.equal(await sceneSound.getAttribute('aria-pressed'), 'false');
+    await page.locator('.tools-settings summary').click();
     const unloaded = await page.locator('.inventory img').evaluateAll(imgs => imgs.filter(img => !img.complete || img.naturalWidth === 0).map(img => img.src));
     assert.equal(unloaded.length, 0, 'missing icon images: ' + unloaded.join(', '));
     await page.screenshot({ path: path.join(OUT, 'desktop-newborn.png'), fullPage: true, animations: 'disabled' });
