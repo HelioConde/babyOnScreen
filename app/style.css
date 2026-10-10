@@ -3,11 +3,11 @@
 button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #9a6eda;outline-offset:2px}
 .baby{position:fixed;top:0;left:0;border:0;background:transparent;width:64px;height:72px;padding:0;z-index:3;image-rendering:pixelated;cursor:grab;touch-action:none;pointer-events:auto;filter:drop-shadow(0 4px 3px #664b6755)}
 .baby:active{cursor:grabbing}
-.baby:after{content:"";position:absolute;left:9px;top:11px;height:45px;width:45px;background:url('../sprits/char1.png') no-repeat var(--frame-x,-54px) var(--frame-y,-2px)}
+.baby:after{content:"";position:absolute;left:9px;top:11px;height:45px;width:45px;background:url('../assets/sprites/generated/crescimento/element_001.png') no-repeat var(--frame-x,-54px) var(--frame-y,-2px)}
 .baby.front{--frame-y:-2px}.baby.back{--frame-y:-156px}.baby.left{--frame-y:-52px}.baby.right{--frame-y:-104px}
 .baby.baby-stage:after,.baby.toddler:after,.baby.child:after{top:0;left:3px;width:58px;height:67px;background-position:center;background-repeat:no-repeat;background-size:contain}
-.baby.baby-stage:after{background-image:url('../assets/growth/baby.svg')}.baby.toddler:after{background-image:url('../assets/growth/toddler.svg')}.baby.child:after{background-image:url('../assets/growth/child.svg')}
-.baby.sleeping:after{background-image:url('../sprits/sleep.png');background-position:center;background-size:40px 69px}.baby.eating:after{background-image:url('../sprits/eating.png');background-position:center;background-size:24px 38px}
+.baby.baby-stage:after{background-image:url('../assets/sprites/generated/crescimento/element_005.png')}.baby.toddler:after{background-image:url('../assets/sprites/generated/crescimento/element_029.png')}.baby.child:after{background-image:url('../assets/sprites/generated/crescimento/element_033.png')}
+.baby.sleeping:after{background-image:url('../assets/sprites/generated/sono/element_007.png');background-position:center;background-size:40px 69px}.baby.eating:after{background-image:url('../assets/sprites/generated/alimentacao/element_002.png');background-position:center;background-size:24px 38px}
 .baby.crying:before{content:"💧";font-size:18px;position:absolute;left:46px;top:-10px;animation:cry .8s infinite}
 .baby.drop-target{outline:3px dashed #70c7a3;border-radius:25px}
 @keyframes cry{50%{transform:translateY(-5px)}}
