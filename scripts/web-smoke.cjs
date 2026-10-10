@@ -233,7 +233,10 @@ async function drag(page, source, target) {
     const beforeFrame = await admin.locator('#frame-label').textContent();
     await admin.locator('#next-frame').click();
     assert.notEqual(await admin.locator('#frame-label').textContent(), beforeFrame);
-    await admin.locator('#fps').fill('12');
+    await admin.locator('#fps').evaluate(el => {
+      el.value = '12';
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    });
     assert.equal(await admin.locator('#fps-value').textContent(), '12');
     await admin.screenshot({ path: path.join(OUT, 'admin-sprites-first-steps.png'), fullPage: true, animations: 'disabled' });
     await admin.close();
