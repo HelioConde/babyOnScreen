@@ -1,5 +1,20 @@
 # 👶 Baby On Screen
 
+## 🌐 Versão web — jogue sem instalar
+
+**[👶 Experimentar Baby On Screen no GitHub Pages](https://helioconde.github.io/babyOnScreen/)**
+
+A versão web gratuita usa o mesmo motor de necessidades da versão Windows e os sprites originais do projeto. Funciona em navegadores modernos, no computador e no celular.
+
+**Como experimentar:** abra o link, arraste o bebê dentro da tela simulada e clique em Alimentar, Dormir, Trocar fralda ou Cuidar. O progresso, a velocidade, a pausa e a preferência de som ficam guardados localmente no navegador (localStorage). Para recomeçar, abra Preferências e clique em Recomeçar o progresso.
+
+**Diferença importante:** navegadores não podem criar um personagem que ande livremente sobre as outras janelas do sistema operacional. Essa função existe somente na versão Electron para Windows; na web o bebê permanece dentro do playground ilustrado.
+
+**Arquivos web:** \`web/index.html\`, \`web/style.css\`, \`web/app.js\`, além de \`engine.js\` e dos diretórios de sprites e áudio já usados pela versão Windows. A raiz \`index.html\` redireciona ao jogo. A branch \`gh-pages\` é a fonte de publicação; o GitHub Pages publica da pasta \`/(root)\` dessa branch.
+
+Para atualizar o site, sincronize a branch \`gh-pages\` com as alterações testadas na branch de desenvolvimento; não altere a \`master\` histórica para publicar o site. O workflow \`web-validation.yml\` verifica o código web sempre que há commits.
+
+
 Bebê virtual que passeia pela área de trabalho do **Windows**. Um relançamento do protótipo de julho de 2020, com sprites e sons originais preservados.
 
 **Status: beta 1.0.0-beta.1.** A lógica possui testes automatizados; a transparência, a interação com o Windows e os executáveis ainda necessitam de validação visual antes do lançamento estável.
