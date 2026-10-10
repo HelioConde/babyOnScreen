@@ -26,7 +26,7 @@
   let y = Math.max(80, Math.min(window.innerHeight - 105, window.innerHeight * .5));
   let dx = 1, dy = .65, direction = 'front';
   let frame = 1, lastFrame = 0, lastTurn = 0, lastDraw = 0, lastTime = performance.now();
-  let busyUntil = 0, dragging = false, hovered = false, dragOffsetX = 0, dragOffsetY = 0;
+  let busyUntil = 0, dragging = false, hovered = false, dragOffsetX = 0, dragOffsetY = 0, pressX = 0, pressY = 0;
   let lastBubble = '';
   function save() {
     game.savedAt = Date.now();
@@ -116,6 +116,8 @@
   baby.addEventListener('pointerdown', event => {
     if (event.button !== 0) return;
     dragging = true;
+    pressX = event.clientX;
+    pressY = event.clientY;
     dragOffsetX = event.clientX - x;
     dragOffsetY = event.clientY - y;
     baby.setPointerCapture(event.pointerId);
@@ -136,7 +138,7 @@
   }
   baby.addEventListener('pointerup', event => {
     if (!dragging) return;
-    const moved = Math.hypot(event.clientX - (x + dragOffsetX), event.clientY - (y + dragOffsetY));
+    const moved = Math.hypot(event.clientX - pressX, event.clientY - pressY);
     releasePointer(event);
     if (moved < 6) setPanel(true);
   });
