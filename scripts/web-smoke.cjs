@@ -38,6 +38,12 @@ async function drag(page, source, target) {
       return false;
     }, null, { timeout: 10000 });
     assert.match(await page.locator('#hero-character').getAttribute('class'), /sprite-preview/);
+    const crawling = await page.evaluate(() => window.BabySpriteManifest?.newborn?.walk?.left?.files);
+    assert.ok(Array.isArray(crawling) && crawling.length >= 3, 'newborn should crawl while moving');
+    const babyBounds = await page.locator('#baby').boundingBox();
+    const stageBounds = await page.locator('#stage').boundingBox();
+    assert.ok(babyBounds && stageBounds && babyBounds.y - stageBounds.y >= 110,
+      'baby should stay clear of the stage title and crying indicator');
     await page.locator('.game-shell').scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(OUT, 'desktop-before-interaction.png'), fullPage: true, animations: 'disabled' });
     const foodBefore = Number(await page.locator('#food').getAttribute('value'));
