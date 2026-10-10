@@ -11,7 +11,7 @@
   <title>Baby On Screen | Cresça com sua amiguinha virtual</title>
   <link rel="icon" href="../sprits/char1.png" type="image/png">
   <link rel="stylesheet" href="./style.css">
-  <script defer src="../engine.js"></script><script defer src="./app.js"></script>
+  <script defer src="../engine.js"></script><script defer src="../app/sprite-runtime.js"></script><script defer src="../app/sprite-controller.js"></script><script defer src="../app/sprite-integration.js"></script><script defer src="../app/sprite-manifest.js"></script><script defer src="./app.js"></script>
 </head>
 <body>
   <header class="site-header"><div class="shell header-inner">
@@ -58,7 +58,7 @@
             <div class="stage-title"><span class="green-dot"></span><span id="scene-name">Quarto da bebê</span><span class="mini-weather">☁ um dia especial</span></div>
             <div id="cry-indicator" class="cry-indicator" role="status" aria-live="polite">Tudo tranquilo 💗</div>
             <div id="speech-bubble" class="speech-bubble" aria-live="polite">Gugu! 💕</div>
-            <button type="button" id="baby" class="baby newborn front" aria-label="Bebê. Arraste para mover, toque para carinho ou solte nela um item." title="Sua amiguinha!"></button>
+            <button type="button" id="baby" class="baby newborn front" aria-label="Bebê. Arraste para mover, toque para carinho ou solte nela um item." title="Sua amiguinha!"><canvas id="baby-sprite" width="64" height="72" hidden aria-hidden="true"></canvas></button>
             <div class="rug" aria-hidden="true"></div>
             <div class="stage-tip" id="stage-tip">✧ Arraste um objeto até a bebê quando ela precisar</div>
             <div class="milestone-toast" id="milestone-toast" role="status" aria-live="polite" hidden></div>
