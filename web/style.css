@@ -9,3 +9,27 @@
 @media(max-width:900px){.game-meta{gap:12px}.inventory{grid-template-columns:repeat(4,1fr)}.phases{grid-template-columns:repeat(2,1fr)}.hero{gap:8px}.hero-text h1{font-size:clamp(37px,5vw,51px)}.memory-row{flex-direction:column}.demo-disclaimer{max-width:none}}
 @media(max-width:630px){.shell{width:min(100% - 24px,1160px)}.header-inner{min-height:66px}.brand{font-size:17px}.brand-baby{width:34px;height:34px;font-size:18px}.site-header nav{gap:9px}.site-header nav a:not(.github){display:none}.site-header nav .github{font-size:11px;padding:9px}.hero{padding:38px 0 50px;display:flex;flex-direction:column;gap:14px}.hero-text h1{font-size:clamp(36px,9vw,47px)}.hero-text>p:not(.eyebrow){font-size:13px}.hero-art{height:295px;width:100%}.hero-orbit{width:245px;height:245px}.hero-character{width:120px;height:120px}.hero-character:after{transform:scale(2)}.hero-quote{right:10px;top:37px;font-size:11px}.hero-caption{bottom:9px}.game-section{padding:54px 0}.intro h2{font-size:32px}.game-shell{border-radius:16px}.game-header{padding:13px;align-items:flex-start}.profile-avatar{height:42px;width:42px;font-size:22px}.character-profile h3{font-size:15px}.character-profile p{font-size:10px}.game-meta{flex-direction:column;text-align:right;gap:5px}.game-meta>div{flex-direction:row;gap:4px;justify-content:flex-end}.game-meta small{font-size:8px}.game-meta strong{font-size:9px}.game-bars{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;padding:13px}.game-stage{min-height:375px}.window-decor{right:30px;top:40px;width:110px;height:110px}.stage-title{top:9px;left:9px;padding:7px 9px}.cry-indicator{top:52px;left:9px}.stage-tip{left:9px;bottom:10px;max-width:65%;font-size:9px}.play-dock{padding:16px 10px}.dock-heading strong{font-size:14px}.dock-heading small{font-size:9px}.game-time{font-size:9px;padding:7px}.inventory{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.item{min-height:83px;padding:8px 2px}.item img{width:27px;height:27px}.item strong{font-size:9px}.item small{font-size:8px}.growth-line{flex-direction:column;align-items:stretch;gap:8px}.growth-line progress{width:100%}.light-button,.speed-label{font-size:10px;padding:8px}.evolution-section{padding:60px 0}.phases{gap:9px}.phases article{padding:16px 12px}.desktop-banner{flex-direction:column;align-items:flex-start}.desktop-illustration{align-self:center}.footer{flex-direction:column;align-items:flex-start;padding:27px 0}.mini-weather{display:none}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:0s!important;transition-duration:0s!important}}
+
+
+/* Keep the baby and the item dock within a common desktop viewport for drag-and-drop. */
+@media (min-width: 691px) {
+  .game-header { padding: 11px 20px; }
+  .profile-avatar { width: 44px; height: 44px; font-size: 23px; }
+  .game-bars { padding: 11px 20px; }
+  .game-stage { min-height: 290px; }
+  .window-decor { width: 118px; height: 114px; }
+  .play-dock { padding: 12px 20px; }
+  .dock-heading strong { font-size: 14px; }
+  .inventory { margin-top: 10px; }
+  .item { min-height: 73px; padding: 6px 4px; }
+  .item img { width: 29px; height: 29px; }
+  .feedback { margin-top: 9px; min-height: 34px; padding: 8px 12px; }
+  .growth-line { margin-top: 9px; padding: 9px 0; }
+}
+.tools-settings { margin-top: 10px; border-top: 1px solid #f2e9f3; padding-top: 10px; }
+.tools-settings summary { cursor: pointer; color: #8a71a0; font-size: 11px; font-weight: 900; list-style-position: inside; }
+.tools-settings .game-actions { margin-top: 10px; padding-bottom: 8px; }
+@media (max-width: 690px) {
+  .game-stage { min-height: 340px; }
+  .item { min-height: 79px; }
+}

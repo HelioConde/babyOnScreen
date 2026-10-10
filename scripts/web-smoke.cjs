@@ -28,7 +28,8 @@ async function drag(page, source, target) {
     await page.locator('#baby').waitFor();
     assert.match(await page.title(), /Baby On Screen/);
     assert.match(await page.locator('#phase-name').textContent(), /Recém-nascida/);
-    await page.locator('#jogar').scrollIntoViewIfNeeded();
+    await page.locator('.game-shell').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: path.join(OUT, 'desktop-before-interaction.png'), fullPage: true, animations: 'disabled' });
     const foodBefore = Number(await page.locator('#food').getAttribute('value'));
     assert.ok(foodBefore <= 74, 'first feed should be ready to play');
     await drag(page, '[data-item="feed"]', '#baby');
