@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Baby On Screen</title>
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="../engine.js"></script>
+  <script defer src="./renderer.js"></script>
+</head>
+<body>
+  <button id="baby" class="baby walking front" type="button" aria-label="Bebê virtual — arraste ou clique para abrir cuidados" title="Clique para cuidar ou arraste para mover"></button>
+  <output id="thought" class="thought" aria-live="polite">Olá! 👋</output>
+
+  <button id="launcher" class="launcher" type="button" aria-label="Abrir ou fechar painel do bebê" title="Painel do bebê">👶 <span>Meu bebê</span></button>
+  <aside id="panel" class="panel" aria-label="Painel de cuidados">
+    <header class="panel-header">
+      <div class="avatar">👶</div>
+      <div class="heading"><small>SEU COMPANHEIRO DE TELA</small><h1>Baby On Screen</h1><p id="level">Nível 1 · Bebê curioso</p></div>
+      <button id="close-panel" type="button" class="icon-button" aria-label="Fechar painel">×</button>
+    </header>
+    <div class="mood"><span id="mood-icon">😊</span><div><strong id="mood-label">Estou feliz!</strong><small id="mood-detail">Cuide de mim de vez em quando.</small></div></div>
+    <section class="needs" aria-label="Necessidades do bebê">
+      <div class="need"><div class="need-label"><span>🍼 Fome</span><output id="food-val">85%</output></div><progress id="food" max="100" value="85"></progress></div>
+      <div class="need"><div class="need-label"><span>🌙 Energia</span><output id="energy-val">85%</output></div><progress id="energy" max="100" value="85"></progress></div>
+      <div class="need"><div class="need-label"><span>🫧 Higiene</span><output id="hygiene-val">85%</output></div><progress id="hygiene" max="100" value="85"></progress></div>
+      <div class="need"><div class="need-label"><span>💗 Saúde</span><output id="health-val">95%</output></div><progress id="health" max="100" value="95"></progress></div>
+    </section>
+    <h2>Hora de cuidar</h2>
+    <div class="actions">
+      <button class="care" data-action="feed" type="button"><span>🍼</span> Alimentar</button>
+      <button class="care" data-action="sleep" type="button"><span>🛏️</span> Dormir</button>
+      <button class="care" data-action="diaper" type="button"><span>🧷</span> Fralda</button>
+      <button class="care" data-action="medicine" type="button"><span>💊</span> Remédio</button>
+    </div>
+    <p id="feedback" class="feedback" aria-live="polite">Clique no bebê para cuidar dele. Você também pode arrastá-lo pela tela.</p>
+    <section class="options" aria-label="Preferências">
+      <h2>Preferências</h2>
+      <label class="toggle"><input id="sound" type="checkbox" checked> Ativar sons</label>
+      <label class="toggle"><input id="pause" type="checkbox"> Pausar movimentos</label>
+      <label class="range">Velocidade <input id="speed" type="range" min="0.5" max="2" step="0.25" value="1"></label>
+    </section>
+    <footer class="panel-footer">
+      <small id="version">Baby On Screen</small>
+      <div class="footer-buttons"><button id="reset" type="button">Recomeçar</button><button id="hide" type="button">Ocultar</button></div>
+    </footer>
+  </aside>
+</body>
+</html>
