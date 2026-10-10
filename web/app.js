@@ -6,6 +6,9 @@
   if (!E || !stage) return;
   const $ = id => document.getElementById(id);
   const baby = $('baby');
+  const spriteLayer = window.BabySpriteIntegration?.attachBabySprites({
+    baby, canvas: $('baby-sprite'), manifest: window.BabySpriteManifest, base: '..'
+  }) || null;
   const speechBubble = $('speech-bubble');
   const stateKey = 'baby-on-screen-web-v1';
   const optionsKey = 'baby-on-screen-web-preferences-v1';
@@ -47,8 +50,23 @@
   let nextTurn = 0, nextSpeech = 10000, lastCry = 0, busyUntil = 0, crySince = 0;
   let frameIndex = 1, animationStage = E.ageStage(game).id, memoryCount = -1;
   let lastUrgency = 'calm', toastTimer = null;
+  let careAction = 'idle', spriteState = '', spriteRefreshAt = 0;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const audioCache = new Map();
+
+  function syncSprite(now = performance.now()) {
+    if (!spriteLayer || now < spriteRefreshAt) return;
+    spriteRefreshAt = now + 180;
+    const age = E.ageStage(game).id;
+    const direction = ({ front: 'down', back: 'up', left: 'left', right: 'right' })[facing] || 'down';
+    const moving = !options.paused && !draggingBaby && !itemDrag && !reducedMotion.matches;
+    const action = now < busyUntil ? careAction : (moving ? 'walk' : 'idle');
+    const key = [age, direction, action].join(':');
+    if (key !== spriteState) {
+      spriteState = key;
+      void spriteLayer.show({ stage: age, direction, action });
+    }
+  }
 
   function save() {
     game.savedAt = Date.now();
@@ -145,6 +163,8 @@
     game = result.state;
     const newStage = E.ageStage(game).id;
     busyUntil = performance.now() + (name === 'sleep' ? 3000 : 1800);
+    careAction = name;
+    spriteRefreshAt = 0; syncSprite();
     baby.classList.remove('sleeping', 'eating', 'stage-reaction');
     if (name === 'sleep') baby.classList.add('sleeping');
     else if (name === 'feed') baby.classList.add('eating');
@@ -166,6 +186,7 @@
     game.happiness = E.clamp(game.happiness + 2, 0, 100);
     speak('happy');
     busyUntil = performance.now() + 1000;
+    careAction = 'pet'; spriteRefreshAt = 0; syncSprite();
     setFeedback(E.ageStage(game).id === 'newborn' ? 'Ela adorou seu carinho. Gugu! 💕' : 'Sua amiguinha ficou feliz com o carinho!');
     play('feliz');
     save();
@@ -275,6 +296,7 @@
   function updateStage() {
     const stageInfo = E.ageStage(game);
     if (animationStage !== stageInfo.id) {
+      spriteState = ''; spriteRefreshAt = 0;
       baby.classList.remove('newborn', 'baby-stage', 'toddler', 'child');
       baby.classList.add(stageInfo.id === 'baby' ? 'baby-stage' : stageInfo.id);
       $('hero-character').className = 'hero-character ' + (stageInfo.id === 'newborn' ? '' : stageInfo.id);
@@ -451,6 +473,7 @@
       play('chorando'); lastCry = now;
     }
     place();
+    syncSprite(now);
     if (now - lastUIAt > 500) { updateUI(); lastUIAt = now; }
     requestAnimationFrame(loop);
   }
