@@ -6,7 +6,7 @@
 
   function spriteUrl(category, filename, base = "") {
     if (!CATEGORIES.has(category)) throw new Error("Unknown sprite category");
-    if (typeof filename !== "string" || !/^element_\d{3}\.png$|^sheet\.png$/.test(filename)) {
+    if (typeof filename !== "string" || ! /^(?:element_\d{3}\.png|sheet\.png|crawl_sheet\.webp)$/.test(filename)) {
       throw new Error("Invalid sprite filename");
     }
     return [String(base).replace(/\/$/, ""), ROOT, category, filename].filter(Boolean).join("/");
