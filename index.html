@@ -1,107 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<!doctype html>
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Baby On Screen</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Baby On Screen | Seu bebê virtual no navegador</title>
+<meta name="description" content="Experimente Baby On Screen: um bebê virtual para alimentar, cuidar e acompanhar. Demonstração gratuita no navegador.">
+<link rel="canonical" href="https://helioconde.github.io/babyOnScreen/web/">
+<meta http-equiv="refresh" content="0; url=./web/">
+<script>window.location.replace('./web/' + window.location.search + window.location.hash);</script>
 </head>
-<script src="./jquery.min.js"></script>
-<script>window.$ = window.jQuery = require('jquery');</script>
-<script src="demo.js"></script>
-<link rel="stylesheet" href="demo.css">
-<style>
-    #notification {
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        width: 200px;
-        padding: 20px;
-        border-radius: 5px;
-        background-color: white;
-        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-    }
-
-    #version {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: -1;
-        color: whitesmoke;
-    }
-
-    .hidden {
-        display: none;
-    }
-</style>
-
-<body class="no-ptr">
-    <main>
-    </main>
-    <div id="char" class="front2 widget ptr">
-    </div>
-    <div id="developer">
-        <div id="left"></div>
-        <div id="right"></div>
-    </div>
-    <div id="status">
-    </div>
-    <div id="obj">
-    </div>
-    <div class="navBar ptr">
-        <span class="button medicine">MEDICINE</span>
-        <span class="button diaper">DIAPER</span>
-        <span class="button sleep">SLEEP</span>
-        <span class="button hunger">HUNGER</span>
-    </div>
-    <div class="bar button ptr">
-        Action
-    </div>
-
-    <p id="version"></p>
-    <div id="notification" class="hidden ptr">
-        <p id="message"></p>
-        <button id="close-button" onClick="closeNotification()">
-            Close
-        </button>
-        <button id="restart-button" onClick="restartApp()" class="hidden">
-            Restart
-        </button>
-    </div>
-    <script>
-        const { ipcRenderer } = require('electron');
-        const version = document.getElementById('version');
-        const notification = document.getElementById('notification');
-        const message = document.getElementById('message');
-        const restartButton = document.getElementById('restart-button');
-
-        ipcRenderer.send('app_version');
-        ipcRenderer.on('app_version', (event, arg) => {
-            ipcRenderer.removeAllListeners('app_version');
-            version.innerText = 'Version ' + arg.version;
-        });
-
-        ipcRenderer.on('update_available', () => {
-            ipcRenderer.removeAllListeners('update_available');
-            message.innerText = 'A new update is available. Downloading now...';
-            notification.classList.remove('hidden');
-        });
-
-        ipcRenderer.on('update_downloaded', () => {
-            ipcRenderer.removeAllListeners('update_downloaded');
-            message.innerText = 'Update Downloaded. It will be installed on restart. Restart now?';
-            restartButton.classList.remove('hidden');
-            notification.classList.remove('hidden');
-        });
-
-        function closeNotification() {
-            notification.classList.add('hidden');
-        }
-
-        function restartApp() {
-            ipcRenderer.send('restart_app');
-        }
-    </script>
-</body>
-
+<body><p>Redirecionando para o jogo… <a href="./web/">Abrir Baby On Screen</a>.</p></body>
 </html>
