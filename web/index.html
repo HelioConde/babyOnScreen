@@ -1,113 +1,93 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#fff7ed">
-  <meta name="description" content="Baby On Screen: cuide de um bebê virtual que passeia pela sua tela. Experimente a demonstração grátis no navegador e conheça o jogo para Windows.">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#fcf7fb">
+  <meta name="description" content="Baby On Screen: acompanhe sua bebê virtual do nascimento à infância, cuide de suas necessidades, brinque e descubra suas primeiras palavras. Jogue grátis.">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Baby On Screen — seu novo companheiro de tela">
-  <meta property="og:description" content="Alimente, cuide, brinque e acompanhe seu bebê virtual. Experimente a demonstração web gratuitamente.">
+  <meta property="og:title" content="Baby On Screen — cresça com sua amiguinha virtual">
+  <meta property="og:description" content="Uma bebê virtual que cresce com seu carinho. Jogue diretamente no navegador.">
   <meta property="og:url" content="https://helioconde.github.io/babyOnScreen/">
-  <meta name="color-scheme" content="light">
-  <title>Baby On Screen | Seu bebê virtual no navegador</title>
+  <title>Baby On Screen | Cresça com sua amiguinha virtual</title>
   <link rel="icon" href="../sprits/char1.png" type="image/png">
   <link rel="stylesheet" href="./style.css">
-  <script defer src="../engine.js"></script>
-  <script defer src="./app.js"></script>
+  <script defer src="../engine.js"></script><script defer src="./app.js"></script>
 </head>
 <body>
-  <header class="site-header">
-    <div class="shell header-inner">
-      <a class="brand" href="#inicio" aria-label="Baby On Screen, início"><span class="brand-icon" aria-hidden="true">👶</span><span>baby<span class="brand-accent">on</span>screen<span class="brand-dot">.</span></span></a>
-      <nav class="top-nav" aria-label="Navegação principal"><a href="#demo">Experimentar</a><a href="#como-funciona">Como funciona</a><a class="nav-github" href="https://github.com/HelioConde/babyOnScreen" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a></nav>
-    </div>
-  </header>
-
+  <header class="site-header"><div class="shell header-inner">
+    <a href="#inicio" class="brand" aria-label="Baby On Screen — início"><span class="brand-baby">👶</span><span>baby<span class="accent">on</span>screen<span class="orange">.</span></span></a>
+    <nav aria-label="Navegação"><a href="#jogar">Jogar</a><a href="#evolucao">Evolução</a><a href="#versao-pc">Versão PC</a><a class="github" href="https://github.com/HelioConde/babyOnScreen" target="_blank" rel="noopener noreferrer">GitHub ↗</a></nav>
+  </div></header>
   <main id="inicio">
-    <div class="shell">
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-copy">
-          <div class="eyebrow"><span class="live-dot"></span> UM AMIGUINHO DIGITAL PARA O SEU DIA</div>
-          <h1 id="hero-title">Tem um bebê <em>passeando</em> pela sua tela. <span aria-hidden="true">👀</span></h1>
-          <p>Ele é pequeno, curioso e precisa de você. Alimente, cuide e acompanhe seu bebê virtual em uma experiência leve, nostálgica e cheia de carinho.</p>
-          <div class="hero-buttons"><a class="btn btn-primary" href="#demo">👶 &nbsp; Experimentar grátis <span aria-hidden="true">→</span></a><a class="btn btn-soft" href="https://github.com/HelioConde/babyOnScreen" target="_blank" rel="noopener noreferrer">⌘ &nbsp; Ver projeto no GitHub</a></div>
-          <div class="hero-foot"><span>✦ Jogue direto no navegador</span><span>✦ Sem conta, sem instalação</span></div>
-        </div>
-        <div class="hero-art" aria-hidden="true">
-          <div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
-          <div class="art-spark spark-one">✳</div><div class="art-spark spark-two">✦</div><div class="art-spark spark-three">✳</div>
-          <div class="hero-baby"><div class="pixel-baby"></div></div>
-          <div class="art-bubble bubble-top">💛 Oi, humano!</div>
-          <div class="art-bubble bubble-bottom">🍼 Hora de cuidar!</div>
-          <div class="art-label">seu novo melhor amigo</div>
-        </div>
-      </section>
-      <div class="features-strip" aria-label="Recursos do jogo"><span>🍼 Alimente</span><span>🌙 Hora da soneca</span><span>🫧 Troque a fralda</span><span>💗 Cuide da saúde</span><span>🌟 Ganhe experiência</span></div>
-    </div>
-
-    <section class="demo-section" id="demo" aria-labelledby="demo-title">
-      <div class="shell">
-        <div class="section-top"><div><div class="section-kicker">PLAYGROUND DIGITAL <span aria-hidden="true">✳</span></div><h2 id="demo-title">Conheça seu novo <em>amiguinho.</em></h2><p>Arraste o bebê pela área de brincadeira e use os botões para cuidar dele. Tudo funciona aqui mesmo!</p></div><span class="web-pill"><span class="live-dot"></span> DEMO INTERATIVA</span></div>
-        <div class="play-layout">
-          <div class="desktop-wrap">
-            <div class="desktop-head"><div class="mac-dots"><i></i><i></i><i></i></div><span>Baby's desktop <span aria-hidden="true">✧</span></span><span class="head-status"><span class="live-dot"></span> ONLINE</span></div>
-            <div class="desktop-stage" id="stage" tabindex="0" aria-label="Área para brincar com o bebê. Use as setas do teclado para mover o bebê.">
-              <div class="stage-grid" aria-hidden="true"></div>
-              <div class="desktop-clock" aria-hidden="true"><span id="clock">10:08</span><small>um dia especial ✿</small></div>
-              <div class="stage-cloud cloud-one" aria-hidden="true">☁</div><div class="stage-cloud cloud-two" aria-hidden="true">☁</div>
-              <div class="desktop-icons" aria-hidden="true"><span>🧸<small>Brinquedos</small></span><span>🎨<small>Desenhos</small></span><span>💌<small>Cartinhas</small></span></div>
-              <div class="thought" id="thought" aria-live="polite">Oi! Vamos brincar? 💕</div>
-              <button id="baby" class="stage-baby front" type="button" aria-label="Bebê: clique para dar carinho ou arraste para movimentar" title="Clique ou arraste o bebê"></button>
-              <div class="stage-tip">✧ Arraste o bebê ou clique para dar carinho</div>
-              <div class="stage-floor" aria-hidden="true"></div>
-            </div>
-            <div class="desktop-bottom"><span>♡ Um pequeno mundo para descobrir</span><span><span class="bottom-heart">♥</span> Baby On Screen</span></div>
-          </div>
-
-          <aside class="care-panel" aria-labelledby="care-title">
-            <div class="care-top"><div class="mini-avatar">👶</div><div><small>SEU PEQUENO COMPANHEIRO</small><h3 id="care-title">Meu bebê <span>✿</span></h3></div><span class="level-pill" id="level">NV. 01</span></div>
-            <div class="mood-box"><span id="mood-icon" aria-hidden="true">😊</span><div><strong id="mood-title">Está tudo ótimo!</strong><small id="mood-description">Obrigado por cuidar de mim 💕</small></div></div>
-            <div class="panel-heading"><h4>Como estou hoje</h4><span id="care-count">0 cuidados</span></div>
-            <div class="need"><div class="need-meta"><label for="food">🍼 Alimentação</label><output id="food-value" for="food">85%</output></div><progress id="food" max="100" value="85">85%</progress></div>
-            <div class="need"><div class="need-meta"><label for="energy">🌙 Energia</label><output id="energy-value" for="energy">85%</output></div><progress id="energy" max="100" value="85">85%</progress></div>
-            <div class="need"><div class="need-meta"><label for="hygiene">🫧 Higiene</label><output id="hygiene-value" for="hygiene">85%</output></div><progress id="hygiene" max="100" value="85">85%</progress></div>
-            <div class="need"><div class="need-meta"><label for="health">💗 Saúde</label><output id="health-value" for="health">95%</output></div><progress id="health" max="100" value="95">95%</progress></div>
-            <div class="panel-heading care-label"><h4>Vamos cuidar?</h4><span>ESCOLHA UMA AÇÃO</span></div>
-            <div class="actions">
-              <button class="action-button" data-care="feed" type="button"><span>🍼</span> Alimentar</button>
-              <button class="action-button" data-care="sleep" type="button"><span>🛏️</span> Dormir</button>
-              <button class="action-button" data-care="diaper" type="button"><span>🧷</span> Trocar fralda</button>
-              <button class="action-button" data-care="medicine" type="button"><span>💊</span> Cuidar</button>
-            </div>
-            <p class="feedback" id="feedback" role="status" aria-live="polite">Seu amiguinho está pronto para brincar!</p>
-            <details class="settings"><summary>⚙️ Preferências do jogo</summary>
-              <div class="setting-row"><label for="sound">Ativar sons</label><input id="sound" type="checkbox"></div>
-              <div class="setting-row"><label for="pause">Pausar jogo</label><input id="pause" type="checkbox"></div>
-              <div class="setting-row"><label for="speed">Velocidade</label><input id="speed" type="range" min="0.5" max="2" step="0.25" value="1"></div>
-              <button class="reset-button" id="reset" type="button">↻ Recomeçar o progresso</button>
-            </details>
-            <div class="save-note">🔒 Seu progresso fica apenas neste navegador.</div>
-          </aside>
-        </div>
-        <p class="demo-note"><strong>Nota:</strong> esta é uma demonstração web. No navegador, o bebê fica dentro do espaço do jogo. Na versão para Windows, ele pode passear pela área de trabalho do computador.</p>
+    <section class="hero shell">
+      <div class="hero-text">
+        <p class="eyebrow"><i class="green-dot"></i> UMA PEQUENA VIDA, GRANDES DESCOBERTAS</p>
+        <h1>Uma amiguinha que <em>cresce</em> com você.</h1>
+        <p>Ela começa dizendo “gugu”, aprende a dar os primeiros passos e, com seu carinho, descobre o mundo. Alimente, cuide, brinque e acompanhe cada conquista.</p>
+        <div class="hero-buttons"><a class="primary-btn" href="#jogar">👶 Experimentar grátis <span>→</span></a><a class="secondary-btn" href="#evolucao">Descubra as fases</a></div>
+        <div class="hero-meta"><span>✓ Sem instalar</span><span>✓ Progresso salvo</span><span>✓ Gratuito</span></div>
+      </div>
+      <div class="hero-art" aria-label="Personagem pixel-art do Baby On Screen">
+        <div class="hero-orbit"></div><span class="star s1">✦</span><span class="star s2">✳</span>
+        <div class="hero-character" id="hero-character" aria-hidden="true"></div>
+        <span class="hero-quote" id="hero-quote">Gugu! 💕</span>
+        <span class="hero-caption">sua nova amiguinha ✨</span>
       </div>
     </section>
-
-    <section class="steps-section" id="como-funciona" aria-labelledby="steps-title"><div class="shell">
-      <div class="section-kicker">É SIMPLES ASSIM <span aria-hidden="true">✳</span></div><h2 id="steps-title">Um companheiro para <em>cada momento.</em></h2>
-      <div class="steps-grid">
-        <article class="step-card"><span class="step-number">01</span><span class="step-emoji" aria-hidden="true">🕹️</span><h3>Comece a brincar</h3><p>Abra a demonstração e conheça o bebê. Ele passeia sozinho, mas você também pode arrastá-lo.</p></article>
-        <article class="step-card"><span class="step-number">02</span><span class="step-emoji" aria-hidden="true">🍼</span><h3>Cuide com carinho</h3><p>Acompanhe a fome, o sono, a higiene e a saúde. Cada cuidado deixa seu bebê mais feliz.</p></article>
-        <article class="step-card"><span class="step-number">03</span><span class="step-emoji" aria-hidden="true">🌟</span><h3>Cresçam juntos</h3><p>Ganhe experiência, suba de nível e volte quando quiser. Seu progresso fica salvo no navegador.</p></article>
+    <section class="game-section" id="jogar">
+      <div class="shell">
+        <div class="intro"><p class="eyebrow">✳ SEU CANTINHO DE BRINCADEIRAS</p><h2>Vamos cuidar da nossa <em>pequena?</em></h2><p>Arraste um objeto até a bebê quando ela pedir. As necessidades mudam com o tempo, e cada cuidado ajuda sua amiga a crescer.</p></div>
+        <div class="game-shell" aria-label="Jogo Baby On Screen">
+          <div class="game-header">
+            <div class="character-profile"><div class="profile-avatar" id="profile-avatar">👶</div><div><small>MINHA AMIGUINHA</small><h3 id="phase-name">Recém-nascida</h3><p id="phase-desc">Descobrindo o mundo</p></div></div>
+            <div class="game-meta">
+              <div><small>IDADE SIMULADA</small><strong id="life-day">Dia 1</strong></div>
+              <div><small>EVOLUÇÃO</small><strong id="level">Nível 1</strong></div>
+              <div><small>CARINHO RECEBIDO</small><strong id="care-count">0 cuidados</strong></div>
+            </div>
+          </div>
+          <div class="game-bars" aria-label="Quatro necessidades da bebê">
+            <div class="need"><div class="need-label"><span><img src="../assets/icons/bottle.svg" alt="" width="20" height="20"> Alimentação</span><output id="food-value" for="food">85%</output></div><progress id="food" max="100" value="85">85%</progress></div>
+            <div class="need"><div class="need-label"><span><img src="../assets/icons/moon.svg" alt="" width="20" height="20"> Energia</span><output id="energy-value" for="energy">85%</output></div><progress id="energy" max="100" value="85">85%</progress></div>
+            <div class="need"><div class="need-label"><span><img src="../assets/icons/diaper.svg" alt="" width="20" height="20"> Higiene</span><output id="hygiene-value" for="hygiene">85%</output></div><progress id="hygiene" max="100" value="85">85%</progress></div>
+            <div class="need"><div class="need-label"><span><img src="../assets/icons/heart.svg" alt="" width="20" height="20"> Saúde</span><output id="health-value" for="health">95%</output></div><progress id="health" max="100" value="95">95%</progress></div>
+          </div>
+          <div class="game-stage" id="stage" tabindex="0" aria-label="Cenário de brincadeira. Arraste um item da barra de ferramentas para a bebê, ou use o teclado para selecionar um item e depois a bebê.">
+            <div class="grid-texture" aria-hidden="true"></div>
+            <div class="window-decor" aria-hidden="true"><span class="window-sun">☀</span><span class="window-hill"></span></div>
+            <div class="stage-title"><span class="green-dot"></span><span id="scene-name">Quarto da bebê</span><span class="mini-weather">☁ um dia especial</span></div>
+            <div id="cry-indicator" class="cry-indicator" role="status" aria-live="polite">Tudo tranquilo 💗</div>
+            <div id="speech-bubble" class="speech-bubble" aria-live="polite">Gugu! 💕</div>
+            <button type="button" id="baby" class="baby newborn front" aria-label="Bebê. Arraste para mover, toque para carinho ou solte nela um item." title="Sua amiguinha!"></button>
+            <div class="rug" aria-hidden="true"></div>
+            <div class="stage-tip" id="stage-tip">✧ Arraste um objeto até a bebê quando ela precisar</div>
+            <div class="milestone-toast" id="milestone-toast" role="status" aria-live="polite" hidden></div>
+            <div class="ground" aria-hidden="true"></div>
+          </div>
+          <div class="play-dock" id="play-dock">
+            <div class="dock-heading"><div><strong>Caixinha de cuidados</strong><small>Arraste até a bebê · toque e depois toque na bebê no celular</small></div><span class="game-time" id="game-time">0 min de vida</span></div>
+            <div class="inventory" id="inventory">
+              <button type="button" class="item" data-item="feed" data-care="feed" aria-label="Mamadeira, arraste para o bebê"><img src="../assets/icons/bottle.svg" alt="" width="33" height="33"><strong>Mamadeira</strong><small data-remaining="feed">Quando pedir</small></button>
+              <button type="button" class="item" data-item="sleep" data-care="sleep" aria-label="Berço, arraste para o bebê"><img src="../assets/icons/crib.svg" alt="" width="33" height="33"><strong>Berço</strong><small data-remaining="sleep">Quando pedir</small></button>
+              <button type="button" class="item" data-item="diaper" data-care="diaper" aria-label="Fralda, arraste para o bebê"><img src="../assets/icons/diaper.svg" alt="" width="33" height="33"><strong>Fralda</strong><small data-remaining="diaper">Quando pedir</small></button>
+              <button type="button" class="item" data-item="medicine" data-care="medicine" aria-label="Remédio, arraste para o bebê"><img src="../assets/icons/medicine.svg" alt="" width="33" height="33"><strong>Remédio</strong><small data-remaining="medicine">Quando pedir</small></button>
+              <button type="button" class="item" data-item="toy" aria-label="Brinquedo, arraste para brincar"><img src="../assets/icons/toy.svg" alt="" width="33" height="33"><strong>Brinquedo</strong><small data-remaining="toy">Brincar</small></button>
+              <button type="button" class="item" data-item="letter" aria-label="Cartinha, arraste para a bebê"><img src="../assets/icons/letter.svg" alt="" width="33" height="33"><strong>Cartinha</strong><small data-remaining="letter">Carinho</small></button>
+              <button type="button" class="item" data-item="drawing" aria-label="Desenho, arraste para a bebê"><img src="../assets/icons/drawing.svg" alt="" width="33" height="33"><strong>Desenho</strong><small data-remaining="drawing">Criatividade</small></button>
+            </div>
+            <p class="feedback" id="feedback" role="status" aria-live="polite">Sua amiguinha está explorando o mundo. Espere ela precisar de algo e ajude!</p>
+            <div class="growth-line"><div><strong id="growth-label">Próxima fase: Bebê curiosa</strong><small id="growth-detail">Tempo e carinho desbloqueiam novas fases</small></div><progress id="growth-progress" max="100" value="0">0%</progress></div>
+            <div class="game-actions"><button id="sound" type="button" aria-pressed="false" class="light-button">🔇 Som desligado</button><button id="pause" type="button" aria-pressed="false" class="light-button">⏸ Pausar</button><label class="speed-label">Velocidade <input type="range" id="speed" min="0.5" max="2" step="0.25" value="1"></label><button id="export" type="button" class="light-button">↓ Salvar progresso</button><label class="light-button upload-label" for="import-file">↑ Importar progresso<input id="import-file" type="file" accept=".json,application/json" hidden></label><button id="reset" type="button" class="light-button danger">↺ Recomeçar</button></div>
+          </div>
+        </div>
+        <div class="memory-row"><details><summary>📖 Álbum de memórias <span id="memory-count">0 lembranças</span></summary><div id="memories" class="memory-list"><p>As primeiras lembranças aparecerão aqui...</p></div></details><p class="demo-disclaimer">Na Web, a personagem vive dentro do jogo. No PC, ela pode passear pela área de trabalho. O progresso fica salvo somente neste navegador até você exportá-lo.</p></div>
       </div>
-    </div></section>
-
-    <section class="download-section"><div class="shell"><div class="download-card">
-      <div><div class="section-kicker">MAIS DO QUE UMA DEMO</div><h2>Quer o bebê passeando <em>pelo seu Windows?</em></h2><p>Conheça a versão para computador. O projeto é aberto e está recebendo melhorias no GitHub.</p></div>
-      <a class="btn btn-primary" href="https://github.com/HelioConde/babyOnScreen/pull/16" target="_blank" rel="noopener noreferrer">Ver versão Windows no GitHub <span aria-hidden="true">↗</span></a>
-    </div></div></section>
+    </section>
+    <section id="evolucao" class="evolution-section shell"><p class="eyebrow">UMA VIDA CHEIA DE DESCOBERTAS</p><h2>Da primeira risadinha às <em>primeiras palavras.</em></h2><p class="section-description">As fases dependem de tempo de jogo e cuidados: cada descoberta é conquistada, não acontece apenas por deixar a página aberta.</p>
+      <div class="phases"><article><img src="../sprits/char1.png" alt="Sprite original da recém-nascida" class="stage-image baby-original"><h3>01 · Recém-nascida</h3><p>Gugu, dada, primeiros cuidados e choro quando precisa de você.</p></article><article><img src="../assets/growth/baby.svg" alt="Sprite da bebê curiosa" class="stage-image"><h3>02 · Bebê curiosa</h3><p>Começa a reconhecer palavras, brincar e pedir colo.</p></article><article><img src="../assets/growth/toddler.svg" alt="Sprite dos primeiros passos" class="stage-image"><h3>03 · Primeiros passos</h3><p>Aprende a andar, dizer frases curtas e fazer descobertas.</p></article><article><img src="../assets/growth/child.svg" alt="Sprite da personagem criança" class="stage-image"><h3>04 · Criança</h3><p>Conversa, cria desenhos, constrói memórias e se prepara para novas aventuras.</p></article></div>
+    </section>
+    <section id="versao-pc" class="desktop-section"><div class="shell desktop-banner"><div><p class="eyebrow">A AVENTURA CONTINUA</p><h2>O mundo dela vai muito <em>além do navegador.</em></h2><p>No Windows, a personagem acompanha sua área de trabalho. O projeto de longo prazo inclui escola, amizades, habilidades, novos ambientes e muitos sprites. Uma primeira atividade escolar experimental já está em desenvolvimento.</p><a class="primary-btn" href="https://github.com/HelioConde/babyOnScreen/pull/16" rel="noopener noreferrer" target="_blank">Acompanhar versão PC ↗</a></div><div class="desktop-illustration" aria-hidden="true"><img src="../assets/growth/child.svg" alt=""><span>🏫</span></div></div></section>
   </main>
-  <footer class="site-footer"><div class="shell footer-inner"><a class="brand" href="#inicio"><span class="brand-icon" aria-hidden="true">👶</span><span>baby<span class="brand-accent">on</span>screen<span class="brand-dot">.</span></span></a><span>Um projetinho feito com 💜 por Hélio Conde</span><a href="https://github.com/HelioConde/babyOnScreen" target="_blank" rel="noopener noreferrer">Código no GitHub ↗</a></div></footer>
+  <footer class="footer shell"><a class="brand" href="#inicio"><span class="brand-baby">👶</span><span>baby<span class="accent">on</span>screen<span class="orange">.</span></span></a><p>Um projeto feito com carinho por Hélio Conde. <a href="https://github.com/HelioConde/babyOnScreen">Código no GitHub ↗</a></p></footer>
 </body>
 </html>
