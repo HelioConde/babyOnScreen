@@ -281,6 +281,69 @@ async function drag(page, source, target) {
     });
     assert.equal(await admin.locator('#fps-value').textContent(), '12');
     await admin.screenshot({ path: path.join(OUT, 'admin-sprites-first-steps.png'), fullPage: true, animations: 'disabled' });
+
+    // Editor must erase opaque pixels, undo/redo, restore draft after reopen and export PNG.
+    await admin.locator('#view-assets').click();
+    await admin.locator('#sprite-grid .sprite-card').first().click();
+    await admin.locator('#load-status.ready').waitFor({ timeout: 15000 });
+    await admin.locator('#open-editor').click();
+    await admin.locator('#sprite-editor').waitFor({ state: 'visible' });
+    await admin.waitForFunction(() => document.getElementById('editor-save-status')?.textContent.includes('Pronto'));
+    const sample = await admin.locator('#editor-canvas').evaluate(canvas => {
+      const { width, height } = canvas;
+      const pixels = canvas.getContext('2d').getImageData(0, 0, width, height).data;
+      for (let y = Math.floor(height * .3); y < Math.floor(height * .7); y++) {
+        for (let x = Math.floor(width * .3); x < Math.floor(width * .7); x++) {
+          if (pixels[(y * width + x) * 4 + 3] >= 230)
+            return { x, y, width, height };
+        }
+      }
+      return null;
+    });
+    assert.ok(sample, 'sprite editor must display actual source pixels');
+    const canvasBounds = await admin.locator('#editor-canvas').boundingBox();
+    assert.ok(canvasBounds);
+    await admin.locator('#editor-brush').evaluate(el => {
+      el.value = '12'; el.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await admin.mouse.click(canvasBounds.x + (sample.x + .5) * canvasBounds.width / sample.width,
+      canvasBounds.y + (sample.y + .5) * canvasBounds.height / sample.height);
+    await admin.waitForFunction(({x,y,width}) => {
+      const c = document.getElementById('editor-canvas');
+      return c.getContext('2d').getImageData(x,y,1,1).data[3] === 0;
+    }, { x: sample.x, y: sample.y, width: sample.width });
+    await admin.locator('#editor-undo').click();
+    assert.ok(await admin.locator('#editor-canvas').evaluate((c,{x,y}) =>
+      c.getContext('2d').getImageData(x,y,1,1).data[3] > 0, sample));
+    await admin.locator('#editor-redo').click();
+    assert.equal(await admin.locator('#editor-canvas').evaluate((c,{x,y}) =>
+      c.getContext('2d').getImageData(x,y,1,1).data[3], sample), 0);
+    await admin.locator('#editor-save').click();
+    await admin.waitForFunction(() =>
+      document.getElementById('editor-save-status')?.textContent.includes('salvas'));
+    const draftExists = await admin.evaluate(async () => {
+      const row = await window.BabySpriteEditor.getDraft('../assets/sprites/generated/crescimento/element_001.png');
+      return !!row?.blob && row?.width > 0;
+    });
+    assert.ok(draftExists, 'manual edits should persist in browser storage');
+    const download = admin.waitForEvent('download');
+    await admin.locator('#editor-download').click();
+    const file = await download;
+    assert.equal(file.suggestedFilename(), 'element_001.png');
+    await admin.locator('#editor-close').click();
+    await admin.locator('#open-editor').click();
+    await admin.waitForFunction(() =>
+      document.getElementById('editor-save-status')?.textContent.includes('restaurado'));
+    assert.equal(await admin.locator('#editor-canvas').evaluate((c,{x,y}) =>
+      c.getContext('2d').getImageData(x,y,1,1).data[3], sample), 0,
+      'saved edits must survive reopening editor');
+    admin.once('dialog', dialog => dialog.accept());
+    await admin.locator('#editor-reset').click();
+    await admin.waitForFunction(() =>
+      document.getElementById('editor-save-status')?.textContent.includes('original restaurada'));
+    assert.equal(await admin.locator('#editor-canvas').evaluate((c,{x,y}) =>
+      c.getContext('2d').getImageData(x,y,1,1).data[3] > 0, sample), true);
+    await admin.locator('#editor-close').click();
     await admin.close();
 
     const adminMobileContext = await browser.newContext({

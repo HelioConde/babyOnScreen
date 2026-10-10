@@ -47,7 +47,7 @@ test('every registered stage animation is visible with the correct crop data and
     }
   }
 });
-test('panel is read-only and validates its DOM and JavaScript files', () => {
+test('sprite laboratory provides browser-local editing controls and source validation', () => {
   const html = fs.readFileSync(path.join(root, 'web/admin-sprites.html'), 'utf8');
   const js = fs.readFileSync(path.join(root, 'web/admin-sprites.js'), 'utf8');
   for (const id of ['sprite-grid','preview','frames','search','phase','action','direction',
@@ -58,6 +58,18 @@ test('panel is read-only and validates its DOM and JavaScript files', () => {
   assert.match(html, /noindex,nofollow/);
   assert.match(html, /sprite-admin-catalog\.js/);
   assert.match(html, /admin-sprites\.js/);
+  for (const id of ['open-editor','sprite-editor','editor-canvas','editor-close',
+    'editor-brush','editor-zoom','editor-undo','editor-redo','editor-before',
+    'editor-save','editor-download','editor-reset','editor-viewport']) {
+    assert.ok(html.includes('id="' + id + '"'), id);
+  }
+  const editor = fs.readFileSync(path.join(root, 'web/sprite-editor.js'), 'utf8');
+  assert.match(html, /sprite-editor\.js/);
+  assert.match(editor, /indexedDB\.open\(/);
+  assert.match(editor, /toBlob\(/);
+  assert.match(editor, /createObjectURL\(/);
+  assert.doesNotMatch(editor, /fetch\s*\(\s*['"]https:\/\//);
   assert.doesNotMatch(js, /fetch\s*\(\s*['"]https:\/\//);
   assert.doesNotThrow(() => new vm.Script(js));
+  assert.doesNotThrow(() => new vm.Script(editor));
 });

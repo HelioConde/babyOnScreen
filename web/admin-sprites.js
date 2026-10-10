@@ -1,5 +1,5 @@
-/* Read-only QA viewer for all imported assets and the live game manifest.
-   No network API, admin token, or write access is required. */
+/* Browser-only QA and local retouching viewer for imported sprites.
+   No GitHub credentials or write access are required. */
 (() => {
   'use strict';
   const catalog = window.BabySpriteAdminCatalog;
@@ -59,6 +59,9 @@
     const key = (shouldClean ? 'clean:' : 'raw:') + path;
     if (!cache.has(key)) {
       const promise = (async () => {
+        // Locally saved manual edits take precedence over any automatic cleanup.
+        const draft = await window.BabySpriteEditor?.getDraft(path);
+        if (draft?.blob) return createImageBitmap(draft.blob);
         if (shouldClean && cleaner) return cleaner.load(path);
         const img = new Image();
         img.src = path;
@@ -343,6 +346,27 @@
     renderGallery(false);
   });
   els.flipped.addEventListener('change', () => setFrame(currentFrame));
+  $('open-editor').addEventListener('click', () => {
+    if (!selected || !window.BabySpriteEditor) return;
+    const frame = selected.frames?.[currentFrame] || null;
+    window.BabySpriteEditor.open({
+      path: entryPath(selected, currentFrame),
+      frame
+    });
+  });
+  window.addEventListener('baby:sprite-edited', async event => {
+    const { path, blob, reset } = event.detail || {};
+    if (!path) return;
+    // Refresh both the raw and cleaned previews without touching GitHub assets.
+    const cached = reset ? null : await createImageBitmap(blob);
+    for (const type of ['raw:', 'clean:']) {
+      cache.delete(type + path);
+      if (cached) cache.set(type + path, Promise.resolve(cached));
+    }
+    renderGallery(true);
+    if (selected?.files.some(file => catalog.pathFor(selected.category, file) === path))
+      void inspect(selected);
+  });
   els.copy.addEventListener('click', async () => {
     if (!selected) return;
     try {
