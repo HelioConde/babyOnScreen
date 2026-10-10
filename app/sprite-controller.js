@@ -113,7 +113,8 @@
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       if (width > 0 && height > 0) {
         const scale = Math.min((this.canvas.width - 4) / width, (this.canvas.height - 4) / height);
-        this.ctx.imageSmoothingEnabled = true;
+        // Avoid sampling color from neighboring atlas cells at their edges.
+        this.ctx.imageSmoothingEnabled = false;
         this.animator.draw(this.ctx, this.canvas.width / 2, this.canvas.height - 2, {
           scale, flipX: this.flipX
         });

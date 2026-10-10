@@ -28,14 +28,18 @@ test('every configured sprite is present in the imported pack', () => {
         assert.ok(files.length, stage + '/' + action + '/' + direction);
         for (const file of files) {
           const relative = context.BabySpriteRuntime.spriteUrl(entry.category, file);
-          // Optional crawl atlas: old frames remain active until it is uploaded.
-          if (file === 'crawl_sheet.webp' && entry.fallback) {
+          assert.ok(fs.existsSync(path.join(root, relative)), relative);
+          if (file === 'crawl_sheet.webp') {
+            const bytes = fs.readFileSync(path.join(root, relative));
+            assert.equal(bytes.toString('ascii', 0, 4), 'RIFF', 'valid WebP container');
+            assert.equal(bytes.toString('ascii', 8, 12), 'WEBP', 'valid WebP signature');
+            assert.ok(bytes.length > 1000, 'crawl atlas should not be empty');
+          }
+          if (entry.fallback) {
             for (const fallbackFile of entry.fallback.files) {
               const fallbackPath = context.BabySpriteRuntime.spriteUrl(entry.fallback.category, fallbackFile);
               assert.ok(fs.existsSync(path.join(root, fallbackPath)), fallbackPath);
             }
-          } else {
-            assert.ok(fs.existsSync(path.join(root, relative)), relative);
           }
         }
       }

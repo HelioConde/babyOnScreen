@@ -1,17 +1,13 @@
-# Novo ciclo de engatinhar (8 frames)
+# Atlas de engatinhar do Baby On Screen
 
-O motor de sprites já aceita o atlas `crawl_sheet.webp` nesta pasta, mas **o arquivo binário precisa ser enviado aqui** para ativar a nova animação. Até isso acontecer, o jogo mantém a animação antiga automaticamente.
+O arquivo **`crawl_sheet.webp` já foi enviado para o GitHub** e é usado nas fases recém-nascida e bebê. O atlas substitui as poses laterais antigas e também é reutilizado temporariamente nas direções verticalizadas para evitar mudanças abruptas entre estilos.
 
-## Formato
-
-- Arquivo: `assets/sprites/generated/crescimento/crawl_sheet.webp`
+- Caminho: `assets/sprites/generated/crescimento/crawl_sheet.webp`
 - Dimensões: **256 × 128 px**
 - Grade: **4 colunas × 2 linhas**
-- Cada quadro: **64 × 64 px**
-- Quadros: 8, em ordem de leitura, 8 FPS
-- Transparência real, sem fundo quadriculado
-- Personagem virada à esquerda; direita é espelhada pelo jogo
+- Frame: **64 × 64 px**; oito frames, **8 FPS**
+- Transparência real; personagem olha para a esquerda; direita é espelhada pelo motor
 
-O arquivo está incluído no pacote `baby_crawl_github_ready.zip`, junto com os oito PNGs individuais e um GIF de prévia. No GitHub, entre nesta pasta e use **Add file → Upload files** para enviar somente `crawl_sheet.webp`. O manifesto `app/sprite-manifest.js` já aponta para o nome correto.
+O motor não usa interpolação com vizinhos ao desenhar células do atlas, evitando resíduos de borda. Se o WebP falhar, existe um fallback com PNGs anteriores. Durante cartinha, desenho e outros cuidados, a posição do bebê permanece independente da animação.
 
-O atlas foi gerado com limpeza automática de fundo e alinhamento. **A qualidade do ciclo de movimento ainda exige revisão visual**, pois a geração original tem pequenas diferenças de pose.
+**Pendente:** revisão artística do ciclo diagonal de mãos e joelhos e poses específicas para frente e trás; o código não corrige diferenças anatômicas dos quadros gerados.

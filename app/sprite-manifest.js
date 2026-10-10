@@ -30,7 +30,7 @@
   const oldCrawlingLeft = Object.freeze({ ...sequence("crescimento", [15, 16, 17], 5), frames: crawlingFrames });
   const oldCrawlingRight = Object.freeze({ ...sequence("crescimento", [15, 16, 17], 5, true), frames: crawlingFrames });
   // 8 poses cleaned and aligned to a 4x2 atlas of 64x64 cells.
-  // The new art activates automatically when crawl_sheet.webp is uploaded.
+  // The corrected crawl atlas is installed; older extracted frames remain a fallback.
   const crawlAtlasFrames = Array.from({ length: 8 }, (_, i) => ({
     imageIndex: 0, x: (i % 4) * 64, y: Math.floor(i / 4) * 64, w: 64, h: 64
   }));
@@ -59,8 +59,10 @@
       walk: {
         left: crawlingLeft,
         right: crawlingRight,
-        down: crawlingFront,
-        up: crawlingFront
+        // Dedicated up/down sprites are still experimental; use the consistent atlas
+        // instead of abruptly switching to mixed-quality extracted frames.
+        down: crawlingLeft,
+        up: crawlingLeft
       },
       feed: { down: feeding },
       sleep: { down: sleeping },
@@ -76,8 +78,8 @@
       walk: {
         left: crawlingLeft,
         right: crawlingRight,
-        down: crawlingFront,
-        up: crawlingFront
+        down: crawlingLeft,
+        up: crawlingLeft
       },
       feed: { down: feeding },
       sleep: { down: sleeping },

@@ -38,8 +38,16 @@ async function drag(page, source, target) {
       return false;
     }, null, { timeout: 10000 });
     assert.match(await page.locator('#hero-character').getAttribute('class'), /sprite-preview/);
-    const crawling = await page.evaluate(() => window.BabySpriteManifest?.newborn?.walk?.left?.files);
-    assert.ok(Array.isArray(crawling) && crawling.length >= 3, 'newborn should crawl while moving');
+    const crawling = await page.evaluate(() => window.BabySpriteManifest?.newborn?.walk?.left);
+    assert.equal(crawling?.filename, 'crawl_sheet.webp', 'newborn must use the current crawl atlas');
+    assert.equal(crawling?.frames?.length, 8, 'newborn crawl must have eight animation frames');
+    const atlasSize = await page.evaluate(async () => {
+      const img = new Image();
+      img.src = '../assets/sprites/generated/crescimento/crawl_sheet.webp';
+      await img.decode();
+      return { width: img.naturalWidth, height: img.naturalHeight };
+    });
+    assert.deepEqual(atlasSize, { width: 256, height: 128 }, 'crawl atlas must load from the web server');
     const babyBounds = await page.locator('#baby').boundingBox();
     const stageBounds = await page.locator('#stage').boundingBox();
     assert.ok(babyBounds && stageBounds && babyBounds.y - stageBounds.y >= 110,
