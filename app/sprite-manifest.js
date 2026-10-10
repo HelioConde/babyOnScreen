@@ -42,6 +42,12 @@
     category: "crescimento", filename: "crawl_sheet.webp",
     frames: crawlAtlasFrames, fps: 8, flipX: true, fallback: oldCrawlingRight
   });
+  // Stationary crawl pose, used while dragging an item or pausing the game.
+  // Keep the same appearance instead of abruptly switching to a swaddled baby.
+  const crawlIdle = Object.freeze({
+    category: "crescimento", filename: "crawl_sheet.webp",
+    frames: [crawlAtlasFrames[0]], fps: 1, fallback: oldCrawlingLeft
+  });
   const crawlingFront = Object.freeze({ ...sequence("crescimento", [18, 19, 21], 5), frames: crawlFrontFrames });
   // Calm, stationary pose during reading, drawing and medical care.
   // Without an explicit entry, the newborn would abruptly revert to its swaddle.
@@ -55,7 +61,7 @@
 
   global.BabySpriteManifest = Object.freeze({
     newborn: {
-      idle: { down: sequence("crescimento", [1, 2, 1], 2) },
+      idle: { down: crawlIdle },
       walk: {
         left: crawlingLeft,
         right: crawlingRight,
@@ -74,7 +80,7 @@
       pet: { down: petting }
     },
     baby: {
-      idle: { down: sequence("crescimento", [5, 6, 5], 2.5) },
+      idle: { down: crawlIdle },
       walk: {
         left: crawlingLeft,
         right: crawlingRight,

@@ -41,6 +41,8 @@ async function drag(page, source, target) {
     const crawling = await page.evaluate(() => window.BabySpriteManifest?.newborn?.walk?.left);
     assert.equal(crawling?.filename, 'crawl_sheet.webp', 'newborn must use the current crawl atlas');
     assert.equal(crawling?.frames?.length, 8, 'newborn crawl must have eight animation frames');
+    assert.equal(await page.evaluate(() => window.BabySpriteManifest.newborn.idle.down.filename),
+      'crawl_sheet.webp', 'idle pose must not revert to swaddled art');
     const atlasSize = await page.evaluate(async () => {
       const img = new Image();
       img.src = '../assets/sprites/generated/crescimento/crawl_sheet.webp';
