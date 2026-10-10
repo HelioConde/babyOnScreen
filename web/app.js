@@ -344,24 +344,52 @@
       $('growth-progress').value = 100;
     }
   }
+  let showAllMemories = false;
   function renderMemories() {
-    const all = game.memories;
-    if (all.length === memoryCount) return;
-    memoryCount = all.length;
+    const summary = E.memorySummary(game);
+    if (summary.total === memoryCount) return;
+    memoryCount = summary.total;
     const parent = $('memories');
     parent.replaceChildren();
-    $('memory-count').textContent = all.length + (all.length === 1 ? ' lembrança' : ' lembranças');
-    if (!all.length) {
+    $('memory-count').textContent = summary.total +
+      (summary.total === 1 ? ' lembrança' : ' lembranças') +
+      (summary.groups.length ? ' · ' + summary.groups.length + (summary.groups.length === 1 ? ' tipo' : ' tipos') : '');
+    if (!summary.total) {
       const p = document.createElement('p');
       p.textContent = 'As suas primeiras conquistas e desenhos aparecerão aqui.';
       parent.append(p);
       return;
     }
-    all.slice().reverse().forEach(text => {
-      const p = document.createElement('span');
-      p.textContent = '✦ ' + text;
-      parent.append(p);
-    });
+    const shown = showAllMemories ? summary.groups : summary.groups.slice(0, 6);
+    for (const item of shown) {
+      const chip = document.createElement('span');
+      chip.className = 'memory-chip';
+      const text = document.createElement('span');
+      text.textContent = '✦ ' + item.label;
+      chip.append(text);
+      if (item.count > 1) {
+        const tally = document.createElement('strong');
+        tally.className = 'memory-tally';
+        tally.textContent = '×' + item.count;
+        tally.setAttribute('aria-label', item.count + ' vezes');
+        chip.append(tally);
+      }
+      parent.append(chip);
+    }
+    if (summary.groups.length > 6) {
+      const more = document.createElement('button');
+      more.type = 'button';
+      more.className = 'memory-more';
+      more.textContent = showAllMemories
+        ? 'Mostrar menos'
+        : 'Ver mais ' + (summary.groups.length - 6) + ' tipos';
+      more.addEventListener('click', () => {
+        showAllMemories = !showAllMemories;
+        memoryCount = -1;
+        renderMemories();
+      });
+      parent.append(more);
+    }
   }
   function updateUI() {
     updateStage();

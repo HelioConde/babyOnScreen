@@ -104,3 +104,29 @@ test('interfaces possuem jogabilidade e aprendizado', () => {
   assert.match(pc, /E\.school\(/);
   assert.doesNotMatch(site, /Oi, humano/i);
 });
+
+test('album acumula atividades iguais mesmo depois do limite de 24 eventos', () => {
+  let state = E.initial(1000000);
+  const start = 1000000;
+  for (let i = 0; i < 35; i++) {
+    const result = E.interact(state, 'toy', start + i * 80000);
+    assert.equal(result.applied, true);
+    state = result.state;
+  }
+  const summary = E.memorySummary(state);
+  assert.equal(summary.groups.find(x => x.label === 'Brincamos com um brinquedo!')?.count, 35);
+  assert.ok(state.memories.length <= 24);
+  assert.ok(summary.total >= 35);
+  assert.equal(E.memorySummary(E.importSave(E.exportSave(state))).total, summary.total);
+  const after = E.interact(state, 'drawing', start + 35 * 80000);
+  assert.equal(after.applied, true);
+  assert.equal(E.memorySummary(after.state).groups.find(x => x.label === 'Criamos um desenho juntas!')?.count, 1);
+});
+test('album migra lembranças antigas e ignora contadores inválidos', () => {
+  const old = E.sanitize({ memories: ['Cartinha', 'Desenho', 'Cartinha'] });
+  assert.equal(E.memorySummary(old).total, 3);
+  assert.equal(E.memorySummary(old).groups.find(x => x.label === 'Cartinha')?.count, 2);
+  const sanitized = E.sanitize({ memories: ['Cartinha'], memoryCounts: { Cartinha: 6, Invalido: -2 } });
+  assert.equal(E.memorySummary(sanitized).total, 6);
+  assert.equal(E.memorySummary(sanitized).groups.length, 1);
+});

@@ -113,12 +113,23 @@ async function drag(page, source, target) {
     // reload is overwritten by the previous page's pagehide auto-save.
     await page.addInitScript(() => {
       window.localStorage.setItem('baby-on-screen-web-v1', JSON.stringify({
-        activeSeconds: 5400, careCount: 65, memories: ['Primeiros passos!']
+        activeSeconds: 5400, careCount: 65,
+        memories: ['Criamos um desenho juntas!', 'Ganhei uma cartinha carinhosa!',
+          'Criamos um desenho juntas!', 'Primeiros passos!'],
+        memoryCounts: { 'Criamos um desenho juntas!': 18,
+          'Ganhei uma cartinha carinhosa!': 7, 'Primeiros passos!': 1 }
       }));
     });
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => document.getElementById('phase-name')?.textContent.includes('Criança'));
     assert.match(await page.locator('#phase-name').textContent(), /Criança/);
+    assert.match(await page.locator('#memory-count').textContent(), /26 lembranças · 3 tipos/);
+    await page.locator('.memory-row details summary').click();
+    assert.equal(await page.locator('.memory-chip').count(), 3,
+      'repeated memories should be combined into three badges');
+    assert.ok((await page.locator('.memory-chip').allTextContents()).some(x =>
+      x.includes('Criamos um desenho juntas!') && x.includes('×18')),
+      'accumulated count must appear in the album');
     await page.screenshot({ path: path.join(OUT, 'desktop-child.png'), fullPage: true, animations: 'disabled' });
     const childArt = await page.locator('#baby').evaluate(baby => getComputedStyle(baby, '::after').backgroundImage);
     assert.match(childArt, /child\.svg/);

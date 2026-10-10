@@ -90,7 +90,7 @@
       schemaVersion: VERSION, needs: { ...defaults }, happiness: 80, xp: 0, careCount: 0,
       interactions: 0, lastCare: '', lifeSeconds: 0, activeSeconds: 0,
       skills: { play: 0, bond: 0, creativity: 0, reading: 0, numbers: 0, arts: 0 },
-      schoolVisits: 0, memories: [], cooldowns: {}, achievements: [], lastSpoken: '',
+      schoolVisits: 0, memories: [], memoryCounts: {}, cooldowns: {}, achievements: [], lastSpoken: '',
       savedAt: finite(now, Date.now(), 0, 9999999999999)
     };
   }
@@ -108,6 +108,21 @@
       cooldowns[key] = finite(v.cooldowns && v.cooldowns[key], 0, 0, 9999999999999);
     }
     const cleanStrings = (list, max, limit) => Array.isArray(list) ? list.filter(x => typeof x === 'string').slice(-max).map(x => x.slice(0, limit)) : [];
+    const memories = cleanStrings(v.memories, 24, 120);
+    const memoryCounts = Object.create(null);
+    if (v.memoryCounts && typeof v.memoryCounts === 'object' && !Array.isArray(v.memoryCounts)) {
+      for (const [rawLabel, rawCount] of Object.entries(v.memoryCounts).slice(-80)) {
+        const label = rawLabel.trim().slice(0, 120);
+        const count = Math.floor(finite(rawCount, 0, 0, 1000000));
+        if (label && count > 0) memoryCounts[label] = count;
+      }
+    }
+    // Migrate existing saves: only the most recent 24 events are recoverable.
+    if (Object.keys(memoryCounts).length === 0) {
+      for (const label of memories) {
+        if (label.trim()) memoryCounts[label] = (memoryCounts[label] || 0) + 1;
+      }
+    }
     return {
       schemaVersion: VERSION,
       needs, happiness: finite(v.happiness, 80, 0, 100),
@@ -118,11 +133,38 @@
       lifeSeconds: finite(v.lifeSeconds, 0, 0, 100000000),
       activeSeconds: finite(v.activeSeconds, v.lifeSeconds || 0, 0, 100000000),
       skills, schoolVisits: Math.floor(finite(v.schoolVisits, 0, 0, 100000)),
-      memories: cleanStrings(v.memories, 24, 120),
+      memories, memoryCounts,
       cooldowns, achievements: cleanStrings(v.achievements, 30, 64),
       lastSpoken: typeof v.lastSpoken === 'string' ? v.lastSpoken.slice(0, 120) : '',
       savedAt: finite(v.savedAt, Date.now(), 0, 9999999999999)
     };
+  }
+  function addMemory(state, label) {
+    if (typeof label !== 'string' || !label.trim()) return;
+    const key = label.trim().slice(0, 120);
+    // Recent history stays bounded for small saves; aggregates do not lose old events.
+    state.memories.push(key);
+    state.memories = state.memories.slice(-24);
+    const counts = state.memoryCounts;
+    if (!Object.hasOwn(counts, key) && Object.keys(counts).length >= 80) {
+      delete counts[Object.keys(counts)[0]];
+    }
+    counts[key] = Math.min(1000000, (counts[key] || 0) + 1);
+  }
+  function memorySummary(input) {
+    const state = sanitize(input);
+    const counts = state.memoryCounts;
+    const ordered = [];
+    const seen = new Set();
+    // Show the most recently experienced types first, including existing saves.
+    for (const label of state.memories.slice().reverse()) {
+      if (counts[label] && !seen.has(label)) { ordered.push(label); seen.add(label); }
+    }
+    for (const label of Object.keys(counts).reverse()) {
+      if (!seen.has(label)) { ordered.push(label); seen.add(label); }
+    }
+    const groups = ordered.map(label => ({ label, count: counts[label] }));
+    return { total: groups.reduce((sum, item) => sum + item.count, 0), groups };
   }
   function ageStage(input) {
     const s = sanitize(input);
@@ -159,11 +201,10 @@
     for (const [key, done, label] of checks) {
       if (done && !s.achievements.includes(key)) {
         s.achievements.push(key);
-        s.memories.push(label);
+        addMemory(s, label);
         unlocked.push(label);
       }
     }
-    s.memories = s.memories.slice(-24);
     return unlocked;
   }
   function tick(input, seconds, opts) {
@@ -213,7 +254,7 @@
       letter: 'Ganhei uma cartinha carinhosa!',
       drawing: 'Criamos um desenho juntas!'
     };
-    s.memories.push(notes[name]); s.memories = s.memories.slice(-24);
+    addMemory(s, notes[name]);
     s.savedAt = time;
     return { state: s, applied: true, reason: 'ok', achievements: unlock(s) };
   }
@@ -229,8 +270,7 @@
     s.needs.food = clamp(s.needs.food - 8, 0, 100);
     s.happiness = clamp(s.happiness + 8, 0, 100);
     s.cooldowns.school = time + 360 * 1000; s.savedAt = time;
-    s.memories.push('Aprendi ' + lesson.label.toLowerCase() + ' na escola!');
-    s.memories = s.memories.slice(-24);
+    addMemory(s, 'Aprendi ' + lesson.label.toLowerCase() + ' na escola!');
     return { state: s, applied: true, reason: 'ok', achievements: unlock(s) };
   }
   function speak(input, context, random) {
@@ -259,6 +299,6 @@
   return Object.freeze({
     VERSION, defaults, stages, actions, activities, schoolSubjects, speech,
     initial, sanitize, tick, care, interact, school, ageStage, ageDays, level, concern, urgency,
-    speak, ready, exportSave, importSave, clamp
+    speak, ready, exportSave, importSave, memorySummary, clamp
   });
 });

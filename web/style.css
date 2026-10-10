@@ -72,3 +72,13 @@ color:#8a6399;font-size:19px;cursor:pointer;transition:background .15s,box-shado
 .scene-sound:hover{background:#fff;box-shadow:0 6px 19px #87609c40}
 .scene-sound:focus-visible{outline:3px solid #976cd5;outline-offset:2px}
 @media(max-width:690px){.scene-sound{top:10px;right:9px;width:39px;height:39px}}
+
+/* The album groups repeated memories into compact, counted badges. */
+.memory-list{align-items:center}
+.memory-list .memory-chip{display:inline-flex;align-items:center;gap:8px;min-width:0;max-width:100%;line-height:1.4}
+.memory-chip>span{overflow-wrap:anywhere}
+.memory-tally{font:900 11px/1.3 inherit;font-size:11px;line-height:1.3;padding:3px 7px;border-radius:8px;
+background:#ead9f3;color:#84569f;white-space:nowrap;font-variant-numeric:tabular-nums}
+.memory-list .memory-more{border:1px solid #e9d7f1;border-radius:9px;padding:8px 12px;
+background:#fff;color:#82609d;font-size:11px;font-weight:800;cursor:pointer}
+.memory-list .memory-more:hover{background:#f5e9fa}

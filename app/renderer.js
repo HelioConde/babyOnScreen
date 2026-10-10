@@ -378,12 +378,19 @@
       ' · números ' + game.skills.numbers + ' · artes ' + game.skills.arts;
     $('skills').textContent = 'Brincadeiras ' + game.skills.play + ' · Vínculo ' + game.skills.bond +
       ' · Criatividade ' + game.skills.creativity + ' · Escola ' + game.schoolVisits + ' aulas';
-    if (lastMemoryCount !== game.memories.length) {
-      lastMemoryCount = game.memories.length;
+    const album = E.memorySummary(game);
+    if (lastMemoryCount !== album.total) {
+      lastMemoryCount = album.total;
       $('memories').replaceChildren();
-      game.memories.slice().reverse().forEach(entry => {
+      if (!album.total) {
         const span = document.createElement('span');
-        span.textContent = '✦ ' + entry; $('memories').append(span);
+        span.textContent = 'As primeiras lembranças aparecerão aqui.';
+        $('memories').append(span);
+      }
+      album.groups.forEach(entry => {
+        const span = document.createElement('span');
+        span.textContent = '✦ ' + entry.label + (entry.count > 1 ? ' ×' + entry.count : '');
+        $('memories').append(span);
       });
     }
   }
