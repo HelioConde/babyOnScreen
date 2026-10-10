@@ -43,7 +43,8 @@
     paused: oldOptions.paused === true,
     speed: E.clamp(Number(oldOptions.speed) || 1, .5, 2)
   };
-  let x = 170, y = 185, vx = 0.88, vy = .48, facing = 'front';
+  let x = Math.round(stage.clientWidth / 2 - 48), y = Math.round(stage.clientHeight - 120);
+  let vx = 0.88, vy = .48, facing = 'front';
   let draggingBaby = false, itemDrag = null, selectedItem = null;
   let babyPressX = 0, babyPressY = 0, babyOffsetX = 0, babyOffsetY = 0;
   let lastFrameAt = 0, lastTime = performance.now(), lastUIAt = 0;
@@ -104,15 +105,23 @@
     game.lastSpoken = line;
     nextSpeech = performance.now() + (E.urgency(game).level === 'crying' ? 7200 : 12000 + Math.random() * 7500);
   }
+  function playArea() {
+    const left = Math.min(Math.round(stage.clientWidth * .14), Math.max(8, stage.clientWidth - 104));
+    const right = Math.max(left, stage.clientWidth - 104 - left);
+    const top = Math.min(145, Math.max(18, stage.clientHeight - 104));
+    const bottom = Math.max(top, stage.clientHeight - 100);
+    return { left, right, top, bottom };
+  }
   function bounds() {
-    x = E.clamp(x, 5, Math.max(5, stage.clientWidth - 65));
-    y = E.clamp(y, 18, Math.max(18, stage.clientHeight - 76));
+    const area = playArea();
+    x = E.clamp(x, area.left, area.right);
+    y = E.clamp(y, area.top, area.bottom);
   }
   function place() {
     baby.style.transform = 'translate3d(' + Math.round(x) + 'px,' + Math.round(y) + 'px,0)';
     const bubbleWidth = 184;
-    const bx = E.clamp(x + 47, 7, Math.max(7, stage.clientWidth - bubbleWidth));
-    const by = E.clamp(y - 39, 8, Math.max(8, stage.clientHeight - 75));
+    const bx = E.clamp(x + 80, 7, Math.max(7, stage.clientWidth - bubbleWidth));
+    const by = E.clamp(y - 55, 8, Math.max(8, stage.clientHeight - 75));
     speechBubble.style.transform = 'translate3d(' + Math.round(bx) + 'px,' + Math.round(by) + 'px,0)';
   }
   function hitBaby(clientX, clientY) {
@@ -452,8 +461,9 @@
         }
         x += vx * dt * 33 * options.speed;
         y += vy * dt * 33 * options.speed;
-        if (x <= 5 || x >= stage.clientWidth - 65) vx *= -1;
-        if (y <= 18 || y >= stage.clientHeight - 76) vy *= -1;
+        const area = playArea();
+        if (x <= area.left || x >= area.right) vx *= -1;
+        if (y <= area.top || y >= area.bottom) vy *= -1;
         bounds();
       }
     }
