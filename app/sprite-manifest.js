@@ -27,8 +27,21 @@
     { imageIndex: 1, x: 16, y: 0, w: 144, h: 171 },
     { imageIndex: 2, x: 14, y: 0, w: 138, h: 169 }
   ];
-  const crawlingLeft = Object.freeze({ ...sequence("crescimento", [15, 16, 17], 5), frames: crawlingFrames });
-  const crawlingRight = Object.freeze({ ...sequence("crescimento", [15, 16, 17], 5, true), frames: crawlingFrames });
+  const oldCrawlingLeft = Object.freeze({ ...sequence("crescimento", [15, 16, 17], 5), frames: crawlingFrames });
+  const oldCrawlingRight = Object.freeze({ ...sequence("crescimento", [15, 16, 17], 5, true), frames: crawlingFrames });
+  // 8 poses cleaned and aligned to a 4x2 atlas of 64x64 cells.
+  // The new art activates automatically when crawl_sheet.webp is uploaded.
+  const crawlAtlasFrames = Array.from({ length: 8 }, (_, i) => ({
+    imageIndex: 0, x: (i % 4) * 64, y: Math.floor(i / 4) * 64, w: 64, h: 64
+  }));
+  const crawlingLeft = Object.freeze({
+    category: "crescimento", filename: "crawl_sheet.webp",
+    frames: crawlAtlasFrames, fps: 8, fallback: oldCrawlingLeft
+  });
+  const crawlingRight = Object.freeze({
+    category: "crescimento", filename: "crawl_sheet.webp",
+    frames: crawlAtlasFrames, fps: 8, flipX: true, fallback: oldCrawlingRight
+  });
   const crawlingFront = Object.freeze({ ...sequence("crescimento", [18, 19, 21], 5), frames: crawlFrontFrames });
   // Calm, stationary pose during reading, drawing and medical care.
   // Without an explicit entry, the newborn would abruptly revert to its swaddle.
