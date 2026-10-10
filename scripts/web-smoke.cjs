@@ -40,10 +40,12 @@ async function drag(page, source, target) {
     assert.equal(unloaded.length, 0, 'missing icon images: ' + unloaded.join(', '));
     await page.screenshot({ path: path.join(OUT, 'desktop-newborn.png'), fullPage: true, animations: 'disabled' });
 
-    await page.evaluate(() => {
-      const s = window.BabyEngine.initial();
-      s.activeSeconds = 5400; s.careCount = 65; s.memories.push('Primeiros passos!');
-      window.localStorage.setItem('baby-on-screen-web-v1', JSON.stringify(s));
+    // Inject before app.js hydrates. A normal localStorage edit followed by
+    // reload is overwritten by the previous page's pagehide auto-save.
+    await page.addInitScript(() => {
+      window.localStorage.setItem('baby-on-screen-web-v1', JSON.stringify({
+        activeSeconds: 5400, careCount: 65, memories: ['Primeiros passos!']
+      }));
     });
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => document.getElementById('phase-name')?.textContent.includes('Criança'));
