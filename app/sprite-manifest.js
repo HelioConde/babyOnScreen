@@ -1,6 +1,7 @@
-/* Verified asset IDs from assets/sprites/generated. Each file is one frame.
-   The "child" stage intentionally uses the existing CSS art until a matching
-   older-child sprite set has been reviewed. */
+/* Sprite atlas inventory verified against assets/sprites/generated.
+   All four ages use the consistent brown-haired, pink-bow character art.
+   Child currently reuses the tallest standing/walking poses until distinct
+   older-child artwork is produced; it must never fall back to the blocky SVG. */
 (function (global) {
   "use strict";
   const sequence = (category, ids, fps = 5, flipX = false) => Object.freeze({
@@ -60,6 +61,11 @@
   const calmToddler = sequence("crescimento", [11], 1);
   const walkingRight = sequence("crescimento", [30, 31, 30, 32], 5);
   const walkingLeft = sequence("crescimento", [30, 31, 30, 32], 5, true);
+  // Standing poses for the older-child preview share the approved character
+  // identity. The art pack does not yet include a distinct school-age sprite.
+  const childStanding = sequence("crescimento", [33], 1);
+  const childStandingSide = sequence("crescimento", [30], 1);
+  const childStandingLeft = sequence("crescimento", [30], 1, true);
 
   global.BabySpriteManifest = Object.freeze({
     newborn: {
@@ -112,6 +118,25 @@
       letter: { down: calmToddler },
       drawing: { down: calmToddler },
       medicine: { down: calmToddler },
+      pet: { down: petting }
+    },
+    child: {
+      idle: {
+        left: childStandingLeft, right: childStandingSide,
+        down: childStanding, up: childStanding
+      },
+      walk: {
+        left: walkingLeft, right: walkingRight,
+        down: sequence("crescimento", [29, 32, 33], 5),
+        up: sequence("crescimento", [29, 32, 33], 5)
+      },
+      feed: { down: feeding },
+      sleep: { down: sleeping },
+      diaper: { down: diaper },
+      toy: { down: playing },
+      letter: { down: childStanding },
+      drawing: { down: childStanding },
+      medicine: { down: childStanding },
       pet: { down: petting }
     }
   });

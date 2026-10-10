@@ -32,3 +32,16 @@ h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#765c82;ma
 #baby-sprite{position:absolute;inset:0;width:64px;height:72px;image-rendering:pixelated;pointer-events:none}
 #baby-sprite[hidden]{display:none}
 .baby.sprite-ready::after{display:none}
+
+/* Never revert to the former blocky char1/growth SVG character while loading. */
+.baby:not(.sprite-ready)::after{
+  content:"";position:absolute;top:7px;left:3px;width:62px;height:62px;
+  background:url('../assets/sprites/generated/crescimento/element_001.png') center/contain no-repeat;
+  image-rendering:auto
+}
+.baby.baby-stage:not(.sprite-ready)::after{background-image:url('../assets/sprites/generated/crescimento/element_005.png')}
+.baby.toddler:not(.sprite-ready)::after{background-image:url('../assets/sprites/generated/crescimento/element_029.png')}
+.baby.child:not(.sprite-ready)::after{background-image:url('../assets/sprites/generated/crescimento/element_033.png')}
+.baby.sleeping:not(.sprite-ready)::after{background-image:url('../assets/sprites/generated/sono/element_007.png')}
+.baby.eating:not(.sprite-ready)::after{background-image:url('../assets/sprites/generated/alimentacao/element_002.png')}
+.baby.sprite-ready::after{display:none}

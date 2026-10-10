@@ -10,17 +10,32 @@
     baby, canvas: $('baby-sprite'), manifest: window.BabySpriteManifest, base: '..'
   }) || null;
   const speechBubble = $('speech-bubble');
-  // Clean old evolution previews as well as the sprite frames inside the game.
+  // The landing page and the playable scene must show the same baby character.
+  // Clean the old import artifacts, without changing the original PNG files.
   if (window.BabySpriteCleaner) {
     const hero = $('hero-character');
-    for (const [stage, id] of [['newborn', '002'], ['baby', '005'], ['toddler', '009']]) {
-      window.BabySpriteCleaner.load('../assets/sprites/generated/crescimento/element_' + id + '.png')
-        .then(canvas => {
-          if (hero && typeof canvas.toDataURL === 'function') {
-            hero.style.setProperty('--hero-clean-' + stage,
-              'url("' + canvas.toDataURL('image/png') + '")');
-          }
-        }).catch(() => { /* Preserve original art if processing fails. */ });
+    const poses = [
+      ['newborn', '001'], ['baby', '005'], ['toddler', '029'], ['child', '033']
+    ];
+    const cleanedUrl = new Map();
+    function spritePreview(url) {
+      if (!cleanedUrl.has(url)) {
+        cleanedUrl.set(url, window.BabySpriteCleaner.load(url).then(canvas =>
+          typeof canvas.toDataURL === 'function' ? canvas.toDataURL('image/png') : url
+        ));
+      }
+      return cleanedUrl.get(url);
+    }
+    for (const [stage, id] of poses) {
+      const url = '../assets/sprites/generated/crescimento/element_' + id + '.png';
+      spritePreview(url).then(cleanUrl => {
+        if (hero) hero.style.setProperty('--hero-clean-' + stage,
+          'url("' + cleanUrl + '")');
+      }).catch(() => {});
+    }
+    for (const img of document.querySelectorAll('img[data-clean-sprite]')) {
+      const url = img.getAttribute('src');
+      spritePreview(url).then(cleanUrl => { img.src = cleanUrl; }).catch(() => {});
     }
   }
   const stateKey = 'baby-on-screen-web-v1';
@@ -339,7 +354,7 @@
       spriteState = ''; spriteRefreshAt = 0;
       baby.classList.remove('newborn', 'baby-stage', 'toddler', 'child');
       baby.classList.add(stageInfo.id === 'baby' ? 'baby-stage' : stageInfo.id);
-      $('hero-character').className = 'hero-character ' + (stageInfo.id === 'newborn' ? '' : stageInfo.id) + (stageInfo.id === 'child' ? '' : ' sprite-preview');
+      $('hero-character').className = 'hero-character ' + stageInfo.id + ' sprite-preview';
       $('stage').classList.toggle('child-stage', stageInfo.id === 'child');
       $('stage').classList.toggle('toddler-stage', stageInfo.id === 'toddler');
       $('scene-name').textContent = stageInfo.id === 'child' ? 'Meu cantinho criativo' :

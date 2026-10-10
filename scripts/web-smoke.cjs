@@ -199,10 +199,25 @@ async function drag(page, source, target) {
     assert.ok(chips.some(x => x.includes('Criamos um desenho juntas!') && x.includes('×18')),
       'accumulated count must appear in the album');
     await page.screenshot({ path: path.join(OUT, 'desktop-child.png'), fullPage: true, animations: 'disabled' });
+    const childEntry = await page.evaluate(() => window.BabySpriteManifest.child.walk.right);
+    assert.ok(childEntry.files.includes('element_030.png'), 'child phase uses the pink-bow sprite pack');
+    await page.locator('#baby-sprite').waitFor({ state: 'visible', timeout: 15000 });
+    await page.waitForFunction(() => {
+      const sprite = document.getElementById('baby-sprite');
+      const pixels = sprite.getContext('2d').getImageData(0, 0, sprite.width, sprite.height).data;
+      return pixels.some((n, i) => i % 4 === 3 && n > 80);
+    }, null, { timeout: 15000 });
     const childArt = await page.locator('#baby').evaluate(baby => getComputedStyle(baby, '::after').backgroundImage);
-    assert.match(childArt, /child\.svg/);
-    assert.equal(await page.locator('#baby-sprite').isHidden(), true,
-      'child stage must preserve the original CSS art until mapped');
+    assert.match(childArt, /element_033\.png/, 'child CSS fallback should use the same baby, not SVG');
+    assert.match(await page.locator('#hero-character').getAttribute('class'), /sprite-preview/);
+    for (const card of await page.locator('.phases img.stage-image').all()) {
+      assert.ok(await card.evaluate(img => img.complete && img.naturalWidth > 0),
+        'all evolution stages must have an available high-resolution sprite');
+      assert.equal(await card.evaluate(img => img.src.includes('growth/')), false,
+        'growth cards must not use old blocky SVGs');
+    }
+    assert.equal(await page.locator('.desktop-illustration img').getAttribute('src').then(src => src.includes('growth/')), false);
+
 
     const mobileContext = await browser.newContext({
       viewport: { width: 390, height: 844 }, deviceScaleFactor: 1,
