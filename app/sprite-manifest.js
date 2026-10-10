@@ -23,6 +23,11 @@
   global.BabySpriteManifest = Object.freeze({
     newborn: {
       idle: { down: sequence("crescimento", [1, 2, 1], 2) },
+      walk: {
+        left: crawlingLeft,
+        right: crawlingRight,
+        down: sequence("crescimento", [18, 19, 21], 5)
+      },
       feed: { down: feeding },
       sleep: { down: sleeping },
       diaper: { down: diaper },
