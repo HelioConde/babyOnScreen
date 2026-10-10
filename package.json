@@ -1,13 +1,13 @@
 {
   "name": "baby-on-screen",
-  "version": "1.0.0-beta.1",
+  "version": "1.1.0-beta.1",
   "private": true,
   "description": "A tiny virtual baby companion for the Windows desktop.",
   "main": "app/main.cjs",
   "scripts": {
     "start": "electron .",
     "test": "node --test tests/*.test.cjs",
-    "check": "node --check app/main.cjs && node --check app/preload.cjs && node --check app/renderer.js && node --check engine.js",
+    "check": "node --check app/main.cjs && node --check app/preload.cjs && node --check app/renderer.js && node --check engine.js && node --check web/app.js",
     "build:win": "electron-builder --win --x64 --publish never"
   },
   "author": "Hélio Conde",
@@ -25,6 +25,7 @@
     "files": [
       "app/**/*",
       "engine.js",
+      "assets/**/*",
       "sprits/**/*",
       "som/**/*",
       "package.json"
