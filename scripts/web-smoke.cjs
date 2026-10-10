@@ -52,6 +52,31 @@ async function drag(page, source, target) {
     assert.match(await page.locator('#care-count').textContent(), /1 cuidado/);
     await drag(page, '[data-item="toy"]', '#baby');
     assert.match(await page.locator('#feedback').textContent(), /brincou|brincar/i);
+    // Regression: the parent button's transform must never be animated.
+    // Previously .stage-reaction animated transform, teleporting the baby
+    // to the top-left when interacting with letters, drawings and toys.
+    for (const [item, feedback] of [
+      ['letter', /cartinha/i],
+      ['drawing', /desenho/i]
+    ]) {
+      await drag(page, '[data-item="' + item + '"]', '#baby');
+      assert.match(await page.locator('#feedback').textContent(), feedback);
+      assert.equal(await page.locator('#baby').evaluate(el => getComputedStyle(el).animationName),
+        'none', item + ': baby container must not animate transform');
+      const first = await page.locator('#baby').boundingBox();
+      const stageRect = await page.locator('#stage').boundingBox();
+      assert.ok(first && stageRect && first.x >= stageRect.x + 10 &&
+        first.y >= stageRect.y + 100, item + ': baby must remain in the play area');
+      await page.waitForTimeout(350);
+      const second = await page.locator('#baby').boundingBox();
+      assert.ok(second && Math.abs(second.x - first.x) < 3 &&
+        Math.abs(second.y - first.y) < 3, item + ': baby must stay in place during care');
+    }
+    const manifest = await page.evaluate(() => window.BabySpriteManifest.newborn);
+    for (const item of ['letter', 'drawing', 'medicine']) {
+      assert.ok(manifest[item]?.down?.files?.[0]?.includes('element_019.png'),
+        item + ': care must use the calm crawling pose rather than swaddled idle');
+    }
     const unloaded = await page.locator('.inventory img').evaluateAll(imgs => imgs.filter(img => !img.complete || img.naturalWidth === 0).map(img => img.src));
     assert.equal(unloaded.length, 0, 'missing icon images: ' + unloaded.join(', '));
     await page.screenshot({ path: path.join(OUT, 'desktop-newborn.png'), fullPage: true, animations: 'disabled' });
