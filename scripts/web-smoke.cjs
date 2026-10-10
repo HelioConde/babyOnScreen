@@ -209,6 +209,49 @@ async function drag(page, source, target) {
     assert.equal(Number.parseInt(await paused.locator('#game-time').textContent(), 10), 1,
       'paused games must not advance on resume');
     await pausedContext.close();
+    // QA lab: verify real static inventory, manifest animations and a working player.
+    const admin = await context.newPage();
+    admin.on('pageerror', error => errors.push('admin: ' + error.message));
+    await admin.goto(new URL('admin-sprites.html', BASE).href, { waitUntil: 'domcontentloaded' });
+    await admin.locator('#sprite-grid .sprite-card').first().waitFor();
+    assert.equal(await admin.locator('#asset-total').textContent(), '566');
+    assert.equal(await admin.locator('#category-total').textContent(), '10');
+    assert.equal(await admin.locator('#sprite-grid .sprite-card').count(), 30,
+      'inventory must page the hundreds of PNGs');
+    await admin.locator('#load-status.ready').waitFor({ timeout: 15000 });
+    await admin.screenshot({ path: path.join(OUT, 'admin-sprites-library.png'), fullPage: true, animations: 'disabled' });
+    await admin.locator('#view-animations').click();
+    assert.equal(await admin.locator('#view-animations').getAttribute('aria-pressed'), 'true');
+    await admin.locator('#phase').selectOption('toddler');
+    await admin.locator('#action').selectOption('walk');
+    await admin.locator('#direction').selectOption('right');
+    assert.equal(await admin.locator('#sprite-grid .sprite-card').count(), 1);
+    await admin.locator('#sprite-grid .sprite-card').click();
+    await admin.locator('#load-status.ready').waitFor({ timeout: 15000 });
+    assert.match(await admin.locator('#viewer-title').textContent(), /Primeiros passos/);
+    assert.equal(await admin.locator('#frames .frame-button').count(), 4);
+    const beforeFrame = await admin.locator('#frame-label').textContent();
+    await admin.locator('#next-frame').click();
+    assert.notEqual(await admin.locator('#frame-label').textContent(), beforeFrame);
+    await admin.locator('#fps').fill('12');
+    assert.equal(await admin.locator('#fps-value').textContent(), '12');
+    await admin.screenshot({ path: path.join(OUT, 'admin-sprites-first-steps.png'), fullPage: true, animations: 'disabled' });
+    await admin.close();
+
+    const adminMobileContext = await browser.newContext({
+      viewport: { width: 390, height: 844 }, deviceScaleFactor: 1,
+      isMobile: true, hasTouch: true
+    });
+    const adminMobile = await adminMobileContext.newPage();
+    adminMobile.on('pageerror', error => errors.push('admin-mobile: ' + error.message));
+    await adminMobile.goto(new URL('admin-sprites.html', BASE).href, { waitUntil: 'domcontentloaded' });
+    await adminMobile.locator('.sprite-card').first().waitFor();
+    const adminWidth = await adminMobile.evaluate(() =>
+      ({ document: document.documentElement.scrollWidth, window: window.innerWidth }));
+    assert.ok(adminWidth.document <= adminWidth.window + 3,
+      'sprite admin mobile horizontal overflow: ' + JSON.stringify(adminWidth));
+    await adminMobile.screenshot({ path: path.join(OUT, 'admin-sprites-mobile.png'), fullPage: true, animations: 'disabled' });
+    await adminMobileContext.close();
     assert.deepEqual(errors, [], 'browser JS errors');
     await context.close();
     console.log('Web smoke passed. Screenshots at ' + OUT);
