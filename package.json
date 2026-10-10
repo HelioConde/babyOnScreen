@@ -7,7 +7,7 @@
   "scripts": {
     "start": "electron .",
     "test": "node --test tests/*.test.cjs",
-    "check": "node --check app/main.cjs && node --check app/preload.cjs && node --check app/renderer.js && node --check engine.js && node --check web/app.js",
+    "check": "node --check app/main.cjs && node --check app/preload.cjs && node --check app/renderer.js && node --check engine.js && node --check web/app.js && node --check app/sprite-runtime.js && node --check app/sprite-controller.js && node --check app/sprite-integration.js && node --check app/sprite-manifest.js",
     "build:win": "electron-builder --win --x64 --publish never"
   },
   "author": "Hélio Conde",
