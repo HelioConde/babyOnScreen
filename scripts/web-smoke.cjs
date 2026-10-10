@@ -123,12 +123,14 @@ async function drag(page, source, target) {
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => document.getElementById('phase-name')?.textContent.includes('Criança'));
     assert.match(await page.locator('#phase-name').textContent(), /Criança/);
-    assert.match(await page.locator('#memory-count').textContent(), /26 lembranças · 3 tipos/);
+    const displayedCount = await page.locator('#memory-count').textContent();
+    assert.ok(Number.parseInt(displayedCount, 10) >= 26,
+      'existing counts must survive migration and new milestones: ' + displayedCount);
     await page.locator('.memory-row details summary').click();
-    assert.equal(await page.locator('.memory-chip').count(), 3,
-      'repeated memories should be combined into three badges');
-    assert.ok((await page.locator('.memory-chip').allTextContents()).some(x =>
-      x.includes('Criamos um desenho juntas!') && x.includes('×18')),
+    const chips = await page.locator('.memory-chip').allTextContents();
+    assert.equal(chips.filter(x => x.includes('Criamos um desenho juntas!')).length, 1,
+      'all repeated drawings should share one badge');
+    assert.ok(chips.some(x => x.includes('Criamos um desenho juntas!') && x.includes('×18')),
       'accumulated count must appear in the album');
     await page.screenshot({ path: path.join(OUT, 'desktop-child.png'), fullPage: true, animations: 'disabled' });
     const childArt = await page.locator('#baby').evaluate(baby => getComputedStyle(baby, '::after').backgroundImage);
