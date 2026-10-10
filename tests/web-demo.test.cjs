@@ -23,7 +23,7 @@ test('web demo assets are local, present and shared with the Windows engine', ()
   assert.match(html, /src="\.\.\/engine\.js"/);
   assert.match(script, /window\.BabyEngine/);
   assert.match(script, /E\.care\(/);
-  assert.match(script, /E\.tick\(/);
+  assert.match(script, /E\.advanceClock\(/);
 });
 test('web demo script can be parsed by Node', () => {
   const vm = require('node:vm');
