@@ -32,14 +32,11 @@ async function drag(page, source, target) {
     await page.waitForFunction(() => {
       const baby = document.getElementById('baby');
       const canvas = document.getElementById('baby-sprite');
-      return baby?.classList.contains('sprite-ready') && canvas && !canvas.hidden;
-    }, { timeout: 10000 });
-    const spriteSource = await page.locator('#baby-sprite').evaluate(canvas => {
-      const context = canvas.getContext('2d');
-      const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-      return pixels.some((value, index) => index % 4 === 3 && value > 0);
-    });
-    assert.equal(spriteSource, true, 'newborn sprite canvas must draw visible PNG pixels');
+      if (!baby?.classList.contains('sprite-ready') || !canvas || canvas.hidden) return false;
+      const pixels = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
+      for (let i = 3; i < pixels.length; i += 4) if (pixels[i] > 0) return true;
+      return false;
+    }, null, { timeout: 10000 });
     assert.match(await page.locator('#hero-character').getAttribute('class'), /sprite-preview/);
     await page.locator('.game-shell').scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(OUT, 'desktop-before-interaction.png'), fullPage: true, animations: 'disabled' });
