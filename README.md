@@ -1,72 +1,66 @@
-# 👶 Baby On Screen
+# 👶 Baby On Screen — infância, cuidados e primeiras palavras
 
-## 🌐 Versão web — jogue sem instalar
+Projeto iniciado em 2020, renovado como simulador de cuidados e crescimento de uma personagem virtual. A personagem começa como recém-nascida, aprende a balbuciar, dá seus primeiros passos e cresce até a infância.
 
-**[👶 Experimentar Baby On Screen no GitHub Pages](https://helioconde.github.io/babyOnScreen/)**
+## 🌐 Jogue a versão Web
 
-A versão web gratuita usa o mesmo motor de necessidades da versão Windows e os sprites originais do projeto. Funciona em navegadores modernos, no computador e no celular.
+**[Abrir o jogo no GitHub Pages](https://helioconde.github.io/babyOnScreen/)**
 
-**Como experimentar:** abra o link, arraste o bebê dentro da tela simulada e clique em Alimentar, Dormir, Trocar fralda ou Cuidar. O progresso, a velocidade, a pausa e a preferência de som ficam guardados localmente no navegador (localStorage). Para recomeçar, abra Preferências e clique em Recomeçar o progresso.
+A página web agora tem uma tela unificada: quatro necessidades, uma personagem animada e uma caixinha de objetos. **Arraste um objeto até ela** para cuidar ou brincar; no celular e por teclado, selecione o objeto e depois toque ou ative a personagem. Quando uma necessidade está baixa, ela pede ajuda; se estiver crítica, começa a chorar. O áudio pode ser ligado ou desligado.
 
-**Diferença importante:** navegadores não podem criar um personagem que ande livremente sobre as outras janelas do sistema operacional. Essa função existe somente na versão Electron para Windows; na web o bebê permanece dentro do playground ilustrado.
+- Mamadeira: alimentação. Berço: energia. Fralda: higiene. Remédio: saúde. Esses itens só funcionam quando a necessidade está baixa e fora do intervalo de recarga.
+- Brinquedo: brincadeiras e felicidade. Cartinha: vínculo e lembranças. Desenho: criatividade e memórias. Todos têm intervalo de uso.
+- Preferências de som, pausa e velocidade, álbum de memórias, XP e conquistas.
 
-**Arquivos web:** \`web/index.html\`, \`web/style.css\`, \`web/app.js\`, além de \`engine.js\` e dos diretórios de sprites e áudio já usados pela versão Windows. A raiz \`index.html\` redireciona ao jogo. A branch \`gh-pages\` é a fonte de publicação; o GitHub Pages publica da pasta \`/(root)\` dessa branch.
+## 🌱 Crescimento
 
-Para atualizar o site, sincronize a branch \`gh-pages\` com as alterações testadas na branch de desenvolvimento; não altere a \`master\` histórica para publicar o site. O workflow \`web-validation.yml\` verifica o código web sempre que há commits.
+| Fase | Tempo ativo mínimo | Cuidados mínimos | Linguagem |
+|---|---:|---:|---|
+| Recém-nascida | 0 min | 0 | Gugu, dada, choro |
+| Bebê curiosa | 10 min | 8 | Sílabas e palavras |
+| Primeiros passos | 35 min | 26 | Frases curtas |
+| Criança | 90 min | 65 | Frases completas |
 
+O motor combina tempo ativo e cuidados: nenhuma fase depende só de deixar a aba aberta. **Na Web o tempo de jogo avança três vezes mais rápido** enquanto a página está ativa; no Windows passa em tempo real. Esses valores serão balanceados com testes de jogadores. Cada fase tem sprite e falas próprios.
 
-Bebê virtual que passeia pela área de trabalho do **Windows**. Um relançamento do protótipo de julho de 2020, com sprites e sons originais preservados.
+## 💻 Versão Windows
 
-**Status: beta 1.0.0-beta.1.** A lógica possui testes automatizados; a transparência, a interação com o Windows e os executáveis ainda necessitam de validação visual antes do lançamento estável.
+A versão Windows usa Electron e acompanha a área de trabalho com uma janela transparente e cliques que atravessam regiões vazias. Compartilha necessidades, crescimento, sprites e memórias com a Web. Quando chegar à infância, a personagem pode participar de uma **primeira escola experimental**: escolha leitura, números ou artes, responda a uma pergunta e aprenda a habilidade correspondente. Não é ainda um mapa de escola navegável.
 
-## Recursos
+Requisitos: Windows 10/11, Node.js 22+ e npm. No terminal:
 
-- Pixel art original, movimentos aleatórios e bebê arrastável.
-- Cliques atravessam as partes vazias da janela; o bebê e o painel são interativos.
-- Painel de cuidados em português: alimentação, energia, higiene e saúde.
-- Ações: alimentar, dormir, trocar fralda e dar remédio.
-- XP, níveis, áudio opcional, pausa e velocidade ajustável.
-- Progresso salvo no computador e bandeja do Windows com mostrar, ocultar e sair.
-- Instalador NSIS e executável portátil gerados no GitHub Actions.
+    git clone https://github.com/HelioConde/babyOnScreen.git
+    cd babyOnScreen
+    git checkout feat/revival-windows-2026
+    npm install
+    npm run check
+    npm test
+    npm start
 
-## Instalação e desenvolvimento
+Para gerar o instalador e o executável portátil em Windows, use **npm run build:win**. Os workflows GitHub Actions também validam e compilam a beta.
 
-Requer Windows 10/11, Node.js 22+ e npm.
+## 💾 Transferir progresso da Web para o PC
 
-1. Clone o repositório: git clone https://github.com/HelioConde/babyOnScreen.git
-2. Entre na pasta babyOnScreen.
-3. Durante o desenvolvimento da beta, use a branch feat/revival-windows-2026.
-4. Execute npm install e npm start.
-5. Teste: npm run check e npm test.
-6. Gere os executáveis Windows: npm run build:win (saída na pasta dist).
+Na Web, clique em **Salvar progresso** para baixar o JSON. No PC, abra **Preferências e salvamento > Importar** e selecione esse arquivo. A direção contrária também funciona. Faça um backup antes de importar: a importação pede confirmação e substitui o progresso atual. Não há sincronização em nuvem nem contas online.
 
-No painel, clique em um cuidado para satisfazer a necessidade do bebê. Clique no próprio bebê para abrir o painel ou arraste-o pela tela. A opção Ocultar permite restaurar o app pela bandeja do sistema. Recomeçar solicita confirmação antes de apagar progresso.
+O formato compartilhado (versão 2) registra tempo ativo, necessidades, estágio, XP, cuidados, memórias, conquistas, habilidades, cooldowns e escola. Dados ficam apenas no computador ou navegador do jogador.
 
-## Organização
+## Arquitetura
 
-- app/main.cjs: janela transparente, bandeja e detecção de regiões clicáveis.
-- app/preload.cjs: ponte IPC com APIs restritas.
-- app/index.html, app/style.css, app/renderer.js: interface.
-- engine.js: regras do jogo independentes do Electron.
-- tests/: testes unitários do motor.
-- sprits/ e som/: recursos originais de 2020.
+- **engine.js:** motor puro compartilhado, sem acesso a navegador ou Electron.
+- **web/:** jogo web responsivo publicado via branch gh-pages.
+- **app/:** versão Electron segura com preload e canais IPC controlados.
+- **assets/icons/:** ícones SVG independentes de emojis do sistema.
+- **assets/growth/:** sprites pixelados SVG para fases posteriores.
+- **sprits/** e **som/:** recursos originais do projeto de 2020.
+- **tests/:** testes de lógica, web e desktop.
 
-Os scripts históricos demo.js, demo.css e electron-transparency-mouse-fix não são mais carregados pela versão nova.
+## Status honesto
 
-Segurança: integração Node desativada no renderizador, isolamento de contexto e sandbox ativados, política de conteúdo restritiva, canais IPC explícitos. Nenhum dado do jogo é transmitido a servidores e **não há atualização automática** habilitada.
+**Implementado no código:** quatro fases, falas por idade, pedidos/choro, sete itens arrastáveis, cooldown, álbum de memórias, XP, novos sprites, transferir saves e escola experimental no PC.
 
-## Checklist de lançamento
+**Em planejamento para uma versão PC mais completa:** mapa escolar com caminho até a escola, colegas NPCs, amizades, rotinas aprofundadas, calendário, roupas e brinquedos colecionáveis. O recurso de escola atual é um mini-jogo de perguntas, não toda essa simulação.
 
-- [ ] Validar janela realmente transparente no Windows 10 e Windows 11.
-- [ ] Confirmar clique-through sem bloquear outros programas.
-- [ ] Arrastar o bebê, testar 4 cuidados e reiniciar para validar salvamento.
-- [ ] Conferir bandeja, ocultar/mostrar, som, velocidade e pausa.
-- [ ] Testar múltiplos monitores e escalas 125% / 150%.
-- [ ] Instalar e executar ambos os formatos de .exe.
-- [ ] Avaliar assinatura digital (executáveis não assinados podem acionar SmartScreen).
+**Antes da release estável:** validar manualmente clique-through e DPI no Windows, interação móvel, importação em ambas as direções e funcionamento dos instaladores.
 
-## Histórico
-
-A versão 0.0.1 de 2020 pode ser consultada em https://github.com/HelioConde/babyOnScreen/releases. Crescimento do bebê, brinquedos e animais de estimação são ideias futuras, não funcionalidades atuais.
-
-Criado por Hélio Conde.
+Desenvolvido por Hélio Conde.
