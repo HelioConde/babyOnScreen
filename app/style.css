@@ -27,3 +27,8 @@ h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#765c82;ma
 .drag-ghost{position:fixed;left:0;top:0;pointer-events:none;z-index:99;display:grid;place-items:center;width:55px;height:55px;border:2px solid #d7b3e9;border-radius:14px;background:#fff9ffec;box-shadow:0 10px 28px #65477555;transform:translate(-50%,-50%)}.drag-ghost img{width:40px;height:40px}
 @media(max-height:550px){.panel{padding:13px}.mood{margin-bottom:9px}h2{margin:11px 0 9px}.objects{gap:4px}}
 @media(prefers-reduced-motion:reduce){*{animation-duration:0s!important;transition-duration:0s!important}}
+
+/* Generated sprites are opt-in. Hidden canvas never intercepts pointer input. */
+#baby-sprite{position:absolute;inset:0;width:64px;height:72px;image-rendering:pixelated;pointer-events:none}
+#baby-sprite[hidden]{display:none}
+.baby.sprite-ready::after{display:none}
