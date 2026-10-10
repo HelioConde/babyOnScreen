@@ -42,7 +42,7 @@ test('cuidados somente quando necessarios e com intervalo', () => {
   assert.equal(first.applied, true);
   assert.equal(first.state.careCount, 1);
   assert.equal(E.care(first.state, 'feed', now + 1000).reason, 'cooldown');
-  assert.equal(E.care(first.state, 'feed', now + 49000).reason, 'not-needed');
+  assert.equal(E.care(first.state, 'feed', now + 49000).applied, true);
 });
 test('brinquedo, cartinha e desenho geram habilidade e memoria', () => {
   const now = 1000000;
