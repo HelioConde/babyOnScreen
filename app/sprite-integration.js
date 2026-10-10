@@ -24,11 +24,21 @@
       current = key;
       ready = false;
 
-      const success = await controller.play(entry.category, files, entry.frames, {
+      let success = await controller.play(entry.category, files, entry.frames, {
         fps: entry.fps ?? 6,
         loop: entry.loop !== false,
         flipX: entry.flipX === true
       });
+      if (current !== key) return false;
+      // Keep the existing crawling animation until the new atlas has been uploaded.
+      if (!success && entry.fallback) {
+        const old = entry.fallback;
+        success = await controller.play(old.category, old.files ?? old.filename, old.frames, {
+          fps: old.fps ?? 6,
+          loop: old.loop !== false,
+          flipX: old.flipX === true
+        });
+      }
       if (current !== key) return false;
       ready = success;
       canvas.hidden = !success;
