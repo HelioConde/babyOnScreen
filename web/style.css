@@ -42,7 +42,7 @@
 .growth-line progress::-moz-progress-bar { background:#a47acf; border-radius:14px; }
 
 /* Imported pixel-art animations: the canvas is visual only; drag and drop remain on the button. */
-.baby #baby-sprite{position:absolute;inset:0;width:62px;height:72px;display:block;pointer-events:none;image-rendering:auto}
+.baby #baby-sprite{position:absolute;inset:0;width:96px;height:96px;display:block;pointer-events:none;image-rendering:auto}
 .baby #baby-sprite[hidden]{display:none}
 .baby.sprite-ready::after{display:none}
 .hero-character.sprite-preview::after{
@@ -52,3 +52,11 @@
 }
 .hero-character.sprite-preview.baby::after{background-image:url('../assets/sprites/generated/crescimento/element_005.png')}
 .hero-character.sprite-preview.toddler::after{background-image:url('../assets/sprites/generated/crescimento/element_009.png')}
+
+/* Keep the larger crawling character readable and its click/drag area aligned. */
+.baby{width:96px;height:96px}
+.baby:not(.sprite-ready)::after{left:25px;top:20px}
+.baby.baby-stage:not(.sprite-ready)::after,
+.baby.toddler:not(.sprite-ready)::after,
+.baby.child:not(.sprite-ready)::after{left:20px;top:12px}
+.baby.crying::before{left:77px}
