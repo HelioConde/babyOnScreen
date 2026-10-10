@@ -12,6 +12,9 @@
 
   const feeding = sequence("alimentacao", [1, 2, 3, 4, 5], 5);
   const sleeping = sequence("sono", [6, 7, 8], 2.5);
+  const diaper = sequence("fralda", [9, 10, 11, 12], 3.5);
+  const playing = sequence("crescimento", [39, 40], 3);
+  const petting = sequence("crescimento", [11, 28], 3);
   const crawlingLeft = sequence("crescimento", [15, 16, 17], 5);
   const crawlingRight = sequence("crescimento", [15, 16, 17], 5, true);
   const walkingRight = sequence("crescimento", [30, 31, 30, 32], 5);
@@ -21,7 +24,10 @@
     newborn: {
       idle: { down: sequence("crescimento", [1, 2, 1], 2) },
       feed: { down: feeding },
-      sleep: { down: sleeping }
+      sleep: { down: sleeping },
+      diaper: { down: diaper },
+      toy: { down: playing },
+      pet: { down: petting }
     },
     baby: {
       idle: { down: sequence("crescimento", [5, 6, 5], 2.5) },
@@ -31,7 +37,10 @@
         down: sequence("crescimento", [18, 19, 21], 5)
       },
       feed: { down: feeding },
-      sleep: { down: sleeping }
+      sleep: { down: sleeping },
+      diaper: { down: diaper },
+      toy: { down: playing },
+      pet: { down: petting }
     },
     toddler: {
       idle: { down: sequence("crescimento", [9, 10, 11, 10], 2.5) },
@@ -41,7 +50,10 @@
         down: sequence("crescimento", [29, 32, 33], 5)
       },
       feed: { down: feeding },
-      sleep: { down: sleeping }
+      sleep: { down: sleeping },
+      diaper: { down: diaper },
+      toy: { down: playing },
+      pet: { down: petting }
     }
   });
 })(typeof window !== "undefined" ? window : globalThis);
