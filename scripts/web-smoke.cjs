@@ -28,6 +28,19 @@ async function drag(page, source, target) {
     await page.locator('#baby').waitFor();
     assert.match(await page.title(), /Baby On Screen/);
     assert.match(await page.locator('#phase-name').textContent(), /Recém-nascida/);
+    // The imported PNG animation must actually load, not just leave the CSS fallback.
+    await page.waitForFunction(() => {
+      const baby = document.getElementById('baby');
+      const canvas = document.getElementById('baby-sprite');
+      return baby?.classList.contains('sprite-ready') && canvas && !canvas.hidden;
+    }, { timeout: 10000 });
+    const spriteSource = await page.locator('#baby-sprite').evaluate(canvas => {
+      const context = canvas.getContext('2d');
+      const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+      return pixels.some((value, index) => index % 4 === 3 && value > 0);
+    });
+    assert.equal(spriteSource, true, 'newborn sprite canvas must draw visible PNG pixels');
+    assert.match(await page.locator('#hero-character').getAttribute('class'), /sprite-preview/);
     await page.locator('.game-shell').scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(OUT, 'desktop-before-interaction.png'), fullPage: true, animations: 'disabled' });
     const foodBefore = Number(await page.locator('#food').getAttribute('value'));
@@ -53,6 +66,8 @@ async function drag(page, source, target) {
     await page.screenshot({ path: path.join(OUT, 'desktop-child.png'), fullPage: true, animations: 'disabled' });
     const childArt = await page.locator('#baby').evaluate(baby => getComputedStyle(baby, '::after').backgroundImage);
     assert.match(childArt, /child\.svg/);
+    assert.equal(await page.locator('#baby-sprite').isHidden(), true,
+      'child stage must preserve the original CSS art until mapped');
 
     const mobileContext = await browser.newContext({
       viewport: { width: 390, height: 844 }, deviceScaleFactor: 1,
