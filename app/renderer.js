@@ -5,6 +5,10 @@
   if (!E || !desktop) return;
   const $ = id => document.getElementById(id);
   const baby = $('baby'), thought = $('thought'), panel = $('panel');
+  const spriteLayer = window.BabySpriteIntegration?.attachBabySprites({
+    baby, canvas: $('baby-sprite'), manifest: window.BabySpriteManifest, base: '..'
+  }) || null;
+
   const gameKey = 'baby-on-screen-v1', optionsKey = 'baby-on-screen-options-v1';
   const names = { food: 'alimentação', energy: 'energia', hygiene: 'higiene', health: 'saúde' };
   const source = document.currentScript ? document.currentScript.src : window.location.href;
