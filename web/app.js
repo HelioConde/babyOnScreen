@@ -29,7 +29,8 @@
       return val && typeof val === 'object' ? val : fallback;
     } catch { return fallback; }
   }
-  let game = E.sanitize(read(stateKey, E.initial()));
+  const newWebGame = () => { const baby = E.initial(); baby.needs.food = 69; return baby; };
+  let game = E.sanitize(read(stateKey, newWebGame()));
   // Offline doesn't grow the baby: the next session resumes from the last saved age.
   const offline = Math.max(0, Math.min(180, (Date.now() - game.savedAt) / 1000));
   game = E.tick(game, offline, { active: false });
@@ -401,7 +402,7 @@
   });
   $('reset').addEventListener('click', () => {
     if (!window.confirm('Apagar o progresso desta bebê e começar uma nova história?')) return;
-    game = E.initial();
+    game = newWebGame();
     animationStage = ''; memoryCount = -1; lastUrgency = 'calm';
     clearSelected(); updateUI(); speak('return'); save();
     setFeedback('Uma nova vida começou! Gugu dada! 💕');
