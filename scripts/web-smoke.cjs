@@ -46,7 +46,7 @@ async function drag(page, source, target) {
       window.localStorage.setItem('baby-on-screen-web-v1', JSON.stringify(s));
     });
     await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.locator('#phase-name').waitFor();
+    await page.waitForFunction(() => document.getElementById('phase-name')?.textContent.includes('Criança'));
     assert.match(await page.locator('#phase-name').textContent(), /Criança/);
     await page.screenshot({ path: path.join(OUT, 'desktop-child.png'), fullPage: true, animations: 'disabled' });
     const childArt = await page.locator('#baby').evaluate(baby => getComputedStyle(baby, '::after').backgroundImage);

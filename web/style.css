@@ -33,3 +33,10 @@
   .game-stage { min-height: 340px; }
   .item { min-height: 79px; }
 }
+
+/* One original character frame, not the full sprite sheet, in the evolution gallery. */
+.stage-image.baby-original { display: block; background: url('../sprits/char1.png') no-repeat -54px -2px; width:45px; height:45px; image-rendering:pixelated; object-fit:unset; clip-path:none; margin:19px 0 33px 18px; transform:scale(1.65); transform-origin:top left; }
+.growth-line progress { appearance:none; border:0; background:#efe5f4; border-radius:14px; overflow:hidden; }
+.growth-line progress::-webkit-progress-bar { background:#efe5f4; border-radius:14px; }
+.growth-line progress::-webkit-progress-value { background:#a47acf; border-radius:14px; }
+.growth-line progress::-moz-progress-bar { background:#a47acf; border-radius:14px; }
