@@ -326,11 +326,24 @@ async function drag(page, source, target) {
       return !!row?.blob && row?.width > 0;
     });
     assert.ok(draftExists, 'manual edits should persist in browser storage');
+    await admin.waitForFunction(() => document.getElementById('edited-count')?.textContent === '1');
+    assert.equal(await admin.locator('#export-edits').isEnabled(), true);
     const download = admin.waitForEvent('download');
     await admin.locator('#editor-download').click();
     const file = await download;
     assert.equal(file.suggestedFilename(), 'element_001.png');
     await admin.locator('#editor-close').click();
+    const bulkDownload = admin.waitForEvent('download');
+    await admin.locator('#export-edits').click();
+    const downloadedZip = await bulkDownload;
+    assert.match(downloadedZip.suggestedFilename(), /^babyonscreen-sprites-editados-\d{4}-\d{2}-\d{2}\.zip$/);
+    const zipBytes = fs.readFileSync(await downloadedZip.path());
+    assert.equal(zipBytes.toString('ascii', 0, 4), 'PK\x03\x04', 'ZIP must have a valid file header');
+    assert.ok(zipBytes.includes(Buffer.from('assets/sprites/generated/crescimento/element_001.png')),
+      'ZIP must preserve the original repository path');
+    assert.ok(zipBytes.includes(Buffer.from('sprite-edits-manifest.json')),
+      'ZIP must include the change manifest');
+    assert.match(await admin.locator('#export-status').textContent(), /1 PNG/);
     await admin.locator('#open-editor').click();
     await admin.waitForFunction(() =>
       document.getElementById('editor-save-status')?.textContent.includes('restaurado'));
@@ -341,6 +354,9 @@ async function drag(page, source, target) {
     await admin.locator('#editor-reset').click();
     await admin.waitForFunction(() =>
       document.getElementById('editor-save-status')?.textContent.includes('original restaurada'));
+    await admin.waitForFunction(() => document.getElementById('edited-count')?.textContent === '0');
+    assert.equal(await admin.locator('#export-edits').isDisabled(), true,
+      'export button should disable after all edited sprites are reset');
     assert.equal(await admin.locator('#editor-canvas').evaluate((c,{x,y}) =>
       c.getContext('2d').getImageData(x,y,1,1).data[3] > 0, sample), true);
     await admin.locator('#editor-close').click();

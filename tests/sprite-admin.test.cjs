@@ -60,11 +60,15 @@ test('sprite laboratory provides browser-local editing controls and source valid
   assert.match(html, /admin-sprites\.js/);
   for (const id of ['open-editor','sprite-editor','editor-canvas','editor-close',
     'editor-brush','editor-zoom','editor-undo','editor-redo','editor-before',
-    'editor-save','editor-download','editor-reset','editor-viewport']) {
+    'editor-save','editor-download','editor-reset','editor-viewport',
+    'edited-count','export-edits','export-status']) {
     assert.ok(html.includes('id="' + id + '"'), id);
   }
   const editor = fs.readFileSync(path.join(root, 'web/sprite-editor.js'), 'utf8');
   assert.match(html, /sprite-editor\.js/);
+  assert.match(html, /sprite-zip\.js/);
+  assert.match(editor, /listDrafts\(/);
+  assert.match(editor, /BabySpriteZip\.createZip\(/);
   assert.match(editor, /indexedDB\.open\(/);
   assert.match(editor, /toBlob\(/);
   assert.match(editor, /createObjectURL\(/);
