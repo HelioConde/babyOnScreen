@@ -1,307 +1,464 @@
 'use strict';
-
-/* Public web playground. Shares the same rules as the Windows companion. */
+/* Baby On Screen Web: one-screen accessible pet simulator. All gameplay uses engine.js. */
 (() => {
   const E = window.BabyEngine;
   const stage = document.getElementById('stage');
   if (!E || !stage) return;
-
   const $ = id => document.getElementById(id);
   const baby = $('baby');
-  const thought = $('thought');
-  const profileKey = 'baby-on-screen-web-v1';
-  const preferencesKey = 'baby-on-screen-web-preferences-v1';
-  const scriptUrl = document.currentScript && document.currentScript.src;
-  const needsLabels = {
-    food: 'fome',
-    energy: 'sono',
-    hygiene: 'fralda',
-    health: 'saúde'
+  const speechBubble = $('speech-bubble');
+  const stateKey = 'baby-on-screen-web-v1';
+  const optionsKey = 'baby-on-screen-web-preferences-v1';
+  const iconsPath = '../assets/icons/';
+  const names = { food: 'alimentação', energy: 'energia', hygiene: 'higiene', health: 'saúde' };
+  const completed = {
+    feed: 'Mamadeira entregue! A bebê ficou feliz. 🍼',
+    sleep: 'Boa soneca! A energia melhorou. 🌙',
+    diaper: 'Fraldinha trocada! Tudo limpinho. 💗',
+    medicine: 'Os cuidados ajudaram muito! 💕',
+    toy: 'Ela adorou brincar com o ursinho! 🧸',
+    letter: 'Uma cartinha cheia de carinho! 💌',
+    drawing: 'Vocês fizeram um desenho especial! 🎨'
   };
-  const careNotes = {
-    feed: 'Oba! A mamadeira estava deliciosa! 🍼',
-    sleep: 'Que soneca gostosa! Zzz... 🌙',
-    diaper: 'Fraldinha trocada. Agora estou limpinho! 🫧',
-    medicine: 'Obrigadinho pelos cuidados! 💗'
-  };
-  const messages = {
-    food: 'Quero uma mamadeira! 🍼',
-    energy: 'Estou com soninho... 🌙',
-    hygiene: 'Preciso de fralda limpa! 🧷',
-    health: 'Preciso de carinho e cuidados! 💗'
-  };
+  const hint = 'Arraste um objeto até a bebê para interagir.';
+  const source = document.currentScript ? document.currentScript.src : window.location.href;
 
   function read(key, fallback) {
     try {
-      const value = JSON.parse(localStorage.getItem(key));
-      return value && typeof value === 'object' ? value : fallback;
-    } catch {
-      return fallback;
-    }
+      const val = JSON.parse(localStorage.getItem(key));
+      return val && typeof val === 'object' ? val : fallback;
+    } catch { return fallback; }
   }
-
-  let game = E.sanitize(read(profileKey, E.initial()));
-  game = E.tick(game, Math.min(600, Math.max(0, (Date.now() - game.savedAt) / 1000)));
-  const stored = read(preferencesKey, {});
-  const preferences = {
-    sound: stored.sound === true,
-    paused: stored.paused === true,
-    speed: E.clamp(Number(stored.speed) || 1, 0.5, 2)
+  let game = E.sanitize(read(stateKey, E.initial()));
+  // Offline doesn't grow the baby: the next session resumes from the last saved age.
+  const offline = Math.max(0, Math.min(180, (Date.now() - game.savedAt) / 1000));
+  game = E.tick(game, offline, { active: false });
+  const oldOptions = read(optionsKey, {});
+  let options = {
+    sound: oldOptions.sound === true,
+    paused: oldOptions.paused === true,
+    speed: E.clamp(Number(oldOptions.speed) || 1, .5, 2)
   };
-  $('sound').checked = preferences.sound;
-  $('pause').checked = preferences.paused;
-  $('speed').value = String(preferences.speed);
-
-  let x = 120;
-  let y = 165;
-  let vx = 0.9;
-  let vy = 0.45;
-  let dragging = false;
-  let pressX = 0;
-  let pressY = 0;
-  let offsetX = 0;
-  let offsetY = 0;
-  let hovered = false;
-  let moodKey = '';
-  let busyUntil = 0;
-  let direction = 'front';
-  let animationIndex = 1;
-  let lastFrameAt = 0;
-  let lastTurnAt = 0;
-  let lastUIAt = 0;
-  let lastTime = performance.now();
-  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let x = 170, y = 185, vx = 0.88, vy = .48, facing = 'front';
+  let draggingBaby = false, itemDrag = null, selectedItem = null;
+  let babyPressX = 0, babyPressY = 0, babyOffsetX = 0, babyOffsetY = 0;
+  let lastFrameAt = 0, lastTime = performance.now(), lastUIAt = 0;
+  let nextTurn = 0, nextSpeech = 10000, lastCry = 0, busyUntil = 0, crySince = 0;
+  let frameIndex = 1, animationStage = E.ageStage(game).id, memoryCount = -1;
+  let lastUrgency = 'calm', toastTimer = null;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const audioCache = new Map();
 
   function save() {
     game.savedAt = Date.now();
     try {
-      localStorage.setItem(profileKey, JSON.stringify(game));
-      localStorage.setItem(preferencesKey, JSON.stringify(preferences));
-    } catch {
-      // Storage may be disabled; the demo remains playable in memory.
-    }
+      localStorage.setItem(stateKey, JSON.stringify(game));
+      localStorage.setItem(optionsKey, JSON.stringify(options));
+    } catch { setFeedback('Aviso: o navegador não permitiu salvar. Use "Salvar progresso".'); }
   }
-
-  function sound(filename) {
-    if (!preferences.sound || !scriptUrl) return;
+  function play(name) {
+    if (!options.sound) return;
     try {
-      const audio = new Audio(new URL('../som/' + filename + '.mp3', scriptUrl).href);
-      audio.volume = 0.24;
+      if (!audioCache.has(name)) {
+        const a = new Audio(new URL('../som/' + name + '.mp3', source).href);
+        a.volume = .25;
+        audioCache.set(name, a);
+      }
+      const audio = audioCache.get(name);
+      audio.pause();
+      audio.currentTime = 0;
       audio.play().catch(() => {});
-    } catch {
-      // No audio support or asset was unavailable.
-    }
+    } catch { /* Audio is optional and requires browser permission. */ }
   }
-
-  function message(value) { $('feedback').textContent = value; }
-  function bubble(value) { thought.textContent = value; }
-
-  function updateUI() {
-    for (const key of Object.keys(E.defaults)) {
-      const number = Math.round(game.needs[key]);
-      $(key).value = number;
-      $(key + '-value').textContent = number + '%';
-      $(key).setAttribute('aria-valuetext', number + '%');
-    }
-    $('level').textContent = 'NV. ' + String(E.level(game)).padStart(2, '0');
-    $('care-count').textContent = game.careCount + (game.careCount === 1 ? ' cuidado' : ' cuidados');
-
-    const key = E.concern(game);
-    const veryLow = game.needs[key] < 35;
-    const low = game.needs[key] < 55;
-    $('mood-icon').textContent = veryLow ? '🥺' : low ? '😕' : '😊';
-    $('mood-title').textContent = veryLow ? 'Preciso da sua ajuda!' : low ? 'Quero atenção!' : 'Está tudo ótimo!';
-    $('mood-description').textContent = low ? 'Minha ' + needsLabels[key] + ' precisa de atenção.' : 'Obrigado por cuidar de mim 💕';
-    if (!hovered && performance.now() > busyUntil && moodKey !== key) {
-      bubble(low ? messages[key] : 'Oi! Vamos brincar? 💕');
-      moodKey = key;
-    }
+  function setFeedback(text) { $('feedback').textContent = text; }
+  function bubble(text) { speechBubble.textContent = text; }
+  function toast(text) {
+    if (!text) return;
+    clearTimeout(toastTimer);
+    $('milestone-toast').textContent = '🌟 ' + text;
+    $('milestone-toast').hidden = false;
+    toastTimer = setTimeout(() => { $('milestone-toast').hidden = true; }, 4000);
   }
-
-  function clampPosition() {
-    x = E.clamp(x, 4, Math.max(4, stage.clientWidth - 58));
-    y = E.clamp(y, 14, Math.max(14, stage.clientHeight - 65));
+  function speak(context) {
+    const line = E.speak(game, context, Math.random());
+    bubble(line);
+    game.lastSpoken = line;
+    nextSpeech = performance.now() + (E.urgency(game).level === 'crying' ? 7200 : 12000 + Math.random() * 7500);
   }
-
-  function draw() {
+  function bounds() {
+    x = E.clamp(x, 5, Math.max(5, stage.clientWidth - 65));
+    y = E.clamp(y, 18, Math.max(18, stage.clientHeight - 76));
+  }
+  function place() {
     baby.style.transform = 'translate3d(' + Math.round(x) + 'px,' + Math.round(y) + 'px,0)';
-    const bubbleX = E.clamp(x + 34, 8, Math.max(8, stage.clientWidth - 195));
-    thought.style.transform = 'translate3d(' + Math.round(bubbleX) + 'px,' + Math.round(Math.max(10, y - 43)) + 'px,0)';
+    const bubbleWidth = 184;
+    const bx = E.clamp(x + 47, 7, Math.max(7, stage.clientWidth - bubbleWidth));
+    const by = E.clamp(y - 39, 8, Math.max(8, stage.clientHeight - 75));
+    speechBubble.style.transform = 'translate3d(' + Math.round(bx) + 'px,' + Math.round(by) + 'px,0)';
   }
-
-  function care(action) {
-    const result = E.care(game, action);
+  function hitBaby(clientX, clientY) {
+    const r = baby.getBoundingClientRect();
+    return clientX >= r.left - 26 && clientX <= r.right + 26 &&
+      clientY >= r.top - 29 && clientY <= r.bottom + 29;
+  }
+  function stagePosition(event) {
+    const r = stage.getBoundingClientRect();
+    return { x: event.clientX - r.left, y: event.clientY - r.top };
+  }
+  function remainingLabel(name) {
+    const ms = Math.max(0, (game.cooldowns[name] || 0) - Date.now());
+    if (ms > 0) return Math.ceil(ms / 1000) + 's';
+    const action = E.actions[name];
+    if (action && game.needs[action.need] > 74) return 'Quando pedir';
+    return 'Pronto!';
+  }
+  function clearSelected() {
+    selectedItem = null;
+    document.querySelectorAll('.item.selected').forEach(el => el.classList.remove('selected'));
+  }
+  function setSelected(name) {
+    clearSelected();
+    selectedItem = name;
+    const button = document.querySelector('[data-item="' + name + '"]');
+    if (button) button.classList.add('selected');
+    setFeedback('Item escolhido: ' + (button?.querySelector('strong')?.textContent || name) + '. Agora toque na bebê ou arraste o item até ela.');
+  }
+  function careWithItem(name) {
+    let result;
+    if (E.actions[name]) result = E.care(game, name);
+    else if (E.activities[name]) result = E.interact(game, name);
+    else return;
+    clearSelected();
     if (!result.applied) {
-      message('Essa necessidade já está satisfeita. Tente outro cuidado! ✨');
+      if (result.reason === 'cooldown') {
+        setFeedback('Ainda não é hora de usar esse item. Espere o intervalo terminar! ⏳');
+      } else if (result.reason === 'not-needed') {
+        const need = E.actions[name].need;
+        setFeedback('Ela ainda não precisa de ' + names[need] + '. Espere o balão dela pedir! 💕');
+      } else setFeedback('Esta interação não está disponível agora.');
+      bubble(E.speak(game, 'idle', Math.random()));
+      updateUI();
       return;
     }
+    const oldStage = E.ageStage(game).id;
     game = result.state;
-    const sleeping = action === 'sleep';
-    const feeding = action === 'feed';
-    baby.classList.toggle('sleeping', sleeping);
-    baby.classList.toggle('eating', feeding);
-    busyUntil = performance.now() + (sleeping ? 2800 : 1700);
-    bubble(sleeping ? 'Zzz... 😴' : feeding ? 'Nhac nhac! 🍼' : 'Obrigado! 💗');
-    message(careNotes[action]);
-    sound('rindo');
+    const newStage = E.ageStage(game).id;
+    busyUntil = performance.now() + (name === 'sleep' ? 3000 : 1800);
+    baby.classList.remove('sleeping', 'eating', 'stage-reaction');
+    if (name === 'sleep') baby.classList.add('sleeping');
+    else if (name === 'feed') baby.classList.add('eating');
+    else baby.classList.add('stage-reaction');
+    if (name === 'toy') speak('play');
+    else speak('care');
+    setFeedback(completed[name]);
+    if (name === 'letter') toast('Uma lembrança carinhosa para o álbum!');
+    if (name === 'drawing') toast('Um desenho novo entrou no álbum!');
+    play('rindo');
+    if (result.achievements && result.achievements.length) toast(result.achievements[result.achievements.length - 1]);
+    if (oldStage !== newStage) onGrowth(newStage);
     updateUI();
     save();
   }
-
-  document.querySelectorAll('[data-care]').forEach(button => {
-    button.addEventListener('click', () => care(button.dataset.care));
-  });
 
   function pet() {
-    game.happiness = E.clamp(game.happiness + 4, 0, 100);
-    bubble('Hehe! Mais carinho! 💕');
-    message('Carinho recebido! Seu bebê adorou a atenção.');
-    busyUntil = performance.now() + 1100;
-    sound('feliz');
+    if (selectedItem) { careWithItem(selectedItem); return; }
+    game.happiness = E.clamp(game.happiness + 2, 0, 100);
+    speak('happy');
+    busyUntil = performance.now() + 1000;
+    setFeedback(E.ageStage(game).id === 'newborn' ? 'Ela adorou seu carinho. Gugu! 💕' : 'Sua amiguinha ficou feliz com o carinho!');
+    play('feliz');
     save();
   }
 
-  function pointWithinStage(event) {
-    const rect = stage.getBoundingClientRect();
-    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  baby.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    draggingBaby = true;
+    babyPressX = e.clientX; babyPressY = e.clientY;
+    const pos = stagePosition(e);
+    babyOffsetX = pos.x - x; babyOffsetY = pos.y - y;
+    baby.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  baby.addEventListener('pointermove', e => {
+    if (!draggingBaby) return;
+    const p = stagePosition(e);
+    x = p.x - babyOffsetX; y = p.y - babyOffsetY;
+    bounds(); place();
+  });
+  function babyRelease(e, cancelled) {
+    if (!draggingBaby) return;
+    draggingBaby = false;
+    try { baby.releasePointerCapture(e.pointerId); } catch { /* Already released */ }
+    if (!cancelled && Math.hypot(e.clientX - babyPressX, e.clientY - babyPressY) < 8) pet();
+  }
+  baby.addEventListener('pointerup', e => babyRelease(e, false));
+  baby.addEventListener('pointercancel', e => babyRelease(e, true));
+  baby.addEventListener('keydown', e => {
+    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); pet(); }
+  });
+  stage.addEventListener('keydown', e => {
+    const step = 14;
+    if (e.key === 'ArrowUp') y -= step;
+    else if (e.key === 'ArrowDown') y += step;
+    else if (e.key === 'ArrowLeft') x -= step;
+    else if (e.key === 'ArrowRight') x += step;
+    else return;
+    e.preventDefault();
+    bounds(); place();
+  });
+
+  function dragGhost(item, clientX, clientY) {
+    const ghost = document.createElement('div');
+    ghost.className = 'drag-ghost';
+    const img = item.querySelector('img');
+    if (img) {
+      const copy = img.cloneNode();
+      ghost.appendChild(copy);
+    }
+    document.body.appendChild(ghost);
+    ghost.style.left = clientX + 'px';
+    ghost.style.top = clientY + 'px';
+    return ghost;
+  }
+  document.querySelectorAll('[data-item]').forEach(item => {
+    item.addEventListener('pointerdown', e => {
+      if (e.button !== 0 || itemDrag) return;
+      item.setPointerCapture(e.pointerId);
+      item.classList.add('dragging');
+      itemDrag = {
+        name: item.dataset.item, item, startX: e.clientX, startY: e.clientY,
+        ghost: dragGhost(item, e.clientX, e.clientY)
+      };
+      e.preventDefault();
+    });
+    item.addEventListener('pointermove', e => {
+      if (!itemDrag || itemDrag.item !== item) return;
+      itemDrag.ghost.style.left = e.clientX + 'px';
+      itemDrag.ghost.style.top = e.clientY + 'px';
+      baby.classList.toggle('drop-target', hitBaby(e.clientX, e.clientY));
+    });
+    function release(e, cancelled) {
+      if (!itemDrag || itemDrag.item !== item) return;
+      const drag = itemDrag;
+      itemDrag = null;
+      try { item.releasePointerCapture(e.pointerId); } catch { /* Already released */ }
+      item.classList.remove('dragging');
+      baby.classList.remove('drop-target');
+      drag.ghost.remove();
+      if (cancelled) return;
+      if (hitBaby(e.clientX, e.clientY)) {
+        careWithItem(drag.name);
+      } else if (Math.hypot(e.clientX - drag.startX, e.clientY - drag.startY) < 10) {
+        // Accessible touch fallback: select an item, then tap the baby.
+        setSelected(drag.name);
+      } else {
+        setFeedback('Quase! Solte o item sobre a bebê para usar. 💕');
+      }
+    }
+    item.addEventListener('pointerup', e => release(e, false));
+    item.addEventListener('pointercancel', e => release(e, true));
+    item.addEventListener('click', e => {
+      // detail === 0 is keyboard activation; pointer activation is handled by drag.
+      if (e.detail === 0) setSelected(item.dataset.item);
+    });
+  });
+
+  function onGrowth(id) {
+    const current = E.stages.find(s => s.id === id);
+    if (!current) return;
+    toast('Nova fase: ' + current.title + '!');
+    speak('happy');
+    setFeedback('Sua amiguinha cresceu! Agora está na fase: ' + current.title + '.');
+    play('feliz');
+  }
+  function updateStage() {
+    const stageInfo = E.ageStage(game);
+    if (animationStage !== stageInfo.id) {
+      baby.classList.remove('newborn', 'baby-stage', 'toddler', 'child');
+      baby.classList.add(stageInfo.id === 'baby' ? 'baby-stage' : stageInfo.id);
+      $('hero-character').className = 'hero-character ' + (stageInfo.id === 'newborn' ? '' : stageInfo.id);
+      $('stage').classList.toggle('child-stage', stageInfo.id === 'child');
+      $('stage').classList.toggle('toddler-stage', stageInfo.id === 'toddler');
+      $('scene-name').textContent = stageInfo.id === 'child' ? 'Meu cantinho criativo' :
+        stageInfo.id === 'toddler' ? 'Sala das descobertas' : 'Quarto da bebê';
+      animationStage = stageInfo.id;
+      $('hero-quote').textContent = E.speak(game, 'return', .5);
+    }
+    $('phase-name').textContent = stageInfo.title;
+    $('phase-desc').textContent = stageInfo.description;
+    $('life-day').textContent = 'Dia ' + E.ageDays(game);
+    $('game-time').textContent = Math.floor(game.activeSeconds / 60) + ' min de vida';
+    $('level').textContent = 'Nível ' + E.level(game);
+    $('care-count').textContent = game.careCount + (game.careCount === 1 ? ' cuidado' : ' cuidados');
+    const index = E.stages.findIndex(s => s.id === stageInfo.id);
+    const next = E.stages[index + 1];
+    if (next) {
+      const neededMinutes = Math.max(0, Math.ceil(next.minutes - game.activeSeconds / 60));
+      const neededCares = Math.max(0, next.cares - game.careCount);
+      $('growth-label').textContent = 'Próxima fase: ' + next.title;
+      $('growth-detail').textContent = neededMinutes + ' min de jogo e ' + neededCares + ' cuidados restantes';
+      const timeProgress = (game.activeSeconds / 60) / next.minutes;
+      const careProgress = game.careCount / next.cares;
+      $('growth-progress').value = Math.min(100, Math.max(0, Math.min(timeProgress, careProgress) * 100));
+    } else {
+      $('growth-label').textContent = 'Infância desbloqueada! 🌟';
+      $('growth-detail').textContent = 'Continue criando memórias e preparando a próxima aventura.';
+      $('growth-progress').value = 100;
+    }
+  }
+  function renderMemories() {
+    const all = game.memories;
+    if (all.length === memoryCount) return;
+    memoryCount = all.length;
+    const parent = $('memories');
+    parent.replaceChildren();
+    $('memory-count').textContent = all.length + (all.length === 1 ? ' lembrança' : ' lembranças');
+    if (!all.length) {
+      const p = document.createElement('p');
+      p.textContent = 'As suas primeiras conquistas e desenhos aparecerão aqui.';
+      parent.append(p);
+      return;
+    }
+    all.slice().reverse().forEach(text => {
+      const p = document.createElement('span');
+      p.textContent = '✦ ' + text;
+      parent.append(p);
+    });
+  }
+  function updateUI() {
+    updateStage();
+    for (const key of Object.keys(E.defaults)) {
+      const n = Math.round(game.needs[key]);
+      $(key).value = n;
+      $(key + '-value').textContent = n + '%';
+      $(key).setAttribute('aria-valuetext', n + '%');
+    }
+    for (const el of document.querySelectorAll('[data-remaining]')) {
+      const item = el.dataset.remaining;
+      const label = remainingLabel(item);
+      el.textContent = label;
+      const button = el.closest('.item');
+      button.classList.toggle('ready', label === 'Pronto!');
+      button.classList.toggle('waiting', label === 'Quando pedir');
+      button.classList.toggle('cooling', label.endsWith('s'));
+    }
+    const urgent = E.urgency(game);
+    if (urgent.level !== lastUrgency) {
+      lastUrgency = urgent.level;
+      if (urgent.level === 'crying') {
+        crySince = performance.now();
+        speak('cry'); play('chorando'); lastCry = performance.now();
+      } else if (urgent.level === 'asking') {
+        speak(urgent.need);
+      } else {
+        speak('idle');
+      }
+    }
+    $('cry-indicator').classList.toggle('crying', urgent.level === 'crying');
+    baby.classList.toggle('crying', urgent.level === 'crying');
+    $('cry-indicator').textContent = urgent.level === 'crying' ? '😢 Chorando: precisa de ' + names[urgent.need] :
+      urgent.level === 'asking' ? '💭 Precisa de ' + names[urgent.need] : '💗 Tudo tranquilo';
+    renderMemories();
   }
 
-  baby.addEventListener('pointerdown', event => {
-    if (event.button !== 0) return;
-    const point = pointWithinStage(event);
-    dragging = true;
-    hovered = true;
-    pressX = event.clientX;
-    pressY = event.clientY;
-    offsetX = point.x - x;
-    offsetY = point.y - y;
-    baby.setPointerCapture(event.pointerId);
-    event.preventDefault();
-  });
-
-  baby.addEventListener('pointermove', event => {
-    if (!dragging) return;
-    const point = pointWithinStage(event);
-    x = point.x - offsetX;
-    y = point.y - offsetY;
-    clampPosition();
-    draw();
-  });
-
-  function releasePointer(event) {
-    if (!dragging) return;
-    dragging = false;
-    hovered = false;
-    try { baby.releasePointerCapture(event.pointerId); } catch { /* Already released. */ }
-  }
-
-  baby.addEventListener('pointerup', event => {
-    if (!dragging) return;
-    const distance = Math.hypot(event.clientX - pressX, event.clientY - pressY);
-    releasePointer(event);
-    if (distance < 8) pet();
-  });
-  baby.addEventListener('pointercancel', releasePointer);
-  baby.addEventListener('pointerenter', () => {
-    hovered = true;
-    if (!dragging) bubble('Oiii! 👋');
-  });
-  baby.addEventListener('pointerleave', () => {
-    if (!dragging) { hovered = false; moodKey = ''; }
-  });
-
-  stage.addEventListener('keydown', event => {
-    const step = 12;
-    switch (event.key) {
-      case 'ArrowUp': y -= step; break;
-      case 'ArrowDown': y += step; break;
-      case 'ArrowLeft': x -= step; break;
-      case 'ArrowRight': x += step; break;
-      default: return;
-    }
-    event.preventDefault();
-    clampPosition();
-    draw();
-  });
-  baby.addEventListener('keydown', event => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      pet();
-    }
-  });
-
-  $('sound').addEventListener('change', event => { preferences.sound = event.target.checked; save(); });
-  $('pause').addEventListener('change', event => {
-    preferences.paused = event.target.checked;
-    message(preferences.paused ? 'Movimentos pausados. Desmarque para continuar. ⏸' : 'Voltamos a brincar! 🎉');
+  $('sound').addEventListener('click', () => {
+    options.sound = !options.sound;
+    $('sound').textContent = options.sound ? '🔊 Som ligado' : '🔇 Som desligado';
+    $('sound').setAttribute('aria-pressed', String(options.sound));
+    if (options.sound) play('rindo');
     save();
   });
-  $('speed').addEventListener('input', event => { preferences.speed = Number(event.target.value); save(); });
+  $('pause').addEventListener('click', () => {
+    options.paused = !options.paused;
+    $('pause').textContent = options.paused ? '▶ Continuar' : '⏸ Pausar';
+    $('pause').setAttribute('aria-pressed', String(options.paused));
+    setFeedback(options.paused ? 'O tempo e os movimentos estão pausados.' : 'Sua amiguinha voltou a brincar!');
+    save();
+  });
+  $('speed').addEventListener('input', e => { options.speed = Number(e.target.value); save(); });
+  $('export').addEventListener('click', () => {
+    save();
+    const blob = new Blob([E.exportSave(game)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'baby-on-screen-progresso.json';
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    setFeedback('Progresso exportado! Guarde o arquivo para importar no PC.');
+  });
+  $('import-file').addEventListener('change', async e => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    if (file.size > 100000) { setFeedback('Arquivo muito grande. Selecione um salvamento válido.'); return; }
+    try {
+      const loaded = E.importSave(await file.text());
+      if (!window.confirm('Substituir o progresso atual pelo progresso deste arquivo?')) return;
+      game = loaded; animationStage = ''; memoryCount = -1; lastUrgency = 'calm';
+      speak('return'); updateUI(); save();
+      setFeedback('Progresso importado! Bem-vinda de volta, amiguinha! 💕');
+    } catch (err) { setFeedback('Não foi possível importar: ' + err.message); }
+  });
   $('reset').addEventListener('click', () => {
-    if (!window.confirm('Quer apagar seu progresso e começar novamente?')) return;
+    if (!window.confirm('Apagar o progresso desta bebê e começar uma nova história?')) return;
     game = E.initial();
-    save();
-    moodKey = '';
-    updateUI();
-    message('Uma nova aventura começou! 🌈');
-    bubble('Oi, humano! 👶');
+    animationStage = ''; memoryCount = -1; lastUrgency = 'calm';
+    clearSelected(); updateUI(); speak('return'); save();
+    setFeedback('Uma nova vida começou! Gugu dada! 💕');
   });
 
-  window.addEventListener('resize', () => { clampPosition(); draw(); });
-  document.addEventListener('visibilitychange', () => { lastTime = performance.now(); if (document.hidden) save(); });
+  window.addEventListener('resize', () => { bounds(); place(); });
+  document.addEventListener('visibilitychange', () => {
+    lastTime = performance.now();
+    if (document.hidden) save();
+    else { speak('return'); lastTime = performance.now(); }
+  });
   window.addEventListener('pagehide', save);
   setInterval(save, 15000);
-  setInterval(() => {
-    const date = new Date();
-    $('clock').textContent = date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-  }, 30000);
-  $('clock').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-  function animate(now) {
-    const dt = Math.max(0, Math.min(0.1, (now - lastTime) / 1000));
+  function loop(now) {
+    const dt = Math.min(.11, Math.max(0, (now - lastTime) / 1000));
     lastTime = now;
-    // Faster than the desktop companion so needs visibly evolve in a short web visit.
-    if (!preferences.paused) {
-      game = E.tick(game, dt * 6);
-      if (!dragging && !hovered && !reduceMotion.matches && now >= busyUntil) {
-        if (now - lastTurnAt > 2700) {
-          const angle = Math.random() * 2 * Math.PI;
-          vx = Math.cos(angle);
-          vy = Math.sin(angle);
-          lastTurnAt = now;
+    if (!options.paused) {
+      game = E.tick(game, dt * 3);
+      if (!draggingBaby && !itemDrag && now > busyUntil && !reducedMotion.matches) {
+        if (now > nextTurn) {
+          const heading = Math.random() * Math.PI * 2;
+          vx = Math.cos(heading); vy = Math.sin(heading);
+          nextTurn = now + 2800 + Math.random() * 1800;
         }
-        x += vx * 36 * preferences.speed * dt;
-        y += vy * 36 * preferences.speed * dt;
-        const right = stage.clientWidth - 58;
-        const bottom = stage.clientHeight - 65;
-        if (x < 4 || x > right) vx = -vx;
-        if (y < 14 || y > bottom) vy = -vy;
-        clampPosition();
+        x += vx * dt * 33 * options.speed;
+        y += vy * dt * 33 * options.speed;
+        if (x <= 5 || x >= stage.clientWidth - 65) vx *= -1;
+        if (y <= 18 || y >= stage.clientHeight - 76) vy *= -1;
+        bounds();
       }
     }
-
-    if (now - lastFrameAt >= 170) {
-      animationIndex = (animationIndex + 1) % 3;
-      lastFrameAt = now;
+    if (now - lastFrameAt > 180) {
+      frameIndex = (frameIndex + 1) % 3; lastFrameAt = now;
     }
     if (now > busyUntil) {
-      baby.classList.remove('sleeping', 'eating');
-      const next = Math.abs(vx) > Math.abs(vy)
-        ? (vx >= 0 ? 'right' : 'left')
-        : (vy >= 0 ? 'front' : 'back');
-      if (next !== direction) {
-        baby.classList.remove('front', 'left', 'right', 'back');
-        baby.classList.add(next);
-        direction = next;
+      baby.classList.remove('sleeping', 'eating', 'stage-reaction');
+      const dir = Math.abs(vx) > Math.abs(vy) ? (vx > 0 ? 'right' : 'left') : (vy > 0 ? 'front' : 'back');
+      if (dir !== facing) {
+        facing = dir; baby.classList.remove('front', 'left', 'right', 'back'); baby.classList.add(dir);
       }
-      baby.style.setProperty('--frame-x', '-' + (animationIndex * 54) + 'px');
+      baby.style.setProperty('--frame-x', '-' + (frameIndex * 54) + 'px');
     }
-    draw();
-    if (now - lastUIAt > 400) { updateUI(); lastUIAt = now; }
-    requestAnimationFrame(animate);
+    if (!options.paused && now > nextSpeech) speak('idle');
+    if (!options.paused && E.urgency(game).level === 'crying' && now - lastCry > 22000) {
+      play('chorando'); lastCry = now;
+    }
+    place();
+    if (now - lastUIAt > 500) { updateUI(); lastUIAt = now; }
+    requestAnimationFrame(loop);
   }
-  clampPosition();
-  draw();
-  updateUI();
-  requestAnimationFrame(animate);
+  $('sound').textContent = options.sound ? '🔊 Som ligado' : '🔇 Som desligado';
+  $('sound').setAttribute('aria-pressed', String(options.sound));
+  $('pause').textContent = options.paused ? '▶ Continuar' : '⏸ Pausar';
+  $('pause').setAttribute('aria-pressed', String(options.paused));
+  $('speed').value = String(options.speed);
+  animationStage = '';
+  bounds(); place(); updateUI(); speak('return');
+  requestAnimationFrame(loop);
 })();
