@@ -15,8 +15,21 @@
   const diaper = sequence("fralda", [9, 10, 11, 12], 3.5);
   const playing = sequence("crescimento", [39, 40], 3);
   const petting = sequence("crescimento", [11, 28], 3);
-  const crawlingLeft = sequence("crescimento", [15, 16, 17], 5);
-  const crawlingRight = sequence("crescimento", [15, 16, 17], 5, true);
+  // The generated frames include stray pixels from neighboring poses.
+  // Crop those edges so the baby stays visually centered when crawling.
+  const crawlingFrames = [
+    { imageIndex: 0, x: 0, y: 0, w: 198, h: 171 },
+    { imageIndex: 1, x: 19, y: 0, w: 198, h: 171 },
+    { imageIndex: 2, x: 0, y: 0, w: 200, h: 171 }
+  ];
+  const crawlFrontFrames = [
+    { imageIndex: 0, x: 22, y: 0, w: 164, h: 171 },
+    { imageIndex: 1, x: 16, y: 0, w: 144, h: 171 },
+    { imageIndex: 2, x: 14, y: 0, w: 138, h: 169 }
+  ];
+  const crawlingLeft = Object.freeze({ ...sequence("crescimento", [15, 16, 17], 5), frames: crawlingFrames });
+  const crawlingRight = Object.freeze({ ...sequence("crescimento", [15, 16, 17], 5, true), frames: crawlingFrames });
+  const crawlingFront = Object.freeze({ ...sequence("crescimento", [18, 19, 21], 5), frames: crawlFrontFrames });
   const walkingRight = sequence("crescimento", [30, 31, 30, 32], 5);
   const walkingLeft = sequence("crescimento", [30, 31, 30, 32], 5, true);
 
@@ -26,7 +39,8 @@
       walk: {
         left: crawlingLeft,
         right: crawlingRight,
-        down: sequence("crescimento", [18, 19, 21], 5)
+        down: crawlingFront,
+        up: crawlingFront
       },
       feed: { down: feeding },
       sleep: { down: sleeping },
@@ -39,7 +53,8 @@
       walk: {
         left: crawlingLeft,
         right: crawlingRight,
-        down: sequence("crescimento", [18, 19, 21], 5)
+        down: crawlingFront,
+        up: crawlingFront
       },
       feed: { down: feeding },
       sleep: { down: sleeping },
