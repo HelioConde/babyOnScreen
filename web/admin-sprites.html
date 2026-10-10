@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#fffafc">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Laboratório público de inspeção dos sprites e animações do Baby On Screen.">
+  <title>Laboratório de Sprites | Baby On Screen</title>
+  <link rel="icon" href="../sprits/char1.png" type="image/png">
+  <link rel="stylesheet" href="./admin-sprites.css">
+  <script defer src="../app/sprite-runtime.js"></script>
+  <script defer src="../app/sprite-cleaner.js"></script>
+  <script defer src="../app/sprite-manifest.js"></script>
+  <script defer src="../app/sprite-admin-catalog.js"></script>
+  <script defer src="./admin-sprites.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html" aria-label="Voltar ao Baby On Screen"><span class="brand-icon">👶</span> baby<span>on</span>screen<small> / sprites</small></a>
+    <div class="top-actions">
+      <span class="read-only"><span class="live-dot"></span> Laboratório público · somente visualização</span>
+      <a class="back-link" href="./index.html">← Voltar ao jogo</a>
+    </div>
+  </header>
+  <main class="workspace">
+    <aside class="sidebar">
+      <div class="sidebar-intro">
+        <span class="eyebrow">ASSETS &amp; ANIMAÇÕES</span>
+        <h1>Estúdio de sprites <span>✳</span></h1>
+        <p>Explore todos os desenhos, acompanhe cada quadro e encontre o que precisa melhorar.</p>
+      </div>
+      <div class="summary-cards" aria-label="Resumo dos sprites">
+        <div><strong id="asset-total">0</strong><span>Arquivos</span></div>
+        <div><strong id="animation-total">0</strong><span>Animações</span></div>
+        <div><strong id="category-total">0</strong><span>Categorias</span></div>
+      </div>
+      <div class="filter-block">
+        <label for="search">Buscar sprite</label>
+        <input id="search" type="search" placeholder="Ex.: engatinhar, 030, fralda…" autocomplete="off">
+      </div>
+      <div class="filter-block">
+        <label for="category">Categoria</label>
+        <select id="category"><option value="">Todas as categorias</option></select>
+      </div>
+      <div class="filter-pair">
+        <div class="filter-block"><label for="phase">Fase</label><select id="phase"><option value="">Todas</option></select></div>
+        <div class="filter-block"><label for="action">Ação</label><select id="action"><option value="">Todas</option></select></div>
+      </div>
+      <div class="filter-block"><label for="direction">Direção</label><select id="direction"><option value="">Todas as direções</option></select></div>
+      <button type="button" id="reset-filters" class="reset-filters">↺ Limpar filtros</button>
+      <div class="sidebar-note">
+        <strong>Como funciona?</strong>
+        <p><b>Biblioteca</b> mostra todos os arquivos do GitHub. <b>Animações</b> mostra somente as sequências usadas pelo jogo.</p>
+        <p>Este painel é público no GitHub Pages e não altera os arquivos originais.</p>
+      </div>
+    </aside>
+    <section class="main-content">
+      <div class="content-header">
+        <div><span class="eyebrow">PAINEL DE INSPEÇÃO</span><h2>Todos os movimentos, <em>quadro a quadro.</em></h2></div>
+        <div class="view-switch" role="group" aria-label="Tipo de conteúdo">
+          <button id="view-assets" class="active" type="button" aria-pressed="true">◫ Biblioteca</button>
+          <button id="view-animations" type="button" aria-pressed="false">▷ Animações</button>
+        </div>
+      </div>
+      <div class="content-layout">
+        <section class="library-pane" aria-label="Galeria de sprites">
+          <div class="library-toolbar">
+            <div><strong id="result-count">0 resultados</strong><span id="result-hint">Escolha um sprite para inspecionar</span></div>
+            <div class="pager">
+              <button type="button" id="page-prev" aria-label="Página anterior">‹</button>
+              <span id="page-info">1 / 1</span>
+              <button type="button" id="page-next" aria-label="Próxima página">›</button>
+            </div>
+          </div>
+          <div id="sprite-grid" class="sprite-grid" aria-label="Sprites disponíveis"></div>
+          <div id="grid-empty" class="empty-state" hidden><span>🔎</span><strong>Nenhum sprite encontrado</strong><p>Tente remover algum filtro.</p></div>
+        </section>
+        <aside class="inspector" aria-label="Prévia e controles do sprite">
+          <div class="inspector-head">
+            <span class="eyebrow">VISUALIZAÇÃO</span>
+            <span id="load-status" class="load-status" role="status">Aguardando seleção</span>
+          </div>
+          <h3 id="viewer-title">Selecione um sprite</h3>
+          <p id="viewer-subtitle">Visualize quadros, direções e detalhes técnicos.</p>
+          <div id="preview-stage" class="preview-stage checker">
+            <canvas id="preview" width="320" height="320" aria-label="Prévia ampliada do sprite"></canvas>
+            <span class="preview-caption" id="frame-label">Quadro 0 / 0</span>
+          </div>
+          <div class="playback">
+            <button id="prev-frame" type="button" aria-label="Quadro anterior">⏮</button>
+            <button id="play-pause" class="play-primary" type="button" aria-label="Pausar animação">⏸ Pausar</button>
+            <button id="next-frame" type="button" aria-label="Próximo quadro">⏭</button>
+            <label class="speed-control" for="fps"><span>FPS</span><output id="fps-value">8</output></label>
+            <input id="fps" type="range" min="1" max="24" value="8" aria-label="Quadros por segundo">
+          </div>
+          <input id="frame-scrub" type="range" min="0" max="0" value="0" aria-label="Selecionar quadro da animação">
+          <div class="option-chips">
+            <label><input type="checkbox" id="show-checker" checked> Quadriculado</label>
+            <label><input type="checkbox" id="show-cleaned" checked> Limpeza</label>
+            <label><input type="checkbox" id="flip-horizontal"> Espelhar</label>
+          </div>
+          <dl id="viewer-meta" class="viewer-meta"></dl>
+          <div class="frame-heading"><strong>Quadros separados</strong><span id="frames-count">0 quadros</span></div>
+          <div id="frames" class="frame-strip" aria-label="Quadros individuais"></div>
+          <div class="viewer-footer">
+            <a id="open-file" href="#" target="_blank" rel="noopener noreferrer">↗ Abrir arquivo original</a>
+            <button id="copy-path" type="button">⧉ Copiar caminho</button>
+          </div>
+          <p class="panel-caption">Erros de carregamento são indicados no painel. “Carregado” não garante que o desenho esteja artisticamente correto.</p>
+        </aside>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
