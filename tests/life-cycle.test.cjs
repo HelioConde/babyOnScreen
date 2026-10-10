@@ -151,7 +151,7 @@ test('o relógio limita ausência longa, não conta tempo negativo e respeita pa
 test('relógio offline preserva progresso no arquivo exportado e novas conquistas', () => {
   const state = E.initial(1000);
   state.careCount = 65;
-  const next = E.advanceClock(state, 1800);
+  const next = E.advanceClock(state, 800);
   assert.equal(E.ageStage(next).id, 'toddler');
   const copy = E.importSave(E.exportSave(next));
   assert.equal(copy.activeSeconds, next.activeSeconds);
