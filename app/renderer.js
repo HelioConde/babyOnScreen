@@ -60,6 +60,23 @@
   let schoolQuestion = null, schoolVisible = false, lastMemoryCount = -1;
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const sounds = new Map();
+  let spriteState = '';
+  let spriteRefreshAt = 0;
+  function syncSprite(now = performance.now()) {
+    if (!spriteLayer || now < spriteRefreshAt) return;
+    spriteRefreshAt = now + 180;
+    const stage = E.ageStage(game).id;
+    const direction = ({front:'down',back:'up',left:'left',right:'right'})[dir] || 'down';
+    const action = now < busyUntil ? (baby.classList.contains('sleeping') ? 'sleep' :
+      baby.classList.contains('eating') ? 'feed' : 'idle') :
+      (draggingBaby || options.paused || reduced.matches ? 'idle' : 'walk');
+    const key = [stage,direction,action].join(':');
+    if (key !== spriteState) {
+      spriteState = key;
+      void spriteLayer.show({stage,direction,action});
+    }
+  }
+
 
   function save() {
     game.savedAt = Date.now();
@@ -141,6 +158,7 @@
       voice('feliz'); feedback('🌟 Nova fase: ' + E.ageStage(game).title + '! ' + success[name]);
     }
     if (result.achievements?.length) feedback('🌟 ' + result.achievements.join(' · ') + ' — ' + success[name]);
+    spriteRefreshAt = 0; syncSprite();
     render(); save();
   }
   function pet() {
@@ -403,6 +421,7 @@
       voice('chorando'); lastCry = now;
     }
     place();
+    syncSprite(now);
     if (now - lastDraw > 750) { render(); lastDraw = now; }
     requestAnimationFrame(animate);
   }
