@@ -4,9 +4,9 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>Baby On Screen — sua amiguinha</title>
 <link rel="stylesheet" href="./style.css">
-<script defer src="../engine.js"></script><script defer src="./renderer.js"></script>
+<script defer src="../engine.js"></script><script defer src="./sprite-runtime.js"></script><script defer src="./sprite-controller.js"></script><script defer src="./sprite-integration.js"></script><script defer src="./sprite-manifest.js"></script><script defer src="./renderer.js"></script>
 </head><body>
-<button type="button" id="baby" class="baby newborn front" title="Sua amiguinha. Clique para fazer carinho ou arraste para mover." aria-label="Bebê virtual. Arraste para mover ou toque para fazer carinho."></button>
+<button type="button" id="baby" class="baby newborn front" title="Sua amiguinha. Clique para fazer carinho ou arraste para mover." aria-label="Bebê virtual. Arraste para mover ou toque para fazer carinho."><canvas id="baby-sprite" width="96" height="96" hidden aria-hidden="true"></canvas></button>
 <div id="thought" class="thought" role="status" aria-live="polite">Gugu! 💕</div>
 <button id="launcher" class="launcher" type="button" aria-label="Abrir o painel do bebê"><img src="../assets/icons/heart.svg" width="25" height="25" alt=""> <span>Minha amiguinha</span></button>
 <aside id="panel" class="panel" aria-label="Painel do Baby On Screen" hidden>
