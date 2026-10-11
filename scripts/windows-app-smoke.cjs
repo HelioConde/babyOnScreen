@@ -193,10 +193,25 @@ async function main() {
   });
   const grip=gripPosition.result.value;
   const shift=grip.left>110?-95:95;
+  await cdp.request('Runtime.evaluate',{
+    expression:'(() => {window.__panelDragTrace=[];const h=document.getElementById("panel-move-header");' +
+      'for(const type of ["pointerdown","pointermove","pointerup"]) h.addEventListener(type,e=>{' +
+      'window.__panelDragTrace.push({type,x:e.clientX,id:e.pointerId,buttons:e.buttons});});})()'
+  });
   await cdp.request('Input.dispatchMouseEvent',{type:'mouseMoved',x:grip.x,y:grip.y});
+  await delay(100);
   await cdp.request('Input.dispatchMouseEvent',{type:'mousePressed',x:grip.x,y:grip.y,button:'left',clickCount:1});
-  await cdp.request('Input.dispatchMouseEvent',{type:'mouseMoved',x:grip.x+shift,y:grip.y,button:'left',buttons:1});
+  await delay(200);
+  for (const amount of [0.35,0.7,1]) {
+    await cdp.request('Input.dispatchMouseEvent',{type:'mouseMoved',x:grip.x+shift*amount,y:grip.y,button:'left',buttons:1});
+    await delay(130);
+  }
   await cdp.request('Input.dispatchMouseEvent',{type:'mouseReleased',x:grip.x+shift,y:grip.y,button:'left',clickCount:1});
+  await delay(150);
+  const trace=await cdp.request('Runtime.evaluate',{
+    expression:'window.__panelDragTrace',returnByValue:true
+  });
+  console.log('Panel pointer event trace:',JSON.stringify(trace.result?.value));
   const movedPanel = await cdp.request('Runtime.evaluate',{
     expression:'(() => {const r=document.getElementById("panel").getBoundingClientRect();' +
       'return {x:r.left,y:r.top,stored:localStorage.getItem("baby-on-screen-panel-position-v1")};})()',
