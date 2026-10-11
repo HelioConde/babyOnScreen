@@ -7,9 +7,23 @@
   'use strict';
   const VERSION = 2;
   const defaults = Object.freeze({ food: 85, energy: 85, hygiene: 85, health: 95 });
-  // Percent points lost per game-second. 3 game seconds = 1 real second on Web at 1x.
-  // At normal Web speed, food falls ~3.24 points/minute instead of ~9.9.
-  const rates = Object.freeze({ food: .018, energy: .015, hygiene: .013, health: .002 });
+  // Even at maximum Web speed (6 simulated seconds/real second),
+  // essential care stays comfortable during a 25-minute video.
+  const MIN_CARE_INTERVAL_MS = 25 * 60 * 1000;
+  const rates = Object.freeze({ food: .0027, energy: .0025, hygiene: .0025, health: .0004 });
+  const dayPeriods = Object.freeze([
+    Object.freeze({id:'madrugada',label:'Madrugada',icon:'🌙',from:0,to:6,activity:'Descanso e sonhos'}),
+    Object.freeze({id:'manha',label:'Manhã',icon:'☀️',from:6,to:12,activity:'Acordar, brincar e aprender'}),
+    Object.freeze({id:'tarde',label:'Tarde',icon:'🌤️',from:12,to:18,activity:'Passeios e brincadeiras'}),
+    Object.freeze({id:'noite',label:'Noite',icon:'🌆',from:18,to:24,activity:'Histórias e descanso'})
+  ]);
+  // A local-time clock for single-player. A future Socket server can supply
+  // an authoritative timestamp without changing activity scheduling.
+  function timePeriod(now=Date.now()) {
+    const date=new Date(now);
+    const hour=Number.isFinite(date.getTime()) ? date.getHours() : 12;
+    return dayPeriods.find(p=>hour>=p.from && hour<p.to) || dayPeriods[2];
+  }
   const stages = Object.freeze([
     { id: 'newborn', title: 'Recém-nascida', minutes: 0, cares: 0, sprite: 'newborn', description: 'Descobrindo o mundo' },
     { id: 'baby', title: 'Bebê curiosa', minutes: 10, cares: 8, sprite: 'baby', description: 'Aprendendo sons' },
@@ -17,9 +31,9 @@
     { id: 'child', title: 'Criança', minutes: 90, cares: 65, sprite: 'child', description: 'Explorando e conversando' }
   ]);
   const actions = Object.freeze({
-    feed: { need: 'food', amount: 37, label: 'Mamadeira', cooldown: 48 },
-    sleep: { need: 'energy', amount: 42, label: 'Dormir', cooldown: 55 },
-    diaper: { need: 'hygiene', amount: 46, label: 'Trocar fralda', cooldown: 42 },
+    feed: { need: 'food', amount: 37, label: 'Mamadeira', cooldown: 1500 },
+    sleep: { need: 'energy', amount: 42, label: 'Dormir', cooldown: 1500 },
+    diaper: { need: 'hygiene', amount: 46, label: 'Trocar fralda', cooldown: 1500 },
     medicine: { need: 'health', amount: 32, label: 'Remédio', cooldown: 65 }
   });
   const activities = Object.freeze({
@@ -299,6 +313,10 @@
     unlock(next);
     return next;
   }
+  function waitLabel(milliseconds) {
+    const seconds=Math.ceil(Math.max(0,Number(milliseconds)||0)/1000);
+    return seconds>=60 ? Math.ceil(seconds/60)+'min' : seconds+'s';
+  }
   function ready(input, key, now) {
     const s = sanitize(input);
     return finite(now, Date.now(), 0, 9999999999999) >= (s.cooldowns[key] || 0);
@@ -310,7 +328,8 @@
     if (s.needs[item.need] > 74) return { state: s, applied: false, reason: 'not-needed' };
     refreshDaily(s, time);
     s.daily.care = Math.min(10000, s.daily.care + 1);
-    s.needs[item.need] = clamp(s.needs[item.need] + item.amount, 0, 100);
+    s.needs[item.need] = ['feed','sleep','diaper'].includes(name)
+      ? 100 : clamp(s.needs[item.need] + item.amount, 0, 100);
     s.happiness = clamp(s.happiness + 7, 0, 100);
     s.xp = clamp(s.xp + 10, 0, 1000000);
     s.careCount++; s.lastCare = name;
@@ -439,7 +458,7 @@
     return sanitize(parsed.progress);
   }
   return Object.freeze({
-    VERSION, defaults, stages, actions, activities, schoolSubjects, schoolQuestions, milestones, dailyGoals, speech,
+    VERSION, defaults, rates, MIN_CARE_INTERVAL_MS, dayPeriods, timePeriod, waitLabel, stages, actions, activities, schoolSubjects, schoolQuestions, milestones, dailyGoals, speech,
     initial, sanitize, tick, advanceClock, care, interact, school, ageStage, ageDays, level, concern, urgency,
     speak, ready, exportSave, importSave, memorySummary, milestoneStatus, claimMilestone, dailyStatus, claimDaily, renameBaby, clamp
   });

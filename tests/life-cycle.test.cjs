@@ -42,7 +42,10 @@ test('cuidados somente quando necessarios e com intervalo', () => {
   assert.equal(first.applied, true);
   assert.equal(first.state.careCount, 1);
   assert.equal(E.care(first.state, 'feed', now + 1000).reason, 'cooldown');
-  assert.equal(E.care(first.state, 'feed', now + 49000).applied, true);
+  assert.equal(E.care(first.state, 'feed', now + 49000).reason,'cooldown');
+  assert.equal(E.care(first.state, 'feed', now+25*60*1000-1).reason,'cooldown');
+  const later={...first.state,needs:{...first.state.needs,food:50}};
+  assert.equal(E.care(later,'feed',now+25*60*1000).applied,true);
 });
 test('brinquedo, cartinha e desenho geram habilidade e memoria', () => {
   const now = 1000000;
@@ -263,4 +266,28 @@ test('rotinas diárias: migrar saves antigos e desbloquear escola só na infânc
   assert.equal(lesson.applied, true);
   assert.ok(E.dailyStatus(lesson.state, now).goals.find(g => g.id === 'learn').complete);
   assert.equal(E.claimDaily(lesson.state, 'learn', now).claimed, true);
+});
+
+test('relógio de quatro períodos tem horários consistentes', () => {
+  const times=[2,8,14,20].map(h=>new Date(2026,9,11,h).getTime());
+  assert.deepEqual(times.map(t=>E.timePeriod(t).id),['madrugada','manha','tarde','noite']);
+  assert.deepEqual(E.dayPeriods.map(p=>[p.from,p.to]),[[0,6],[6,12],[12,18],[18,24]]);
+  assert.ok(Object.isFrozen(E.dayPeriods));
+});
+test('cuidados essenciais duram 25 minutos reais e não exigem repetição antecipada', () => {
+  const now=Date.now();
+  for(const id of ['feed','sleep','diaper']){
+    const initial=E.initial(now);
+    const need=E.actions[id].need;
+    initial.needs[need]=20;
+    const treated=E.care(initial,id,now);
+    assert.equal(treated.applied,true);
+    assert.equal(treated.state.needs[need],100);
+    assert.equal(treated.state.cooldowns[id]-now,E.MIN_CARE_INTERVAL_MS);
+    assert.equal(E.ready(treated.state,id,now+1499999),false);
+    assert.equal(E.ready(E.importSave(E.exportSave(treated.state)),id,now+1500000),true);
+    let after=treated.state;
+    for(let i=0;i<15;i++)after=E.tick(after,600);
+    assert.ok(after.needs[need]>74,id+' must stay comfortable for 25min at 2x web speed');
+  }
 });
