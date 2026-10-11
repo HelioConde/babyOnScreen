@@ -103,6 +103,18 @@ async function main() {
   assert.equal(introState?.visible,true);
   assert.match(introState.count,/Passo 1 de 5/);
   assert.match(introState.title,/amiguinha chegou/);
+  const tutorialNaming = await cdp.request('Runtime.evaluate',{
+    expression:'(() => {const input=document.getElementById("welcome-baby-name");' +
+      'if (!input || document.getElementById("welcome-name-field").hidden) return null;' +
+      'input.value="Estrelinha";input.dispatchEvent(new Event("input",{bubbles:true}));' +
+      'return {stored:JSON.parse(localStorage.getItem("baby-on-screen-v1")).babyName,' +
+      'settings:document.getElementById("desktop-name-input").value,' +
+      'label:document.getElementById("desktop-name-label").textContent};})()',
+    returnByValue:true
+  });
+  assert.deepEqual(tutorialNaming.result?.value,{
+    stored:'Estrelinha',settings:'Estrelinha',label:'Estrelinha'
+  },'The name entered in the very first tutorial screen must persist');
   let previewCheck;
   for (let attempt=0;attempt<25;attempt++) {
     previewCheck=await cdp.request('Runtime.evaluate',{
@@ -176,15 +188,26 @@ async function main() {
   const monitorState = await cdp.request('Runtime.evaluate',{
     expression:'(async () => {const info=await window.babyDesktop.desktopLayout();' +
       'const b=info.bounds;const screens=info.displays;' +
-      'return {origin:[b.x,b.y],screens:screens.length,screenX:screens[0]?.x,' +
+      'const current=await window.babyDesktop.moveToMonitor(info.activeId);' +
+      'const invalid=await window.babyDesktop.moveToMonitor("__not_a_real_monitor__");' +
+      'const after=await window.babyDesktop.desktopLayout();' +
+      'const active=screens.find(d=>d.id===after.activeId);' +
+      'return {origin:[b.x,b.y],screens:screens.length,screenX:active?.x,' +
       'hasMonitorPicker:document.getElementById("monitor-select").options.length===screens.length,' +
-      'covers:screens.every(d=>d.x>=0&&d.y>=0&&d.x+d.width<=b.width+1&&d.y+d.height<=b.height+1)};})()',
+      'nativeMove:current.ok,invalidRejected:invalid.ok===false,' +
+      'activeId:after.activeId,firstId:info.activeId,' +
+      'covers:!!active&&active.x>=0&&active.y>=0&&' +
+      'active.x+active.width<=after.bounds.width+1&&' +
+      'active.y+active.height<=after.bounds.height+1};})()',
     awaitPromise:true,returnByValue:true
   });
   console.log('Windows monitor geometry:',JSON.stringify(monitorState.result?.value));
   assert.ok(monitorState.result?.value?.screens>=1);
   assert.equal(monitorState.result.value.hasMonitorPicker,true);
   assert.equal(monitorState.result.value.covers,true);
+  assert.equal(monitorState.result.value.nativeMove,true,'The actual OS window must move to the requested display');
+  assert.equal(monitorState.result.value.invalidRejected,true,'Invalid display IDs must be refused');
+  assert.equal(monitorState.result.value.activeId,monitorState.result.value.firstId);
   // CDP native pointer injection is ignored by Electron's transparent
   // Windows overlay in CI (no physical cursor movement). Dispatch browser
   // PointerEvents to exercise the REAL renderer drag handlers instead;
