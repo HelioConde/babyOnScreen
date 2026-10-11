@@ -31,3 +31,18 @@ test('release 0.0.2 is documented and publishes Setup + Portable after tests', (
     assert.ok(workflow.includes(file),file);
   assert.ok(fs.existsSync(path.join(root,'docs/RELEASE_0.0.2.md')));
 });
+
+test('new updater exposes only safe IPC actions through the sandboxed preload', () => {
+  const main = fs.readFileSync(path.join(root, 'app/main.cjs'), 'utf8');
+  const preload = fs.readFileSync(path.join(root, 'app/preload.cjs'), 'utf8');
+  const ui = fs.readFileSync(path.join(root, 'app/index.html'), 'utf8');
+  const renderer = fs.readFileSync(path.join(root, 'app/renderer.js'), 'utf8');
+  for (const id of ['desktop-updates','update-check','update-install','update-progress','update-release'])
+    assert.ok(ui.includes('id="' + id + '"'));
+  assert.match(main, /createUpdateService/);
+  assert.match(main, /validSender\(event\)/);
+  assert.match(preload, /baby:update:install/);
+  assert.match(preload, /baby:update:status/);
+  assert.match(renderer, /desktop\.installUpdate\(\)/);
+  assert.match(renderer, /save\(\); \/\/ Save baby data/);
+});

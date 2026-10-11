@@ -84,6 +84,16 @@
     <label>Nome da bebê <input id="desktop-name-input" type="text" maxlength="20" autocomplete="off" placeholder="Um nome especial"></label>
     <div class="utility-buttons"><button id="export" type="button">↓ Exportar</button><label class="import-label" for="import-file">↑ Importar<input type="file" accept=".json,application/json" id="import-file"></label><button id="reset" type="button">↺ Recomeçar</button></div>
   </details>
+  <details class="extras update-panel" id="desktop-updates">
+    <summary>🔄 Atualizações <span id="update-chip">Disponibilidade</span></summary>
+    <p id="update-message" role="status" aria-live="polite">O jogo procura novas versões automaticamente.</p>
+    <progress id="update-progress" max="100" value="0" hidden aria-label="Progresso do download">0%</progress>
+    <div class="update-buttons">
+      <button id="update-check" type="button">Verificar agora</button>
+      <button id="update-install" type="button" hidden>Reiniciar e atualizar</button>
+      <button id="update-release" type="button" hidden>Baixar no GitHub</button>
+    </div>
+  </details>
   <footer class="panel-footer"><small id="version">Baby On Screen</small><button type="button" id="welcome-reopen" class="welcome-reopen">? Como jogar</button><button type="button" id="hide">Ocultar personagem</button></footer>
 </aside>
 <div id="drag-ghost" class="drag-ghost" hidden><img id="drag-icon" alt="" src="../assets/icons/bottle.svg"></div>

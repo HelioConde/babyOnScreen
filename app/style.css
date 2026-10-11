@@ -126,3 +126,16 @@ h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#765c82;ma
 #welcome-preview{width:100px;height:100px;image-rendering:pixelated;filter:drop-shadow(0 4px 3px #90688b55)}
 .welcome-scene-icon{position:absolute;left:calc(50% + 43px);top:27px;font-size:26px}
 @media(max-height:600px){.welcome-scene{height:82px}#welcome-preview{height:79px;width:79px}.welcome-scene-icon{left:calc(50% + 34px);top:17px}}
+
+/* Desktop updates: progressive status, download and explicit restart consent. */
+.update-panel summary{display:flex;justify-content:space-between;align-items:center;gap:8px}
+#update-chip{border-radius:20px;background:#f2e6fa;color:#75539a;padding:4px 9px;font-size:10px}
+.update-panel>p{font-size:11px;color:#765e85;line-height:1.5;margin:10px 0}
+#update-progress{display:block;width:100%;height:9px;accent-color:#9271be}
+#update-progress[hidden]{display:none}
+.update-buttons{display:flex;flex-wrap:wrap;gap:7px;padding:7px 0}
+.update-buttons button{background:#fff;border:1px solid #e3d4ec;border-radius:9px;padding:9px 11px;font-size:11px;font-weight:900;color:#76598f;cursor:pointer}
+.update-buttons #update-install{background:#8c65b5;border-color:#8c65b5;color:white}
+.update-buttons button[hidden]{display:none}
+.update-buttons button:disabled{opacity:.55;cursor:wait}
+.update-buttons button:focus-visible{outline:3px solid #865db5;outline-offset:2px}

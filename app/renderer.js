@@ -569,6 +569,56 @@
       });
     }
   }
+  const updatesPanel = $('desktop-updates');
+  const updateStates = Object.freeze({
+    idle: ['Em dia', 'O jogo verifica novas versões automaticamente.'],
+    checking: ['Verificando', 'Procurando novas versões no GitHub…'],
+    available: ['Nova versão', 'Atualização encontrada. Preparando o download…'],
+    downloading: ['Baixando', 'Baixando a atualização em segundo plano…'],
+    ready: ['Pronta!', 'A atualização já está baixada. Reinicie para instalar.'],
+    current: ['Atualizado', 'Esta é a versão mais recente.'],
+    error: ['Sem conexão', 'Não foi possível verificar agora. Tente novamente.'],
+    portable: ['Portable', 'A versão portátil pode ser atualizada manualmente pela página de downloads.'],
+    'portable-new': ['Nova versão', 'Nova versão Portable disponível para download no GitHub.'],
+    development: ['Desenvolvimento', 'As atualizações automáticas funcionam no Setup instalado do Windows.'],
+    unavailable: ['Indisponível', 'O serviço de atualizações não está disponível.']
+  });
+  function renderUpdateStatus(state) {
+    if (!state || typeof state !== 'object') return;
+    const phase = String(state.phase || 'unavailable');
+    const [heading, explanation] = updateStates[phase] || updateStates.unavailable;
+    $('update-chip').textContent = heading;
+    $('update-message').textContent = explanation +
+      (typeof state.version === 'string' ? ' Versão: ' + state.version + '.' : '');
+    $('update-progress').hidden = phase !== 'downloading';
+    if (phase === 'downloading')
+      $('update-progress').value = E.clamp(Number(state.percent) || 0, 0, 100);
+    $('update-install').hidden = phase !== 'ready';
+    $('update-release').hidden = !['portable', 'portable-new'].includes(phase);
+    $('update-check').disabled = ['checking', 'downloading'].includes(phase);
+    if (phase === 'ready' || phase === 'portable-new') {
+      updatesPanel.open = true;
+      panelVisible(true);
+      feedback('✨ Uma nova versão do Baby On Screen está disponível!');
+    }
+  }
+  desktop.onUpdateStatus(renderUpdateStatus);
+  desktop.onUpdateShow(() => { panelVisible(true); updatesPanel.open = true; });
+  desktop.updateStatus().then(renderUpdateStatus).catch(() => {});
+  $('update-check').addEventListener('click', () => {
+    void desktop.checkUpdate().then(renderUpdateStatus).catch(() => renderUpdateStatus({ phase: 'error' }));
+  });
+  $('update-install').addEventListener('click', () => {
+    save(); // Save baby data before restarting to install the downloaded update.
+    $('update-install').disabled = true;
+    void desktop.installUpdate().then(started => {
+      if (!started) { $('update-install').disabled = false; renderUpdateStatus({ phase: 'error' }); }
+    }).catch(() => {
+      $('update-install').disabled = false;
+      renderUpdateStatus({ phase: 'error' });
+    });
+  });
+  $('update-release').addEventListener('click', () => { void desktop.openLatestRelease(); });
   desktop.version().then(version => {
     if (version) $('version').textContent = 'Versão ' + version;
   }).catch(() => {});
