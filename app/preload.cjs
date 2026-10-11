@@ -6,6 +6,9 @@ contextBridge.exposeInMainWorld('babyDesktop', Object.freeze({
   },
   setDragging: value => { if (typeof value === 'boolean') ipcRenderer.send('baby:dragging', value); },
   desktopLayout: () => ipcRenderer.invoke('baby:desktop:layout'),
+  moveToMonitor: id => typeof id === 'string'
+    ? ipcRenderer.invoke('baby:desktop:move', id)
+    : Promise.resolve({ ok: false, reason: 'invalid-monitor' }),
   onDesktopLayout: callback => {
     if (typeof callback !== 'function') return () => {};
     const listener = (_event, layout) => callback(layout);

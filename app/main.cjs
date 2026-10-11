@@ -54,7 +54,15 @@ function showOrCreateWindow() {
   createWindow();
 }
 function allDesktopBounds() {
-  return geometry.virtualDesktopBounds(screen.getAllDisplays()) || screen.getPrimaryDisplay().bounds;
+  // A single massive transparent BrowserWindow may be clipped or scaled by
+  // Windows on heterogeneous monitors. Keep one window on one real display.
+  return screen.getPrimaryDisplay().workArea;
+}
+function currentDisplay() {
+  const displays = screen.getAllDisplays();
+  if (!win || win.isDestroyed()) return screen.getPrimaryDisplay();
+  return displays.find(d => d.id === screen.getDisplayMatching(win.getBounds()).id)
+    || screen.getPrimaryDisplay();
 }
 function desktopLayout() {
   if (!win || win.isDestroyed()) return { bounds: allDesktopBounds(), displays: [] };
@@ -63,6 +71,7 @@ function desktopLayout() {
   const sorted = [primary, ...displays.filter(d => d.id !== primary.id)];
   return {
     bounds: win.getBounds(),
+    activeId: String(currentDisplay().id),
     displays: geometry.displayList(sorted, win.getBounds())
   };
 }
@@ -70,9 +79,23 @@ function sendDesktopLayout() {
   if (win && !win.isDestroyed() && !win.webContents.isDestroyed())
     win.webContents.send('baby:desktop-layout', desktopLayout());
 }
+function moveToDisplay(id) {
+  if (!win || win.isDestroyed() || typeof id !== 'string') return { ok: false, reason: 'unavailable' };
+  const target = screen.getAllDisplays().find(d => String(d.id) === id);
+  if (!target) return { ok: false, reason: 'monitor-not-found', layout: desktopLayout() };
+  const desired = target.workArea;
+  // The native OS owns this move; merely updating CSS inside the first
+  // monitor's overlay does not move the actual transparent window.
+  win.setBounds(desired, false);
+  const landed = String(screen.getDisplayMatching(win.getBounds()).id) === id;
+  const layout = desktopLayout();
+  if (landed) sendDesktopLayout();
+  return { ok: landed, reason: landed ? '' : 'move-failed', layout };
+}
 function updateDesktopBounds() {
   if (!win || win.isDestroyed()) return;
-  const next = allDesktopBounds();
+  const target = currentDisplay();
+  const next = target.workArea;
   const old = win.getBounds();
   if (old.x !== next.x || old.y !== next.y ||
       old.width !== next.width || old.height !== next.height) {
@@ -138,6 +161,8 @@ function createTray() {
 }
 ipcMain.handle('baby:desktop:layout', event =>
   validSender(event) ? desktopLayout() : { bounds: allDesktopBounds(), displays: [] });
+ipcMain.handle('baby:desktop:move', (event, id) =>
+  validSender(event) ? moveToDisplay(id) : { ok: false, reason: 'invalid-sender' });
 ipcMain.on('baby:regions', (event, regions) => {
   if (!validSender(event) || !Array.isArray(regions)) return;
   hitRegions = geometry.sanitizeRegions(regions);

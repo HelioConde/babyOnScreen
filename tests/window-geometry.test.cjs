@@ -93,3 +93,16 @@ test('available monitor work areas exclude taskbar and match the overlay region'
   assert.deepEqual(virtualDesktopBounds([{id:1,bounds:{x:0,y:0,width:1024,height:768},
     workArea:{x:0,y:0,width:1024,height:720}}]),{x:0,y:0,width:1024,height:720});
 });
+
+test('Windows switches the NATIVE overlay window instead of just changing CSS coordinates',()=>{
+  const fs=require('node:fs'),path=require('node:path');
+  const main=fs.readFileSync(path.resolve(__dirname,'../app/main.cjs'),'utf8');
+  const preload=fs.readFileSync(path.resolve(__dirname,'../app/preload.cjs'),'utf8');
+  assert.match(main,/function moveToDisplay\(id\)/);
+  assert.match(main,/screen\.getAllDisplays\(\)\.find\(d => String\(d\.id\) === id\)/);
+  assert.match(main,/win\.setBounds\(desired, false\)/);
+  assert.match(main,/screen\.getDisplayMatching\(win\.getBounds\(\)\)/);
+  assert.match(main,/ipcMain\.handle\('baby:desktop:move'/);
+  assert.match(preload,/moveToMonitor: id => typeof id === 'string'/);
+  assert.match(main,/return screen\.getPrimaryDisplay\(\)\.workArea/);
+});
