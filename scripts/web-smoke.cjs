@@ -278,6 +278,10 @@ async function drag(page, source, target) {
     await mobile.screenshot({ path: path.join(OUT, 'mobile-newborn.png'), fullPage: true, animations: 'disabled' });
     const dimensions = await mobile.evaluate(() => ({ body: document.documentElement.scrollWidth, screen: window.innerWidth }));
     assert.ok(dimensions.body <= dimensions.screen + 3, 'mobile horizontal overflow: ' + JSON.stringify(dimensions));
+    const hintWidth = await mobile.locator('#care-suggestion').boundingBox();
+    const wellbeingWidth = await mobile.locator('.wellbeing-bar').boundingBox();
+    assert.ok(hintWidth && wellbeingWidth && hintWidth.width > wellbeingWidth.width * .80,
+      'care advice must have enough room to read on mobile');
     await mobile.locator('[data-item="letter"]').tap();
     await mobile.locator('#baby').tap();
     assert.match(await mobile.locator('#feedback').textContent(), /cartinha/i);
