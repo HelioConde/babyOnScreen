@@ -39,7 +39,7 @@
     const offlineSeconds = Math.min(180, Math.max(0, (Date.now() - game.savedAt) / 1000));
     game = E.tick(game, offlineSeconds * options.speed, { active: false });
   }
-  let milestoneSignature = '';
+  let milestoneSignature = '', dailySignature = '';
   let x = innerWidth * .3, y = innerHeight * .44, dx = .8, dy = .6, dir = 'front';
   let frame = 1, lastTime = performance.now(), lastFrame = 0, lastDraw = 0, nextTurn = 0;
   let nextSpeech = 8000, lastCry = 0, busyUntil = 0, draggingBaby = false;
@@ -362,6 +362,49 @@
     render();
     save();
   });
+  function renderDaily() {
+    const today = E.dailyStatus(game);
+    const signature = today.date + ':' + today.goals.map(g => [g.id, g.progress, g.claimed].join(':')).join('|');
+    if (signature === dailySignature) return;
+    dailySignature = signature;
+    $('desktop-daily-count').textContent = today.goals.filter(g => g.claimed).length + '/' + today.goals.length;
+    const list = $('desktop-daily-list');
+    list.replaceChildren();
+    for (const goal of today.goals) {
+      const row = document.createElement('article');
+      row.className = 'desktop-daily-item' + (goal.complete ? ' daily-ready' : '');
+      const title = document.createElement('strong');
+      title.textContent = (goal.claimed ? '✓ ' : '') + goal.title;
+      const detail = document.createElement('small');
+      detail.textContent = goal.detail + ' · ' + goal.progress + '/' + goal.target + ' · +' + goal.xp + ' XP';
+      row.append(title, detail);
+      if (goal.complete && !goal.claimed) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.claimDaily = goal.id;
+        button.textContent = 'Resgatar recompensa';
+        row.append(button);
+      }
+      if (goal.claimed) {
+        const done = document.createElement('small');
+        done.className = 'desktop-daily-claimed';
+        done.textContent = 'Recompensa recebida';
+        row.append(done);
+      }
+      list.append(row);
+    }
+  }
+  $('desktop-daily-list').addEventListener('click', event => {
+    const button = event.target.closest('button[data-claim-daily]');
+    if (!button) return;
+    const result = E.claimDaily(game, button.dataset.claimDaily);
+    if (!result.claimed) return;
+    game = result.state;
+    dailySignature = ''; lastMemoryCount = -1;
+    feedback('🌷 Rotina: ' + result.title + ' · +' + result.xp + ' XP!');
+    render();
+    save();
+  });
   function render() {
     const age = E.ageStage(game);
     if (age.id !== lastStage) {
@@ -379,6 +422,10 @@
       $(key + '-val').textContent = amount + '%';
       $(key).setAttribute('aria-valuetext', amount + '%');
     }
+    const moodValue = Math.round(game.happiness);
+    $('desktop-happiness').value = moodValue;
+    $('desktop-happiness-value').textContent = moodValue + '%';
+    $('desktop-happiness').setAttribute('aria-valuetext', moodValue + '% de felicidade');
     const urge = E.urgency(game);
     if (urge.level !== lastUrgency) {
       lastUrgency = urge.level;
@@ -387,9 +434,9 @@
       else speak('idle');
     }
     baby.classList.toggle('crying', urge.level === 'crying');
-    $('mood-icon').textContent = urge.level === 'crying' ? '😢' : urge.level === 'asking' ? '🥺' : '😊';
-    $('mood-title').textContent = urge.level === 'crying' ? 'Preciso de ajuda!' : urge.level === 'asking' ? 'Quero sua atenção' : 'Estou feliz!';
-    $('mood-description').textContent = urge.level === 'calm' ? age.description :
+    $('mood-icon').textContent = urge.level === 'crying' ? '😢' : urge.level === 'asking' ? '🥺' : moodValue < 45 ? '😔' : '😊';
+    $('mood-title').textContent = urge.level === 'crying' ? 'Preciso de ajuda!' : urge.level === 'asking' ? 'Quero sua atenção' : moodValue < 45 ? 'Vamos brincar?' : 'Estou feliz!';
+    $('mood-description').textContent = urge.level === 'calm' ? (moodValue < 45 ? 'Um brinquedo ou desenho vai me animar!' : age.description) :
       'Preciso de ' + names[urge.need] + '.';
     for (const el of document.querySelectorAll('[data-wait]')) {
       const name = el.dataset.wait;
@@ -416,6 +463,7 @@
     $('school-stats').textContent = game.schoolVisits + ' aulas · leitura ' + game.skills.reading +
       ' · números ' + game.skills.numbers + ' · artes ' + game.skills.arts;
     renderMissions();
+    renderDaily();
     $('skills').textContent = 'Brincadeiras ' + game.skills.play + ' · Vínculo ' + game.skills.bond +
       ' · Criatividade ' + game.skills.creativity + ' · Escola ' + game.schoolVisits + ' aulas';
     const album = E.memorySummary(game);

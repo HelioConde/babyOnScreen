@@ -57,3 +57,18 @@ h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#765c82;ma
 .desktop-mission.mission-done{border-color:#a3d6bd;background:#f6fff9}
 .desktop-mission button{border:0;border-radius:8px;background:#906bbb;color:white;padding:8px;font-size:10px;font-weight:900;cursor:pointer}
 .desktop-mission button:focus-visible{outline:3px solid #6d499b;outline-offset:2px}
+
+/* Repeatable goals and mood indicator in the desktop companion. */
+.desktop-happiness{display:flex;align-items:center;gap:7px;margin:5px 0 12px;padding:8px 9px;border-radius:9px;background:#fff7fc;border:1px solid #eedeea}
+.desktop-happiness span{font-size:10px;font-weight:900;color:#876c8e;white-space:nowrap}
+.desktop-happiness progress{height:8px;accent-color:#dc92b6;flex:1;min-width:30px}
+.desktop-happiness output{font-size:10px;font-weight:900;color:#98758d}
+#desktop-daily-count{float:right;color:#6d9a75;font-size:10px}
+.desktop-daily-list{display:grid;gap:7px;padding:8px 0}
+.desktop-daily-item{display:grid;gap:4px;padding:10px;border:1px solid #e0e9dd;border-radius:10px;background:#fbfff9}
+.desktop-daily-item strong{font-size:11px;color:#53765c}
+.desktop-daily-item small{font-size:10px;color:#849888}
+.desktop-daily-item.daily-ready{border-color:#9acaa5}
+.desktop-daily-item button{border:0;border-radius:8px;padding:8px;font-size:10px;font-weight:900;color:white;background:#6d9875;cursor:pointer}
+.desktop-daily-item button:focus-visible{outline:3px solid #558d62;outline-offset:2px}
+.desktop-daily-claimed{font-weight:900;color:#588866!important}

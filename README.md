@@ -76,3 +76,8 @@ As recompensas também podem ser resgatadas no painel da versão Windows, em **M
 
 ### Escola no navegador
 Ao alcançar a fase **Criança**, aparece um minijogo de escola também na Web: leitura, matemática básica e artes, com três opções por pergunta, XP e novas memórias. O motor compartilhado valida necessidade de descanso/alimentação e intervalo de aula, igual ao Windows.
+
+## Rotinas diárias e felicidade
+A experiência Web e o painel Windows compartilham uma pequena rotina renovável por data local: dois cuidados, uma brincadeira e uma atividade criativa. Na fase Criança, a rotina inclui uma aula escolar. Cada atividade contabiliza somente ações realmente concluídas, e cada recompensa pode ser resgatada uma vez por dia. O save JSON preserva os resgates e permite continuar nas duas plataformas.
+
+A felicidade agora aparece com uma barra na Web e no Windows; as recomendações Web indicam quando cuidar das necessidades ou brincar. O jogo permanece offline, sem sincronização em nuvem.

@@ -69,3 +69,12 @@ test('rotina diária e indicador de felicidade aparecem no jogo Web', () => {
   assert.match(script, /E\.claimDaily\(game, button\.dataset\.claimDaily\)/);
   assert.match(script, /game\.happiness/);
 });
+
+test('rotina diária e felicidade também aparecem no painel Windows', () => {
+  const htmlPC = fs.readFileSync(path.join(root,'app','index.html'),'utf8');
+  const jsPC = fs.readFileSync(path.join(root,'app','renderer.js'),'utf8');
+  for (const id of ['desktop-daily-list','desktop-daily-count','desktop-happiness','desktop-happiness-value'])
+    assert.ok(htmlPC.includes('id="' + id + '"'), id);
+  assert.match(jsPC, /E\.dailyStatus\(game\)/);
+  assert.match(jsPC, /E\.claimDaily\(game, button\.dataset\.claimDaily\)/);
+});

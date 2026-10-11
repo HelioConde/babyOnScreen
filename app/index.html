@@ -13,6 +13,7 @@
   <header class="panel-header"><div class="avatar">👶</div><div class="panel-title"><small>MINHA AMIGUINHA</small><h1>Baby On Screen</h1><p id="phase-name">Recém-nascida</p></div><button type="button" class="round" id="close-panel" aria-label="Fechar painel">×</button></header>
   <div class="level-row"><span id="life-day">Dia 1</span><strong id="level">Nível 1</strong><span id="care-count">0 cuidados</span></div>
   <div class="mood" id="mood"><span id="mood-icon">🥰</span><div><strong id="mood-title">Estou feliz!</strong><small id="mood-description">Obrigada por cuidar de mim</small></div></div>
+  <div class="desktop-happiness"><span>💕 Felicidade</span><progress id="desktop-happiness" max="100" value="80">80%</progress><output id="desktop-happiness-value" for="desktop-happiness">80%</output></div>
   <h2>Como estou</h2>
   <div class="needs">
     <div class="need"><div><span><img src="../assets/icons/bottle.svg" alt="" width="18" height="18"> Alimentação</span><output id="food-val">85%</output></div><progress id="food" max="100" value="85"></progress></div>
@@ -55,6 +56,11 @@
     <summary>✦ Missões e recompensas <span id="desktop-missions-count">0/6</span></summary>
     <p>Cuide, brinque e desbloqueie pequenas conquistas. Cada recompensa pode ser resgatada uma vez.</p>
     <div class="desktop-missions-list" id="desktop-missions-list"></div>
+  </details>
+  <details class="extras" id="desktop-daily">
+    <summary>🌷 Rotina do dia <span id="desktop-daily-count">0/3</span></summary>
+    <p>Novos desafios de cuidados, brincadeiras e criatividade todos os dias.</p>
+    <div id="desktop-daily-list" class="desktop-daily-list"></div>
   </details>
   <details class="extras">
     <summary>⚙️ Preferências e salvamento</summary>
