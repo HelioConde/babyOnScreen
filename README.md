@@ -84,3 +84,12 @@ A felicidade agora aparece com uma barra na Web e no Windows; as recomendações
 
 ## Personalização da personagem
 O nome da bebê pode ser definido em **Preferências e salvamento** na Web e no Windows. É opcional, tem até 20 caracteres e fica registrado no mesmo progresso JSON usado para transferir a personagem entre plataformas. A interface atualiza o nome sem perder os cuidados ou as conquistas.
+
+## Instaladores Windows
+O GitHub Actions gera **dois executáveis distintos** na branch `feat/revival-windows-2026`:
+- `Baby-On-Screen-Setup-VERSAO-x64.exe`: instalador com escolha de pasta e atalhos;
+- `Baby-On-Screen-Portable-VERSAO-x64.exe`: aplicativo sem instalação.
+
+O workflow verifica que os dois arquivos são produzidos, não estão vazios e têm conteúdo diferente. Para baixar, abra o último workflow **Baby On Screen - Windows beta**, depois **Artifacts**. Ambos vêm juntos no arquivo compactado. Os arquivos não são assinados digitalmente, portanto o Windows pode exibir um aviso SmartScreen. Nunca desative globalmente as proteções do sistema.
+
+A validação automática não substitui uma sessão manual de uso no Windows 10/11, especialmente para transparência e interação entre monitores com DPI diferente.

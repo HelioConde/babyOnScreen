@@ -45,13 +45,16 @@
             "x64"
           ]
         }
-      ],
-      "artifactName": "Baby-On-Screen-${version}-${arch}.${ext}"
+      ]
     },
     "nsis": {
+      "artifactName": "Baby-On-Screen-Setup-${version}-${arch}.${ext}",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true
+    },
+    "portable": {
+      "artifactName": "Baby-On-Screen-Portable-${version}-${arch}.${ext}"
     }
   }
 }
