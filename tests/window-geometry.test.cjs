@@ -65,11 +65,12 @@ test('virtual desktop covers multiple monitors, including negative x and y', () 
   assert.equal(list[0].primary,true);
   assert.equal(virtualDesktopBounds([]),null);
 });
-test('overlay window includes the entire display union and keeps secure IPC', () => {
+test('overlay window stays on the active display and keeps secure IPC', () => {
   const fs=require('node:fs'),path=require('node:path');
   const main=fs.readFileSync(path.resolve(__dirname,'../app/main.cjs'),'utf8');
   const preload=fs.readFileSync(path.resolve(__dirname,'../app/preload.cjs'),'utf8');
-  assert.match(main,/virtualDesktopBounds\(screen\.getAllDisplays\(\)\)/);
+  assert.match(main,/return screen\.getPrimaryDisplay\(\)\.workArea/);
+  assert.match(main,/win\.setBounds\(desired, false\)/);
   assert.match(main,/ipcMain\.handle\('baby:desktop:layout'/);
   assert.match(main,/screen\.on\('display-added', updateDesktopBounds\)/);
   assert.match(main,/screen\.on\('display-removed', updateDesktopBounds\)/);

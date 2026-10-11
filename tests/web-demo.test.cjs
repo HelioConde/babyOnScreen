@@ -145,7 +145,7 @@ test('Windows overlay lets the player drag the control panel and switch monitors
   for(const id of ['panel-move-header','panel-move-handle','monitor-select'])
     assert.ok(html.includes('id="' + id + '"'),id);
   assert.match(script,/desktop\.desktopLayout\(\)/);
-  assert.match(script,/desktop\.onDesktopLayout\(applyDesktopLayout\)/);
+  assert.match(script,/desktop\.onDesktopLayout\(layout =>/);
   assert.match(script,/panelHeader\.setPointerCapture/);
   assert.match(script,/panelHeader\.addEventListener\('pointermove'/);
   assert.match(script,/localStorage\.setItem\(panelPositionKey/);
