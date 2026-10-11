@@ -1,5 +1,14 @@
 # Histórico de versões
 
+## [0.0.6] — 11/10/2026
+
+- Seleção nativa do monitor da janela Electron, evitando o problema da janela transparente gigante.
+- Nova opção `Mover para monitor` no menu de bandeja do Windows.
+- Persistência do monitor escolhido, com recuperação e centralização da bebê/painel.
+- Campo de nome da bebê dentro do primeiro passo do tutorial; persistência do nome no mesmo save.
+- Atalho para Atualizações automáticas no painel, sem reinstalação manual da versão Setup.
+- Testes de seleção de monitor, IDs inválidos, onboarding e inicialização real do Windows.
+
 ## [0.0.5] — 11/10/2026
 
 - Ciclo de quatro períodos: madrugada (0–6h), manhã (6–12h), tarde (12–18h) e noite (18–24h), compartilhado pelas regras Web e Windows.

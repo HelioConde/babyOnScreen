@@ -11,6 +11,14 @@
 
 **Estes endereços não mudam entre as versões**: por exemplo, da 0.0.3 para a 0.0.4 ou posteriores. Cada release manterá tanto o nome versionado para histórico quanto o nome fixo para download direto. Links permanentes apontam para a **última release estável**; betas ainda precisam ser baixadas pela página específica da beta.
 
+## 0.0.6 — monitor 2, nome no tutorial e atualização sem reinstalar
+
+**Trocar de monitor no PC:** no painel, escolha **Monitor 1** ou **Monitor 2**. A janela transparente do Windows é movida fisicamente para a tela selecionada (antes os personagens apenas mudavam de coordenadas dentro de uma janela virtual enorme). A seleção é lembrada ao iniciar. Como alternativa, use o ícone do jogo ao lado do relógio do Windows → **Mover para monitor**. Escolher o monitor atual também traz a bebê e a caixa para o centro da tela. Se somente um monitor aparecer, confirme que o Windows está em **Estender estes vídeos** nas configurações de Tela.
+
+**Dar nome à bebê:** no primeiro passo do tutorial, escreva um nome de até 20 caracteres ou deixe em branco. O nome é salvo no progresso local e também aparece em **Preferências e salvamento**; não apagamos os saves anteriores. Quem já concluiu o tutorial pode abri-lo novamente em **? Como jogar** e nomeá-la ali.
+
+**Atualizar o jogo sem baixar novos EXEs:** instale a versão **Setup** uma única vez. Novas releases oficiais são verificadas automaticamente, baixadas em segundo plano e ficam prontas em **Atualizações automáticas → Reiniciar e atualizar**. Também é possível abrir **Atualizações automáticas** no topo do painel ou **Verificar atualizações** pelo ícone da bandeja. A versão **Portable** não instala atualizações sozinha; ela informa a disponibilidade de uma nova versão e oferece o GitHub. O Windows ainda pode apresentar aviso SmartScreen, pois o executável não possui assinatura digital.
+
 ## 0.0.5 — quatro períodos e cuidados para acompanhar um episódio
 
 O ciclo acompanha o horário local e é dividido em **Madrugada (00h–06h), Manhã (06h–12h), Tarde (12h–18h) e Noite (18h–00h)**. A Web mostra a iluminação correspondente ao período, e o Windows exibe a rotina atual no painel. Os horários são uma referência local por enquanto; em futuras salas com amigos, um servidor poderá definir o relógio compartilhado.
