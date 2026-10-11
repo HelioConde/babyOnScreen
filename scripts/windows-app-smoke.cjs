@@ -193,6 +193,11 @@ async function main() {
   });
   const grip=gripPosition.result.value;
   const shift=grip.left>110?-95:95;
+  // CDP input does not move the Windows physical cursor. Temporarily enable
+  // the same mouse acceptance that pollMouse enables when a person hovers the
+  // handle. Production click-through logic stays unchanged.
+  await cdp.request('Runtime.evaluate',{expression:'window.babyDesktop.setDragging(true)'});
+  await delay(230);
   await cdp.request('Runtime.evaluate',{
     expression:'(() => {window.__panelDragTrace=[];const h=document.getElementById("panel-move-header");' +
       'for(const type of ["pointerdown","pointermove","pointerup"]) h.addEventListener(type,e=>{' +
@@ -208,6 +213,7 @@ async function main() {
   }
   await cdp.request('Input.dispatchMouseEvent',{type:'mouseReleased',x:grip.x+shift,y:grip.y,button:'left',clickCount:1});
   await delay(150);
+  await cdp.request('Runtime.evaluate',{expression:'window.babyDesktop.setDragging(false)'});
   const trace=await cdp.request('Runtime.evaluate',{
     expression:'window.__panelDragTrace',returnByValue:true
   });
