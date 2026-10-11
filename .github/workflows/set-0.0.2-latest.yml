@@ -1,0 +1,25 @@
+name: Set Baby On Screen 0.0.2 as Latest
+
+# Triggered only when introduced into the default branch.
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/set-0.0.2-latest.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  set-latest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Promote the validated v0.0.2 release to Latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh release view v0.0.2 --repo "$GITHUB_REPOSITORY" >/dev/null
+          gh release edit v0.0.2 --prerelease=false --latest --notes-file docs/RELEASE_0.0.2.md --repo "$GITHUB_REPOSITORY"
+          gh release list --repo "$GITHUB_REPOSITORY" --limit 5 --json tagName,isLatest,isPrerelease

@@ -1,6 +1,6 @@
 # Baby On Screen 0.0.2 — renovação do bebê virtual (2026)
 
-Esta é a primeira nova versão pública do projeto desde a 0.0.1 (2020). Reúne a versão Web renovada e o aplicativo Windows com janela transparente e mascote animado. **Pré-lançamento: a verificação automática passou, mas ainda são necessários testes manuais no desktop.**
+Esta é a primeira nova versão pública do projeto desde a 0.0.1 (2020). Reúne a versão Web renovada e o aplicativo Windows com janela transparente e mascote animado. **Release pública 0.0.2:** testes automatizados de compilação, sprites, tutorial e interface aprovados. A verificação manual em Windows real ainda é recomendada para transparência, DPI, instalação e interação com outros programas.
 
 ## Novidades desde 0.0.1
 
