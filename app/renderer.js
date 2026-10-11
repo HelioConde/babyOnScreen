@@ -10,6 +10,8 @@
   }) || null;
 
   const gameKey = 'baby-on-screen-v1', optionsKey = 'baby-on-screen-options-v1';
+  const positionKey = 'baby-on-screen-desktop-position-v1';
+  const panelPositionKey = 'baby-on-screen-panel-position-v1';
   const tourKey = 'baby-on-screen-guide-v1';
   const welcome = $('welcome-tour');
   const preview = $('welcome-preview'), previewContext = preview.getContext('2d');
@@ -20,7 +22,7 @@
       hint:'O guia pausa as necessidades para você aprender com calma.'},
     {title:'Pegue, mova e faça carinho',icon:'🖱️',
       description:'Segure o botão esquerdo sobre a bebê e arraste para outro lugar. Um clique rápido faz carinho e abre o painel.',
-      hint:'Experimente movimentar a bebê sem arrastar outros programas.'},
+      hint:'Experimente levá-la até outro monitor. O painel também pode ser arrastado pelo topo.'},
     {title:'Cuide quando ela precisar',icon:'🍼',
       description:'Acompanhe alimentação, energia, higiene e saúde. Arraste mamadeira, berço, fralda ou remédio até a bebê, ou selecione o item e clique nela.',
       hint:'Brinquedos, cartinhas e desenhos também criam lembranças.'},
@@ -68,6 +70,12 @@
   let frame = 1, lastTime = performance.now(), lastFrame = 0, lastDraw = 0, nextTurn = 0;
   let nextSpeech = 8000, lastCry = 0, busyUntil = 0, draggingBaby = false;
   let pressX = 0, pressY = 0, offsetX = 0, offsetY = 0;
+  let desktopLayout = null, movingPanel = null;
+  let savedBabyPosition = null, savedPanelPosition = null;
+  try {
+    savedBabyPosition = JSON.parse(localStorage.getItem(positionKey) || 'null');
+    savedPanelPosition = JSON.parse(localStorage.getItem(panelPositionKey) || 'null');
+  } catch { /* Ignore corrupt layout preferences. */ }
   let draggingItem = null, selectedItem = null, lastStage = '', lastUrgency = 'calm';
   let careAction = 'idle';
   let schoolQuestion = null, schoolVisible = false, lastMemoryCount = -1;
@@ -174,6 +182,127 @@
     else if (event.key === 'ArrowRight') { event.preventDefault(); $('welcome-next').click(); }
     else if (event.key === 'ArrowLeft') { event.preventDefault(); $('welcome-prev').click(); }
   });
+  function displayedMonitors() {
+    return Array.isArray(desktopLayout?.displays) ? desktopLayout.displays : [];
+  }
+  function nearestMonitor(px, py) {
+    const displays = displayedMonitors();
+    if (!displays.length) return null;
+    return displays.reduce((best, d) => {
+      const distance = Math.pow(Math.max(d.x-px,0,px-(d.x+d.width)),2) +
+        Math.pow(Math.max(d.y-py,0,py-(d.y+d.height)),2);
+      return !best || distance < best.distance ? { display:d, distance } : best;
+    },null).display;
+  }
+  function setPanelPosition(left, top, persist = false) {
+    const r = panel.getBoundingClientRect();
+    const px = E.clamp(left, 8, Math.max(8, innerWidth-r.width-8));
+    const py = E.clamp(top, 8, Math.max(8, innerHeight-r.height-8));
+    panel.style.right = 'auto'; panel.style.bottom = 'auto';
+    panel.style.left = Math.round(px) + 'px';
+    panel.style.top = Math.round(py) + 'px';
+    publishRegions();
+    if (persist && desktopLayout?.bounds) {
+      try { localStorage.setItem(panelPositionKey, JSON.stringify({
+        x:desktopLayout.bounds.x+px, y:desktopLayout.bounds.y+py
+      })); } catch {}
+    }
+  }
+  function saveBabyPosition() {
+    if (!desktopLayout?.bounds) return;
+    try { localStorage.setItem(positionKey,JSON.stringify({
+      x:desktopLayout.bounds.x+x,y:desktopLayout.bounds.y+y
+    })); } catch {}
+  }
+  function refreshMonitorPicker() {
+    const select = $('monitor-select');
+    const selected = nearestMonitor(x+BABY_WIDTH/2,y+BABY_HEIGHT/2);
+    select.replaceChildren();
+    for (const d of displayedMonitors()) {
+      const option = document.createElement('option');
+      option.value = d.id;
+      option.textContent = d.label;
+      select.append(option);
+    }
+    if (selected) select.value = selected.id;
+  }
+  function applyDesktopLayout(layout) {
+    if (!layout?.bounds || !Array.isArray(layout.displays)) return;
+    const previous = desktopLayout?.bounds;
+    const panelRect = panel.getBoundingClientRect();
+    const hadPanelMoved = panel.style.left !== '';
+    const globalPanel = hadPanelMoved && previous
+      ? {x:previous.x+panelRect.left,y:previous.y+panelRect.top} : null;
+    if (previous) {
+      x += previous.x-layout.bounds.x;
+      y += previous.y-layout.bounds.y;
+    }
+    desktopLayout = layout;
+    if (savedBabyPosition && Number.isFinite(savedBabyPosition.x) &&
+        Number.isFinite(savedBabyPosition.y)) {
+      x = savedBabyPosition.x-layout.bounds.x;
+      y = savedBabyPosition.y-layout.bounds.y;
+      savedBabyPosition = null;
+    }
+    const monitor = nearestMonitor(x+BABY_WIDTH/2,y+BABY_HEIGHT/2);
+    if (monitor) {
+      x = E.clamp(x, monitor.x+3, Math.max(monitor.x+3,monitor.x+monitor.width-BABY_WIDTH-4));
+      y = E.clamp(y, monitor.y+8, Math.max(monitor.y+8,monitor.y+monitor.height-BABY_HEIGHT-8));
+    }
+    bounds(); place();
+    const saved = savedPanelPosition && Number.isFinite(savedPanelPosition.x) &&
+        Number.isFinite(savedPanelPosition.y) ? savedPanelPosition : globalPanel;
+    if (saved) setPanelPosition(saved.x-layout.bounds.x,saved.y-layout.bounds.y);
+    savedPanelPosition = null;
+    refreshMonitorPicker();
+    publishRegions();
+  }
+  desktop.onDesktopLayout(applyDesktopLayout);
+  void desktop.desktopLayout().then(applyDesktopLayout).catch(() => {});
+  $('monitor-select').addEventListener('change', event => {
+    const target = displayedMonitors().find(d => d.id === event.target.value);
+    if (!target) return;
+    x = target.x+(target.width-BABY_WIDTH)/2;
+    y = target.y+(target.height-BABY_HEIGHT)/2;
+    bounds(); place(); saveBabyPosition();
+    const r = panel.getBoundingClientRect();
+    setPanelPosition(target.x+(target.width-r.width)/2,
+      target.y+Math.max(10,(target.height-r.height)/2),true);
+    publishRegions();
+    feedback('Bebê e painel movidos para '+target.label+'.');
+  });
+  const panelHeader = $('panel-move-header');
+  panelHeader.addEventListener('pointerdown', event => {
+    if (event.button !== 0 || event.target.closest('button:not(#panel-move-handle)')) return;
+    const r = panel.getBoundingClientRect();
+    movingPanel = {startX:event.clientX,startY:event.clientY,left:r.left,top:r.top,id:event.pointerId};
+    panelHeader.setPointerCapture(event.pointerId);
+    desktop.setDragging(true);
+    event.preventDefault();
+  });
+  panelHeader.addEventListener('pointermove', event => {
+    if (!movingPanel || movingPanel.id !== event.pointerId) return;
+    setPanelPosition(movingPanel.left+event.clientX-movingPanel.startX,
+      movingPanel.top+event.clientY-movingPanel.startY);
+  });
+  function stopMovingPanel(event) {
+    if (!movingPanel || movingPanel.id !== event.pointerId) return;
+    movingPanel = null;
+    desktop.setDragging(false);
+    try { panelHeader.releasePointerCapture(event.pointerId); } catch {}
+    const r = panel.getBoundingClientRect();
+    setPanelPosition(r.left,r.top,true);
+  }
+  panelHeader.addEventListener('pointerup',stopMovingPanel);
+  panelHeader.addEventListener('pointercancel',stopMovingPanel);
+  $('panel-move-handle').addEventListener('keydown', event => {
+    const delta = {ArrowLeft:[-24,0],ArrowRight:[24,0],
+      ArrowUp:[0,-24],ArrowDown:[0,24]}[event.key];
+    if (!delta) return;
+    event.preventDefault();
+    const r = panel.getBoundingClientRect();
+    setPanelPosition(r.left+delta[0],r.top+delta[1],true);
+  });
   $('launcher').addEventListener('click', () => panelVisible(panel.hidden));
   $('close-panel').addEventListener('click', () => panelVisible(false));
   $('hide').addEventListener('click', () => { save(); desktop.hide(); });
@@ -261,7 +390,15 @@
       pet();
     }
   }
-  baby.addEventListener('pointerup', e => releaseBaby(e, false));
+  baby.addEventListener('pointerup', e => {
+    releaseBaby(e, false);
+    const target = nearestMonitor(x+BABY_WIDTH/2,y+BABY_HEIGHT/2);
+    if (target) {
+      x = E.clamp(x,target.x+3,Math.max(target.x+3,target.x+target.width-BABY_WIDTH-4));
+      y = E.clamp(y,target.y+8,Math.max(target.y+8,target.y+target.height-BABY_HEIGHT-8));
+    }
+    bounds(); place(); saveBabyPosition(); refreshMonitorPicker(); publishRegions();
+  });
   baby.addEventListener('pointercancel', e => releaseBaby(e, true));
   baby.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); panelVisible(true); pet(); }
@@ -302,6 +439,10 @@
     item.addEventListener('click', e => { if (e.detail === 0) selectItem(item.dataset.item); });
   });
   window.addEventListener('blur', () => {
+    if (movingPanel) {
+      movingPanel = null; desktop.setDragging(false);
+      const r = panel.getBoundingClientRect(); setPanelPosition(r.left,r.top,true);
+    }
     if (draggingBaby || draggingItem) {
       draggingBaby = false; draggingItem = null; ghost.hidden = true;
       desktop.setDragging(false);
@@ -622,7 +763,14 @@
   desktop.version().then(version => {
     if (version) $('version').textContent = 'Versão ' + version;
   }).catch(() => {});
-  window.addEventListener('resize', () => { bounds(); place(); publishRegions(); });
+  window.addEventListener('resize', () => {
+    bounds(); place();
+    if (panel.style.left !== '') {
+      const r=panel.getBoundingClientRect();
+      setPanelPosition(r.left,r.top);
+    }
+    publishRegions();
+  });
   document.addEventListener('visibilitychange', () => { lastTime = performance.now(); if (document.hidden) save(); });
   window.addEventListener('beforeunload', save);
   setInterval(save, 15000);
@@ -638,9 +786,14 @@
           dx = Math.cos(direction); dy = Math.sin(direction);
           nextTurn = now + 3000 + Math.random() * 2000;
         }
-        x += dx * dt * 30 * options.speed; y += dy * dt * 30 * options.speed;
-        if (x <= 3 || x >= innerWidth - BABY_WIDTH - 4) dx *= -1;
-        if (y <= 15 || y >= innerHeight - BABY_HEIGHT - 8) dy *= -1;
+        const area = nearestMonitor(x+BABY_WIDTH/2,y+BABY_HEIGHT/2) ||
+          {x:0,y:0,width:innerWidth,height:innerHeight};
+        x += dx * dt * 30 * options.speed;
+        y += dy * dt * 30 * options.speed;
+        if (x <= area.x+3 || x >= area.x+area.width-BABY_WIDTH-4) dx *= -1;
+        if (y <= area.y+8 || y >= area.y+area.height-BABY_HEIGHT-8) dy *= -1;
+        x = E.clamp(x,area.x+3,Math.max(area.x+3,area.x+area.width-BABY_WIDTH-4));
+        y = E.clamp(y,area.y+8,Math.max(area.y+8,area.y+area.height-BABY_HEIGHT-8));
         bounds();
       }
     }

@@ -137,3 +137,19 @@ test('o tutorial inicial reutiliza a animação real da bebê, sem emojis substi
   assert.match(jsPC,/previewContext\.drawImage\(live, 0, 0, preview\.width, preview\.height\)/);
   assert.match(jsPC,/welcome\.classList\.add\('welcome-sprite-ready'\)/);
 });
+
+test('Windows overlay lets the player drag the control panel and switch monitors', () => {
+  const html = fs.readFileSync(path.join(root,'app','index.html'),'utf8');
+  const script = fs.readFileSync(path.join(root,'app','renderer.js'),'utf8');
+  const css = fs.readFileSync(path.join(root,'app','style.css'),'utf8');
+  for(const id of ['panel-move-header','panel-move-handle','monitor-select'])
+    assert.ok(html.includes('id="' + id + '"'),id);
+  assert.match(script,/desktop\.desktopLayout\(\)/);
+  assert.match(script,/desktop\.onDesktopLayout\(applyDesktopLayout\)/);
+  assert.match(script,/panelHeader\.setPointerCapture/);
+  assert.match(script,/panelHeader\.addEventListener\('pointermove'/);
+  assert.match(script,/localStorage\.setItem\(panelPositionKey/);
+  assert.match(script,/localStorage\.setItem\(positionKey/);
+  assert.match(script,/nearestMonitor\(x\+BABY_WIDTH\/2,y\+BABY_HEIGHT\/2\)/);
+  assert.match(css,/\.panel-header\{cursor:grab/);
+});
