@@ -199,8 +199,17 @@
     const wasHidden = panel.hidden;
     if (wasHidden) { panel.hidden = false; panel.style.visibility = 'hidden'; }
     const r = panel.getBoundingClientRect();
-    const px = E.clamp(left, 8, Math.max(8, innerWidth-r.width-8));
-    const py = E.clamp(top, 8, Math.max(8, innerHeight-r.height-8));
+    let px = E.clamp(left, 8, Math.max(8, innerWidth-r.width-8));
+    let py = E.clamp(top, 8, Math.max(8, innerHeight-r.height-8));
+    // On drop/restoration, don't leave the panel in an unreachable gap
+    // between displays or off-screen after a monitor is disconnected.
+    if (persist) {
+      const target = nearestMonitor(px+r.width/2,py+Math.min(r.height,200)/2);
+      if (target) {
+        px = E.clamp(px,target.x+8,Math.max(target.x+8,target.x+target.width-r.width-8));
+        py = E.clamp(py,target.y+8,Math.max(target.y+8,target.y+target.height-r.height-8));
+      }
+    }
     panel.style.right = 'auto'; panel.style.bottom = 'auto';
     panel.style.left = Math.round(px) + 'px';
     panel.style.top = Math.round(py) + 'px';
@@ -265,7 +274,17 @@
     bounds(); place();
     const saved = savedPanelPosition && Number.isFinite(savedPanelPosition.x) &&
         Number.isFinite(savedPanelPosition.y) ? savedPanelPosition : globalPanel;
-    if (saved) setPanelPosition(saved.x-layout.bounds.x,saved.y-layout.bounds.y);
+    if (saved) setPanelPosition(saved.x-layout.bounds.x,saved.y-layout.bounds.y,true);
+    else if (monitor && !hadPanelMoved) {
+      // The default right/bottom of the combined virtual rectangle might
+      // be physically empty when monitors have different heights.
+      const hidden = panel.hidden;
+      if (hidden) { panel.hidden=false; panel.style.visibility='hidden'; }
+      const r=panel.getBoundingClientRect();
+      if (hidden) { panel.hidden=true; panel.style.visibility=''; }
+      setPanelPosition(monitor.x+monitor.width-r.width-19,
+        monitor.y+monitor.height-r.height-76);
+    }
     savedPanelPosition = null;
     refreshMonitorPicker();
     publishRegions();
