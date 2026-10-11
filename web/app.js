@@ -76,7 +76,7 @@
     { paused: options.paused, speed: options.speed });
   game.savedAt = startedAt;
   let lastClockAt = startedAt;
-  let x = Math.round(stage.clientWidth / 2 - 48), y = Math.round(stage.clientHeight - 120);
+  let x = Math.round(stage.clientWidth / 2 - 64), y = Math.round(stage.clientHeight - 144);
   let vx = 0.88, vy = .48, facing = 'front';
   let draggingBaby = false, itemDrag = null, selectedItem = null;
   let babyPressX = 0, babyPressY = 0, babyOffsetX = 0, babyOffsetY = 0;
@@ -153,10 +153,12 @@
     nextSpeech = performance.now() + (E.urgency(game).level === 'crying' ? 7200 : 12000 + Math.random() * 7500);
   }
   function playArea() {
-    const left = Math.min(Math.round(stage.clientWidth * .14), Math.max(8, stage.clientWidth - 104));
-    const right = Math.max(left, stage.clientWidth - 104 - left);
-    const top = Math.min(145, Math.max(18, stage.clientHeight - 104));
-    const bottom = Math.max(top, stage.clientHeight - 100);
+    // Keep the character on the main rug, in front of the furniture, at all screen sizes.
+    const size = 128;
+    const left = Math.min(Math.round(stage.clientWidth * .22), Math.max(8, stage.clientWidth - size - 8));
+    const right = Math.max(left, stage.clientWidth - size - left);
+    const top = Math.min(145, Math.max(110, stage.clientHeight - size - 6));
+    const bottom = Math.max(top, stage.clientHeight - size - 6);
     return { left, right, top, bottom };
   }
   function bounds() {
@@ -167,8 +169,8 @@
   function place() {
     baby.style.transform = 'translate3d(' + Math.round(x) + 'px,' + Math.round(y) + 'px,0)';
     const bubbleWidth = 184;
-    const bx = E.clamp(x + 80, 7, Math.max(7, stage.clientWidth - bubbleWidth));
-    const by = E.clamp(y - 55, 8, Math.max(8, stage.clientHeight - 75));
+    const bx = E.clamp(x + 103, 7, Math.max(7, stage.clientWidth - bubbleWidth));
+    const by = E.clamp(y - 62, 8, Math.max(8, stage.clientHeight - 75));
     speechBubble.style.transform = 'translate3d(' + Math.round(bx) + 'px,' + Math.round(by) + 'px,0)';
   }
   function hitBaby(clientX, clientY) {

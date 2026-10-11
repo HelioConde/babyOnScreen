@@ -54,6 +54,8 @@ async function drag(page, source, target) {
     const stageBounds = await page.locator('#stage').boundingBox();
     assert.ok(babyBounds && stageBounds && babyBounds.y - stageBounds.y >= 110,
       'baby should stay clear of the stage title and crying indicator');
+    assert.ok(babyBounds.width >= 120 && babyBounds.height >= 120,
+      'the baby must have a comfortable visual and pointer target');
     await page.locator('.game-shell').scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(OUT, 'desktop-before-interaction.png'), fullPage: true, animations: 'disabled' });
     const foodBefore = Number(await page.locator('#food').getAttribute('value'));

@@ -193,3 +193,13 @@ background:#fff;color:#82609d;font-size:11px;font-weight:800;cursor:pointer}
 .school-web-close{justify-self:start;border:0;background:transparent;color:#7d7298;text-decoration:underline;font-size:11px;cursor:pointer;padding:7px}
 .school-web button:focus-visible,.school-web select:focus-visible{outline:3px solid #516db6;outline-offset:2px}
 @media(max-width:630px){.school-web{padding:12px}.school-web-head{align-items:flex-start;flex-direction:column}.school-web-answers{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Real 128 px canvas and centered walkable rug; all drag hitboxes stay aligned. */
+.game-stage .baby{width:128px;height:128px}
+.game-stage .baby #baby-sprite{width:128px;height:128px;transform:scale(1.06);transform-origin:50% 90%;image-rendering:pixelated}
+.game-stage .baby:not(.sprite-ready)::after{width:108px;height:108px;left:10px;top:10px;transform:scale(1.06);transform-origin:50% 90%}
+.game-stage .baby.baby-stage:not(.sprite-ready)::after,
+.game-stage .baby.toddler:not(.sprite-ready)::after,
+.game-stage .baby.child:not(.sprite-ready)::after{width:108px;height:108px;left:10px;top:10px}
+.game-stage .baby.crying::before{left:102px}
+.game-stage .baby-shadow{left:30px;right:30px;bottom:7px}
