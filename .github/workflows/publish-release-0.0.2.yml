@@ -1,0 +1,65 @@
+name: Publish Baby On Screen 0.0.2
+
+# One-time publication when this workflow first lands in the validated Windows branch.
+# Later commits do not automatically republish or replace v0.0.2.
+on:
+  push:
+    branches: [feat/revival-windows-2026]
+    paths:
+      - '.github/workflows/publish-release-0.0.2.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  verify-and-publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate release version
+        shell: pwsh
+        run: |
+          $version = (Get-Content -Raw -LiteralPath package.json | ConvertFrom-Json).version
+          if ($version -ne '0.0.2') { throw "Expected package version 0.0.2; received $version" }
+          if (-not (Test-Path docs/RELEASE_0.0.2.md)) { throw "Missing release notes" }
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Static checks and unit tests
+        run: |
+          npm run check
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Build Setup and Portable
+        run: npm run build:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Validate both Windows packages
+        shell: pwsh
+        run: ./scripts/verify-windows-artifacts.ps1
+      - name: Test the packaged desktop and its tutorial
+        run: node scripts/windows-app-smoke.cjs
+      - name: Publish GitHub release v0.0.2 with both executables
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $assets = @(
+            'dist/Baby-On-Screen-Setup-0.0.2-x64.exe',
+            'dist/Baby-On-Screen-Portable-0.0.2-x64.exe'
+          )
+          foreach ($asset in $assets) {
+            if (-not (Test-Path -LiteralPath $asset)) { throw "Missing release asset: $asset" }
+          }
+          gh release create v0.0.2 $assets --title "Baby On Screen 0.0.2" --notes-file docs/RELEASE_0.0.2.md --target $env:GITHUB_SHA --prerelease --repo $env:GITHUB_REPOSITORY
+          if ($LASTEXITCODE -ne 0) { throw "Unable to create release v0.0.2" }
+      - name: Upload verification screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: baby-on-screen-0.0.2-windows-checks
+          path: dist/windows-*-smoke.png
+          if-no-files-found: ignore

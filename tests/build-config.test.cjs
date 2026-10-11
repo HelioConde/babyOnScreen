@@ -16,3 +16,18 @@ test('Windows installer and portable have separate artifact filenames', () => {
   assert.match(workflow, /verify-windows-artifacts\.ps1/);
   assert.ok(fs.existsSync(path.join(root,'scripts','verify-windows-artifacts.ps1')));
 });
+
+test('release 0.0.2 is documented and publishes Setup + Portable after tests', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
+  assert.equal(pkg.version,'0.0.2');
+  const workflow = fs.readFileSync(path.join(root,'.github/workflows/publish-release-0.0.2.yml'),'utf8');
+  assert.match(workflow,/permissions:\s*\n\s*contents: write/);
+  assert.match(workflow,/npm run check/);
+  assert.match(workflow,/npm test/);
+  assert.match(workflow,/verify-windows-artifacts\.ps1/);
+  assert.match(workflow,/windows-app-smoke\.cjs/);
+  assert.match(workflow,/gh release create v0\.0\.2/);
+  for (const file of ['Baby-On-Screen-Setup-0.0.2-x64.exe','Baby-On-Screen-Portable-0.0.2-x64.exe'])
+    assert.ok(workflow.includes(file),file);
+  assert.ok(fs.existsSync(path.join(root,'docs/RELEASE_0.0.2.md')));
+});

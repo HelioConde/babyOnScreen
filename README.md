@@ -1,5 +1,13 @@
 # 👶 Baby On Screen — infância, cuidados e primeiras palavras
 
+## Versão 0.0.2 — atualização de 2026
+
+A versão pública seguinte à 0.0.1 (2020) reúne as melhorias feitas na renovação do projeto. **[Ver a release 0.0.2 e baixar para Windows](https://github.com/HelioConde/babyOnScreen/releases/tag/v0.0.2)**.
+
+Disponíveis para Windows x64: **Setup** (instalação) e **Portable** (sem instalação). A versão Web continua em [GitHub Pages](https://helioconde.github.io/babyOnScreen/). Consulte as [notas da versão 0.0.2](docs/RELEASE_0.0.2.md) e o [histórico de mudanças](CHANGELOG.md).
+
+**Importante:** a 0.0.2 é identificada como *pré-lançamento* até os testes manuais em Windows 10/11, especialmente transparência, DPI e cliques através da janela. Os executáveis não possuem assinatura digital. Os números 1.1.0-beta.2 até 1.1.0-beta.5 abaixo representam builds de desenvolvimento anteriores, não releases públicas.
+
 Projeto iniciado em 2020, renovado como simulador de cuidados e crescimento de uma personagem virtual. A personagem começa como recém-nascida, aprende a balbuciar, dá seus primeiros passos e cresce até a infância.
 
 ## 🌐 Jogue a versão Web
@@ -29,9 +37,8 @@ A versão Windows usa Electron e acompanha a área de trabalho com uma janela tr
 
 Requisitos: Windows 10/11, Node.js 22+ e npm. No terminal:
 
-    git clone https://github.com/HelioConde/babyOnScreen.git
+    git clone --branch feat/revival-windows-2026 https://github.com/HelioConde/babyOnScreen.git
     cd babyOnScreen
-    git checkout feat/revival-windows-2026
     npm install
     npm run check
     npm test
