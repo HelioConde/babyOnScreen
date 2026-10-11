@@ -78,6 +78,24 @@ jobs:
             "dist/latest.yml"
           )
           $assets += @(Get-ChildItem -LiteralPath dist -Filter '*.blockmap' -File | ForEach-Object { $_.FullName })
+          # Permanent names make /releases/latest/download/... valid after every version bump.
+          # The versioned executables are retained for archives and latest.yml checksums.
+          $shortcuts = @(
+            @{ Source = "dist/Baby-On-Screen-Setup-$env:VERSION-x64.exe"; Name = 'Baby-On-Screen-Setup-x64.exe' },
+            @{ Source = "dist/Baby-On-Screen-Portable-$env:VERSION-x64.exe"; Name = 'Baby-On-Screen-Portable-x64.exe' }
+          )
+          foreach ($item in $shortcuts) {
+            if (-not (Test-Path -LiteralPath $item.Source -PathType Leaf)) {
+              throw "Cannot make stable download alias: $($item.Source)"
+            }
+            $destination = Join-Path dist $item.Name
+            Copy-Item -LiteralPath $item.Source -Destination $destination
+            $assets += $destination
+            if ((Get-FileHash -Algorithm SHA256 $item.Source).Hash -ne
+                (Get-FileHash -Algorithm SHA256 $destination).Hash) {
+              throw "Stable download alias differs from the versioned executable: $destination"
+            }
+          }
           foreach ($asset in $assets) {
             if (-not (Test-Path -LiteralPath $asset -PathType Leaf)) { throw "Missing release file: $asset" }
           }

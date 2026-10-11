@@ -1,5 +1,16 @@
 # 👶 Baby On Screen — infância, cuidados e primeiras palavras
 
+## ⬇️ Baixar Baby On Screen — sempre a versão mais recente
+
+| Download | Link permanente |
+|---|---|
+| 🖥️ **Instalador Windows (Setup, recomendado)** | **[Baixar Baby On Screen para Windows](https://github.com/HelioConde/babyOnScreen/releases/latest/download/Baby-On-Screen-Setup-x64.exe)** |
+| 📦 **Versão Portable (não precisa instalar)** | **[Baixar Baby On Screen Portable](https://github.com/HelioConde/babyOnScreen/releases/latest/download/Baby-On-Screen-Portable-x64.exe)** |
+| 📋 **Todas as opções e notas da versão** | [Ver downloads no GitHub](https://github.com/HelioConde/babyOnScreen/releases/latest) |
+| 🎮 **Jogar no navegador** | [Abrir versão Web](https://helioconde.github.io/babyOnScreen/) |
+
+**Estes endereços não mudam entre as versões**: por exemplo, da 0.0.3 para a 0.0.4 ou posteriores. Cada release manterá tanto o nome versionado para histórico quanto o nome fixo para download direto. Links permanentes apontam para a **última release estável**; betas ainda precisam ser baixadas pela página específica da beta.
+
 ## Versão 0.0.3 — atualizações automáticas para Windows
 
 A partir da versão **0.0.3**, o aplicativo instalado via Setup pode verificar, baixar e instalar futuras releases oficiais automaticamente. Consulte [Baby On Screen 0.0.3](https://github.com/HelioConde/babyOnScreen/releases/tag/v0.0.3).
@@ -16,7 +27,7 @@ A versão pública seguinte à 0.0.1 (2020) reúne as melhorias feitas na renova
 
 Disponíveis para Windows x64: **Setup** (instalação) e **Portable** (sem instalação). A versão Web continua em [GitHub Pages](https://helioconde.github.io/babyOnScreen/). Consulte as [notas da versão 0.0.2](docs/RELEASE_0.0.2.md) e o [histórico de mudanças](CHANGELOG.md).
 
-**Importante:** a 0.0.2 é a release pública mais recente, com testes automatizados aprovados. Ainda faltam testes manuais em Windows 10/11 (transparência, DPI e cliques através da janela). Os executáveis não possuem assinatura digital. Os números 1.1.0-beta.2 até 1.1.0-beta.5 abaixo representam builds de desenvolvimento anteriores, não releases públicas.
+**Importante:** a 0.0.2 foi a primeira release pública renovada (a 0.0.3 é mais recente), com testes automatizados aprovados. Ainda faltam testes manuais em Windows 10/11 (transparência, DPI e cliques através da janela). Os executáveis não possuem assinatura digital. Os números 1.1.0-beta.2 até 1.1.0-beta.5 abaixo representam builds de desenvolvimento anteriores, não releases públicas.
 
 Projeto iniciado em 2020, renovado como simulador de cuidados e crescimento de uma personagem virtual. A personagem começa como recém-nascida, aprende a balbuciar, dá seus primeiros passos e cresce até a infância.
 

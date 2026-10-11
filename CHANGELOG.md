@@ -2,6 +2,8 @@
 
 ## [0.0.3] — 11/10/2026
 
+- Links de download permanentes para Setup e Portable, com nomes fixos nas releases seguintes e preservação dos nomes versionados.
+
 - Verificação periódica e download de atualizações oficiais do GitHub no aplicativo Setup.
 - Aviso de download concluído e instalação ao reiniciar, preservando o progresso.
 - Painel Atualizações e opção de checagem pela bandeja do Windows.

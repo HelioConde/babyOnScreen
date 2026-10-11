@@ -49,7 +49,7 @@ test('new updater exposes only safe IPC actions through the sandboxed preload', 
 
 test('future Windows releases embed GitHub update feed with strong checksums', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
-  assert.equal(pkg.version,'0.0.3');
+  assert.match(pkg.version, /^\d+\.\d+\.\d+$/, 'Future version bumps must be supported');
   assert.equal(pkg.dependencies['electron-updater'],'6.8.9');
   assert.equal(pkg.build.publish[0].provider,'github');
   assert.equal(pkg.build.publish[0].owner,'HelioConde');
@@ -62,4 +62,19 @@ test('future Windows releases embed GitHub update feed with strong checksums', (
   assert.match(workflow,/verify-update-feed\.ps1/);
   assert.match(workflow,/windows-app-smoke\.cjs/);
   assert.ok(fs.existsSync(path.join(root,'docs/RELEASE_0.0.3.md')));
+});
+
+test('every new release publishes fixed-name direct downloads alongside versioned EXEs', () => {
+  const workflow = fs.readFileSync(path.join(root,'.github/workflows/release-windows.yml'),'utf8');
+  const readme = fs.readFileSync(path.join(root,'README.md'),'utf8');
+  const aliasWorkflow = fs.readFileSync(path.join(root,'.github/workflows/attach-stable-downloads.yml'),'utf8');
+  for (const name of ['Baby-On-Screen-Setup-x64.exe','Baby-On-Screen-Portable-x64.exe']) {
+    assert.ok(workflow.includes(name), 'future release should contain '+name);
+    assert.ok(aliasWorkflow.includes(name), 'current release should contain '+name);
+    assert.ok(readme.includes('releases/latest/download/'+name), 'README link to latest '+name);
+  }
+  assert.match(workflow,/Get-FileHash -Algorithm SHA256/);
+  assert.match(workflow,/gh release create/);
+  assert.match(aliasWorkflow,/gh release upload/);
+  assert.ok(readme.includes('releases/latest'), 'central download hub exists');
 });

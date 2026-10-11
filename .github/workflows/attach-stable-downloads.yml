@@ -1,0 +1,53 @@
+name: Add permanent downloads to existing 0.0.3 release
+
+# One-time compatibility step: existing v0.0.3 must offer the same permanent
+# URLs that all future releases will provide.
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/attach-stable-downloads.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  attach-aliases:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download existing official versioned installers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p release-files
+          gh release download v0.0.3 --repo "$GITHUB_REPOSITORY" --dir release-files \
+            --pattern "Baby-On-Screen-Setup-0.0.3-x64.exe" \
+            --pattern "Baby-On-Screen-Portable-0.0.3-x64.exe"
+          test -s release-files/Baby-On-Screen-Setup-0.0.3-x64.exe
+          test -s release-files/Baby-On-Screen-Portable-0.0.3-x64.exe
+      - name: Create identical fixed-name downloads
+        run: |
+          set -euo pipefail
+          cp release-files/Baby-On-Screen-Setup-0.0.3-x64.exe release-files/Baby-On-Screen-Setup-x64.exe
+          cp release-files/Baby-On-Screen-Portable-0.0.3-x64.exe release-files/Baby-On-Screen-Portable-x64.exe
+          cmp release-files/Baby-On-Screen-Setup-0.0.3-x64.exe release-files/Baby-On-Screen-Setup-x64.exe
+          cmp release-files/Baby-On-Screen-Portable-0.0.3-x64.exe release-files/Baby-On-Screen-Portable-x64.exe
+      - name: Attach both permanent names to published release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh release upload v0.0.3 \
+            release-files/Baby-On-Screen-Setup-x64.exe \
+            release-files/Baby-On-Screen-Portable-x64.exe \
+            --repo "$GITHUB_REPOSITORY"
+      - name: Verify permanent latest download addresses
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          gh release view v0.0.3 --repo "$GITHUB_REPOSITORY" \
+            --json assets --jq '.assets[].name' | grep -Fx Baby-On-Screen-Setup-x64.exe
+          gh release view v0.0.3 --repo "$GITHUB_REPOSITORY" \
+            --json assets --jq '.assets[].name' | grep -Fx Baby-On-Screen-Portable-x64.exe
