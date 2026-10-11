@@ -222,3 +222,45 @@ test('escola usa perguntas compartilhadas entre Windows e Web', () => {
     }
   }
 });
+
+test('rotinas diárias: somente ações reais geram progresso e resgates únicos', () => {
+  const now = new Date(2026, 9, 11, 12).getTime();
+  let s = E.initial(now);
+  assert.equal(E.dailyStatus(s, now).goals.length, 3);
+  assert.equal(E.claimDaily(s, 'care', now).reason, 'incomplete');
+  assert.equal(E.claimDaily(s, 'learn', now).reason, 'unknown');
+  s.needs.food = 30;
+  s = E.care(s, 'feed', now).state;
+  assert.equal(E.dailyStatus(s, now).goals.find(g => g.id === 'care').progress, 1);
+  s.needs.hygiene = 30;
+  s = E.care(s, 'diaper', now).state;
+  s = E.interact(s, 'toy', now).state;
+  s = E.interact(s, 'drawing', now).state;
+  assert.ok(E.dailyStatus(s, now).goals.every(g => g.complete));
+  const done = E.claimDaily(s, 'play', now);
+  assert.equal(done.claimed, true);
+  assert.equal(done.state.xp, s.xp + 15);
+  assert.equal(E.claimDaily(done.state, 'play', now).reason, 'already-claimed');
+  const saved = E.importSave(E.exportSave(done.state));
+  assert.equal(E.dailyStatus(saved, now).goals.find(g => g.id === 'play').claimed, true);
+  const tomorrow = new Date(2026, 9, 12, 12).getTime();
+  assert.ok(E.dailyStatus(saved, tomorrow).goals.every(g => !g.complete && !g.claimed));
+  const newDay = E.interact(saved, 'toy', tomorrow + 72000).state;
+  assert.equal(newDay.daily.play, 1);
+  assert.equal(newDay.daily.care, 0);
+  assert.equal(E.claimDaily(newDay, 'play', tomorrow + 72000).claimed, true);
+});
+test('rotinas diárias: migrar saves antigos e desbloquear escola só na infância', () => {
+  const now = new Date(2026, 9, 11, 12).getTime();
+  const legacy = E.sanitize({ savedAt: now, daily: { date: 'invalid', care: -2, play: 999999, claimed: ['play','play','fake'] } });
+  assert.equal(legacy.daily.care, 0);
+  assert.equal(legacy.daily.play, 10000);
+  assert.deepEqual(legacy.daily.claimed, ['play']);
+  const child = E.initial(now);
+  child.activeSeconds = 5400; child.careCount = 65;
+  assert.equal(E.dailyStatus(child, now).goals.length, 4);
+  const lesson = E.school(child, 'reading', now);
+  assert.equal(lesson.applied, true);
+  assert.ok(E.dailyStatus(lesson.state, now).goals.find(g => g.id === 'learn').complete);
+  assert.equal(E.claimDaily(lesson.state, 'learn', now).claimed, true);
+});

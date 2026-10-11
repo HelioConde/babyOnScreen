@@ -35,6 +35,13 @@
     { id: 'five-cares', title: 'Muito bem cuidada', detail: 'Complete cinco cuidados', target: 5, xp: 35 },
     { id: 'baby-stage', title: 'Primeiras descobertas', detail: 'Chegue à fase Bebê curiosa', target: 1, xp: 45 }
   ]);
+  const dailyGoals = Object.freeze([
+    { id: 'care', title: 'Cuidar com carinho', detail: 'Realize 2 cuidados hoje', counter: 'care', target: 2, xp: 20 },
+    { id: 'play', title: 'Momento de brincar', detail: 'Brinque com o ursinho hoje', counter: 'play', target: 1, xp: 15 },
+    { id: 'create', title: 'Pequena criatividade', detail: 'Entregue uma cartinha ou faça um desenho', counter: 'create', target: 1, xp: 20 },
+    { id: 'learn', title: 'Dia de escola', detail: 'Complete uma aula hoje', counter: 'learn', target: 1, xp: 25 }
+  ]);
+  const dailyCounters = Object.freeze(['care', 'play', 'create', 'learn']);
   const schoolSubjects = Object.freeze({
     reading: { label: 'Leitura', skill: 'reading' },
     numbers: { label: 'Números', skill: 'numbers' },
@@ -112,12 +119,25 @@
     const v = typeof value === 'number' ? value : Number(value);
     return Number.isFinite(v) ? clamp(v, lo, hi) : fallback;
   }
+  function dayKey(now) {
+    const d = new Date(finite(now, Date.now(), 0, 9999999999999));
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') +
+      '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function emptyDaily(date) {
+    return { date, care: 0, play: 0, create: 0, learn: 0, claimed: [] };
+  }
+  function refreshDaily(state, now) {
+    const today = dayKey(now);
+    if (!state.daily || state.daily.date !== today) state.daily = emptyDaily(today);
+  }
   function initial(now) {
     return {
       schemaVersion: VERSION, needs: { ...defaults }, happiness: 80, xp: 0, careCount: 0,
       interactions: 0, lastCare: '', lifeSeconds: 0, activeSeconds: 0,
       skills: { play: 0, bond: 0, creativity: 0, reading: 0, numbers: 0, arts: 0 },
-      schoolVisits: 0, memories: [], memoryCounts: {}, cooldowns: {}, achievements: [], claimedMilestones: [], lastSpoken: '',
+      schoolVisits: 0, memories: [], memoryCounts: {}, cooldowns: {}, achievements: [], claimedMilestones: [],
+      daily: emptyDaily(dayKey(now)), lastSpoken: '',
       savedAt: finite(now, Date.now(), 0, 9999999999999)
     };
   }
@@ -150,8 +170,17 @@
         if (label.trim()) memoryCounts[label] = (memoryCounts[label] || 0) + 1;
       }
     }
+    const daily = emptyDaily(dayKey(v.savedAt));
+    if (v.daily && typeof v.daily === 'object' && !Array.isArray(v.daily)) {
+      if (typeof v.daily.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v.daily.date))
+        daily.date = v.daily.date;
+      for (const key of dailyCounters) daily[key] = Math.floor(finite(v.daily[key], 0, 0, 10000));
+      if (Array.isArray(v.daily.claimed))
+        daily.claimed = [...new Set(v.daily.claimed.filter(id => dailyGoals.some(g => g.id === id)))].slice(0, dailyGoals.length);
+    }
     return {
       schemaVersion: VERSION,
+      daily,
       needs, happiness: finite(v.happiness, 80, 0, 100),
       xp: Math.floor(finite(v.xp, 0, 0, 1000000)),
       careCount: Math.floor(finite(v.careCount, 0, 0, 1000000)),
@@ -276,6 +305,8 @@
     if (!item) return { state: s, applied: false, reason: 'unknown' };
     if (!ready(s, name, time)) return { state: s, applied: false, reason: 'cooldown' };
     if (s.needs[item.need] > 74) return { state: s, applied: false, reason: 'not-needed' };
+    refreshDaily(s, time);
+    s.daily.care = Math.min(10000, s.daily.care + 1);
     s.needs[item.need] = clamp(s.needs[item.need] + item.amount, 0, 100);
     s.happiness = clamp(s.happiness + 7, 0, 100);
     s.xp = clamp(s.xp + 10, 0, 1000000);
@@ -290,6 +321,9 @@
     const s = sanitize(input), item = activities[name], time = finite(now, Date.now(), 0, 9999999999999);
     if (!item) return { state: s, applied: false, reason: 'unknown' };
     if (!ready(s, name, time)) return { state: s, applied: false, reason: 'cooldown' };
+    refreshDaily(s, time);
+    if (name === 'toy') s.daily.play = Math.min(10000, s.daily.play + 1);
+    if (name === 'letter' || name === 'drawing') s.daily.create = Math.min(10000, s.daily.create + 1);
     s.happiness = clamp(s.happiness + item.happiness, 0, 100);
     s.skills[item.skill] = clamp(s.skills[item.skill] + 1, 0, 10000);
     s.interactions++; s.xp = clamp(s.xp + 7, 0, 1000000);
@@ -309,6 +343,8 @@
     if (ageStage(s).id !== 'child') return { state: s, applied: false, reason: 'too-young' };
     if (!ready(s, 'school', time)) return { state: s, applied: false, reason: 'cooldown' };
     if (s.needs.energy < 35 || s.needs.food < 35) return { state: s, applied: false, reason: 'needs-care' };
+    refreshDaily(s, time);
+    s.daily.learn = Math.min(10000, s.daily.learn + 1);
     s.schoolVisits++; s.skills[lesson.skill]++;
     s.xp = clamp(s.xp + 30, 0, 1000000);
     s.needs.energy = clamp(s.needs.energy - 12, 0, 100);
@@ -346,6 +382,31 @@
     addMemory(s, 'Missão concluída: ' + goal.title);
     return { state: s, claimed: true, xp: goal.xp, title: goal.title, achievements: unlock(s) };
   }
+  function dailyStatus(input, now = Date.now()) {
+    const s = sanitize(input), today = dayKey(now);
+    const record = s.daily.date === today ? s.daily : emptyDaily(today);
+    const goals = dailyGoals
+      .filter(goal => goal.id !== 'learn' || ageStage(s).id === 'child')
+      .map(goal => {
+        const progress = Math.min(goal.target, record[goal.counter]);
+        return { ...goal, progress, complete: progress >= goal.target, claimed: record.claimed.includes(goal.id) };
+      });
+    return { date: today, goals };
+  }
+  function claimDaily(input, id, now = Date.now()) {
+    const s = sanitize(input), time = finite(now, Date.now(), 0, 9999999999999);
+    refreshDaily(s, time);
+    const goal = dailyStatus(s, time).goals.find(item => item.id === id);
+    if (!goal) return { state: s, claimed: false, reason: 'unknown' };
+    if (goal.claimed) return { state: s, claimed: false, reason: 'already-claimed' };
+    if (!goal.complete) return { state: s, claimed: false, reason: 'incomplete' };
+    s.daily.claimed.push(id);
+    s.xp = clamp(s.xp + goal.xp, 0, 1000000);
+    s.happiness = clamp(s.happiness + 4, 0, 100);
+    addMemory(s, 'Rotina: ' + goal.title);
+    s.savedAt = time;
+    return { state: s, claimed: true, title: goal.title, xp: goal.xp, achievements: unlock(s) };
+  }
   function speak(input, context, random) {
     const s = sanitize(input), bank = speech[ageStage(s).id], urgent = urgency(s);
     let key = typeof context === 'string' ? context : 'idle';
@@ -370,8 +431,8 @@
     return sanitize(parsed.progress);
   }
   return Object.freeze({
-    VERSION, defaults, stages, actions, activities, schoolSubjects, schoolQuestions, milestones, speech,
+    VERSION, defaults, stages, actions, activities, schoolSubjects, schoolQuestions, milestones, dailyGoals, speech,
     initial, sanitize, tick, advanceClock, care, interact, school, ageStage, ageDays, level, concern, urgency,
-    speak, ready, exportSave, importSave, memorySummary, milestoneStatus, claimMilestone, clamp
+    speak, ready, exportSave, importSave, memorySummary, milestoneStatus, claimMilestone, dailyStatus, claimDaily, clamp
   });
 });
