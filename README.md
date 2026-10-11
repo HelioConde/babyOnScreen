@@ -11,7 +11,7 @@
 
 **Estes endereços não mudam entre as versões**: por exemplo, da 0.0.3 para a 0.0.4 ou posteriores. Cada release manterá tanto o nome versionado para histórico quanto o nome fixo para download direto. Links permanentes apontam para a **última release estável**; betas ainda precisam ser baixadas pela página específica da beta.
 
-## 🖥️ Vários monitores e painel móvel (0.0.4)
+## 🖥️ Baby On Screen 0.0.4 — vários monitores e painel móvel
 
 Na versão Windows é possível **arrastar a bebê até outro monitor** e **mover a caixa de cuidados** pelo cabeçalho, usando o botão ⠿ como alça. No painel, o seletor **Monitor** leva tanto a bebê quanto o painel para a tela escolhida. O botão “Minha amiguinha” acompanha a tela da personagem e continua disponível.
 

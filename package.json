@@ -1,6 +1,6 @@
 {
   "name": "baby-on-screen",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "description": "A tiny virtual baby companion for the Windows desktop.",
   "main": "app/main.cjs",
