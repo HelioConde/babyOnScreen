@@ -1,5 +1,15 @@
 # 👶 Baby On Screen — infância, cuidados e primeiras palavras
 
+## Versão 0.0.3 — atualizações automáticas para Windows
+
+A partir da versão **0.0.3**, o aplicativo instalado via Setup pode verificar, baixar e instalar futuras releases oficiais automaticamente. Consulte [Baby On Screen 0.0.3](https://github.com/HelioConde/babyOnScreen/releases/tag/v0.0.3).
+
+A verificação começa após aproximadamente 15 segundos, repetindo-se a cada quatro horas. O jogo baixa a atualização e apresenta a opção **Reiniciar e atualizar**, salvando a bebê primeiro. A versão Portable apenas oferece o download manual da nova release.
+
+**A 0.0.2 ainda precisa de uma atualização manual para a 0.0.3**, porque foi publicada antes do atualizador existir. As próximas versões são compiladas e publicadas automaticamente após atualizar a versão do `package.json` em `master` e passar nos testes. A release precisa conter `latest.yml`.
+
+Os executáveis ainda não têm assinatura digital; teste novas versões no Windows antes de divulgação ampla.
+
 ## Versão 0.0.2 — atualização de 2026
 
 A versão pública seguinte à 0.0.1 (2020) reúne as melhorias feitas na renovação do projeto. **[Ver a release 0.0.2 e baixar para Windows](https://github.com/HelioConde/babyOnScreen/releases/tag/v0.0.2)**.

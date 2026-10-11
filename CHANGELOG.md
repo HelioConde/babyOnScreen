@@ -1,5 +1,13 @@
 # Histórico de versões
 
+## [0.0.3] — 11/10/2026
+
+- Verificação periódica e download de atualizações oficiais do GitHub no aplicativo Setup.
+- Aviso de download concluído e instalação ao reiniciar, preservando o progresso.
+- Painel Atualizações e opção de checagem pela bandeja do Windows.
+- Aviso de atualização para a edição Portable, com download manual.
+- Workflow para publicar releases em novos números de versão com `latest.yml` e verificação SHA-512.
+
 ## [0.0.2] — 11/10/2026
 
 Reformulação do Baby On Screen e nova release para Windows.

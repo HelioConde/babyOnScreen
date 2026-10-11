@@ -1,13 +1,13 @@
 {
   "name": "baby-on-screen",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "description": "A tiny virtual baby companion for the Windows desktop.",
   "main": "app/main.cjs",
   "scripts": {
     "start": "electron .",
     "test": "node --test tests/*.test.cjs",
-    "check": "node --check app/main.cjs && node --check app/window-geometry.cjs && node --check app/preload.cjs && node --check app/renderer.js && node --check engine.js && node --check web/app.js && node --check app/sprite-runtime.js && node --check app/sprite-controller.js && node --check app/sprite-integration.js && node --check app/sprite-manifest.js && node --check app/sprite-admin-catalog.js && node --check web/admin-sprites.js && node --check web/sprite-editor.js && node --check web/sprite-zip.js",
+    "check": "node --check app/updates.cjs && node --check app/main.cjs && node --check app/window-geometry.cjs && node --check app/preload.cjs && node --check app/renderer.js && node --check engine.js && node --check web/app.js && node --check app/sprite-runtime.js && node --check app/sprite-controller.js && node --check app/sprite-integration.js && node --check app/sprite-manifest.js && node --check app/sprite-admin-catalog.js && node --check web/admin-sprites.js && node --check web/sprite-editor.js && node --check web/sprite-zip.js",
     "build:win": "electron-builder --win --x64 --publish never"
   },
   "author": "Hélio Conde",

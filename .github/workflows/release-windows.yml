@@ -26,7 +26,7 @@ jobs:
         id: release
         shell: pwsh
         env:
-          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $version = (Get-Content -Raw -LiteralPath package.json | ConvertFrom-Json).version
           if ($version -notmatch '^\d+\.\d+\.\d+$') { throw "Expected a stable version x.y.z, got: $version" }
@@ -68,9 +68,9 @@ jobs:
         if: steps.release.outputs.needs_publish == 'true'
         shell: pwsh
         env:
-          GH_TOKEN: \${{ secrets.GITHUB_TOKEN }}
-          VERSION: \${{ steps.release.outputs.version }}
-          RELEASE_TAG: \${{ steps.release.outputs.tag }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.release.outputs.version }}
+          RELEASE_TAG: ${{ steps.release.outputs.tag }}
         run: |
           $assets = @(
             "dist/Baby-On-Screen-Setup-$env:VERSION-x64.exe",
@@ -91,7 +91,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: baby-update-debug-\${{ github.sha }}
+          name: baby-update-debug-${{ github.sha }}
           path: |
             dist/*.yml
             dist/*.exe
