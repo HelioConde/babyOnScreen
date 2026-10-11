@@ -232,6 +232,30 @@ async function main() {
   });
   assert.ok(switchMonitor.result.value.stored,'Choosing a monitor should save baby position');
   assert.ok(switchMonitor.result.value.babyLeft>=0 && switchMonitor.result.value.babyTop>=0);
+  // Regression test: expanding the settings boxes may increase content height,
+  // but must never send the whole panel to the bottom or another monitor.
+  const stable = await cdp.request('Runtime.evaluate',{
+    expression:'(() => {const panel=document.getElementById("panel");' +
+      'const settings=[...panel.querySelectorAll("details")];' +
+      'const before=panel.getBoundingClientRect();' +
+      'const first={x:before.left,y:before.top,height:before.height};' +
+      'settings.forEach(d=>d.open=true);' +
+      'const afterOpen=panel.getBoundingClientRect();' +
+      'settings.forEach(d=>d.open=false);' +
+      'const afterClose=panel.getBoundingClientRect();' +
+      'return {first,afterOpen:{x:afterOpen.left,y:afterOpen.top,height:afterOpen.height},' +
+      'afterClose:{x:afterClose.left,y:afterClose.top,height:afterClose.height},' +
+      'scrollHeight:panel.scrollHeight,clientHeight:panel.clientHeight};})()',
+    returnByValue:true
+  });
+  const stableBox=stable.result?.value;
+  console.log('Expandable panel layout stays stable:',JSON.stringify(stableBox));
+  for(const test of [stableBox.afterOpen,stableBox.afterClose]){
+    assert.ok(Math.abs(test.x-stableBox.first.x)<2,'details cannot change panel X');
+    assert.ok(Math.abs(test.y-stableBox.first.y)<2,'details cannot change panel Y');
+    assert.ok(Math.abs(test.height-stableBox.first.height)<2,'details cannot resize panel');
+  }
+  assert.ok(stableBox.scrollHeight>=stableBox.clientHeight,'expanded content scrolls inside panel');
   const panelShot = await cdp.request('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
   const panelPng=Buffer.from(panelShot.data,'base64');
   assert.equal(panelPng.toString('hex',0,8),'89504e470d0a1a0a');
