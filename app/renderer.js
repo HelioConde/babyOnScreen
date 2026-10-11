@@ -12,6 +12,8 @@
   const gameKey = 'baby-on-screen-v1', optionsKey = 'baby-on-screen-options-v1';
   const positionKey = 'baby-on-screen-desktop-position-v1';
   const panelPositionKey = 'baby-on-screen-panel-position-v1';
+  const monitorKey = 'baby-on-screen-monitor-id-v1';
+  let pendingMonitorId = null;
   let lastDayPeriod = '';
   const tourKey = 'baby-on-screen-guide-v1';
   const welcome = $('welcome-tour');
@@ -19,8 +21,8 @@
   let lastWelcomeDraw = 0;
   const welcomeSteps = Object.freeze([
     {title:'Sua amiguinha chegou! 💕',icon:'👶',
-      description:'Ela mora na sua área de trabalho, como um mascote virtual. Anda, reage e faz companhia enquanto você usa o computador.',
-      hint:'O guia pausa as necessidades para você aprender com calma.'},
+      description:'Antes de começar, escolha como você quer chamar sua amiguinha. Ela vai brincar e fazer companhia na área de trabalho.',
+      hint:'O nome é opcional e o guia pausa as necessidades enquanto você aprende.'},
     {title:'Pegue, mova e faça carinho',icon:'🖱️',
       description:'Segure o botão esquerdo sobre a bebê e arraste para outro lugar. Um clique rápido faz carinho e abre o painel.',
       hint:'Experimente levá-la até outro monitor. O painel também pode ser arrastado pelo topo.'},
@@ -134,6 +136,7 @@
     $('welcome-hint').textContent = step.hint;
     $('welcome-scene-icon').textContent = step.icon;
     $('welcome-count').textContent = 'Passo ' + (welcomeIndex + 1) + ' de ' + welcomeSteps.length;
+    $('welcome-name-field').hidden = welcomeIndex !== 0;
     $('welcome-progress').setAttribute('aria-valuenow', String(welcomeIndex + 1));
     $('welcome-progress').firstElementChild.style.width =
       ((welcomeIndex + 1) / welcomeSteps.length * 100) + '%';
@@ -150,6 +153,7 @@
   }
   function openWelcome() {
     welcomeIndex = 0;
+    $('welcome-baby-name').value = game.babyName;
     updateWelcome();
     welcome.hidden = false;
     panelVisible(true);
@@ -185,7 +189,14 @@
     closeWelcome(); $('welcome-reopen').focus();
   });
   $('welcome-reopen').addEventListener('click', openWelcome);
+  $('welcome-baby-name').addEventListener('input', event => {
+    game = E.renameBaby(game, event.target.value);
+    $('desktop-name-input').value = game.babyName;
+    $('desktop-name-label').textContent = game.babyName || 'MINHA AMIGUINHA';
+    save();
+  });
   welcome.addEventListener('keydown', event => {
+    if (event.target.closest('input')) return;
     if (event.key === 'Escape') { event.preventDefault(); closeWelcome(); $('welcome-reopen').focus(); }
     else if (event.key === 'ArrowRight') { event.preventDefault(); $('welcome-next').click(); }
     else if (event.key === 'ArrowLeft') { event.preventDefault(); $('welcome-prev').click(); }
@@ -246,7 +257,8 @@
   }
   function refreshMonitorPicker() {
     const select = $('monitor-select');
-    const selected = nearestMonitor(x+BABY_WIDTH/2,y+BABY_HEIGHT/2);
+    const selected = displayedMonitors().find(d => d.id === desktopLayout?.activeId)
+      || nearestMonitor(x+BABY_WIDTH/2,y+BABY_HEIGHT/2);
     select.replaceChildren();
     for (const d of displayedMonitors()) {
       const option = document.createElement('option');
@@ -259,22 +271,39 @@
   function applyDesktopLayout(layout) {
     if (!layout?.bounds || !Array.isArray(layout.displays)) return;
     const previous = desktopLayout?.bounds;
+    const switched = !!desktopLayout && desktopLayout.activeId !== layout.activeId;
     const panelRect = panel.getBoundingClientRect();
     const hadPanelMoved = panel.style.left !== '';
-    const globalPanel = hadPanelMoved && previous
+    if (switched) {
+      // A browser window now physically lives on another display.
+      // Reset stale pixel coordinates from the previous monitor.
+      savedBabyPosition = null;
+      savedPanelPosition = null;
+      x = Math.round(layout.bounds.width * .42 - BABY_WIDTH / 2);
+      y = Math.round(layout.bounds.height * .52 - BABY_HEIGHT / 2);
+      panel.style.left = '';
+      panel.style.top = '';
+      panel.style.right = '19px';
+      panel.style.bottom = '76px';
+    }
+    const globalPanel = hadPanelMoved && previous && !switched
       ? {x:previous.x+panelRect.left,y:previous.y+panelRect.top} : null;
-    if (previous) {
+    if (previous && !switched) {
       x += previous.x-layout.bounds.x;
       y += previous.y-layout.bounds.y;
     }
     desktopLayout = layout;
+    if (switched) {
+      try { localStorage.setItem(monitorKey, layout.activeId); } catch {}
+    }
     if (savedBabyPosition && Number.isFinite(savedBabyPosition.x) &&
         Number.isFinite(savedBabyPosition.y)) {
       x = savedBabyPosition.x-layout.bounds.x;
       y = savedBabyPosition.y-layout.bounds.y;
       savedBabyPosition = null;
     }
-    const monitor = nearestMonitor(x+BABY_WIDTH/2,y+BABY_HEIGHT/2);
+    const monitor = displayedMonitors().find(d => d.id === layout.activeId)
+      || nearestMonitor(x+BABY_WIDTH/2,y+BABY_HEIGHT/2);
     if (monitor) {
       panel.style.height=Math.min(610,Math.max(180,monitor.height-20))+'px';
       panel.style.maxHeight=Math.max(180,monitor.height-20)+'px';
@@ -299,22 +328,56 @@
     refreshMonitorPicker();
     publishRegions();
   }
-  desktop.onDesktopLayout(applyDesktopLayout);
-  void desktop.desktopLayout().then(applyDesktopLayout).catch(() => {});
+  desktop.onDesktopLayout(layout => {
+    if (pendingMonitorId && layout.activeId !== pendingMonitorId) return;
+    applyDesktopLayout(layout);
+  });
+  async function selectMonitor(id, initializing = false) {
+    const target = displayedMonitors().find(d => d.id === id);
+    if (!target) return false;
+    if (desktopLayout?.activeId === id) return true;
+    pendingMonitorId = id;
+    try {
+      const result = await desktop.moveToMonitor(id);
+      if (!result?.ok || result.layout?.activeId !== id) {
+        if (!initializing) feedback('O Windows não conseguiu mover a janela. Verifique se o monitor está conectado e escolha novamente.');
+        refreshMonitorPicker();
+        return false;
+      }
+      applyDesktopLayout(result.layout);
+      // Reposition the entire game, not just the sprites inside the first monitor.
+      x = Math.round(innerWidth * .5 - BABY_WIDTH / 2);
+      y = Math.round(innerHeight * .48 - BABY_HEIGHT / 2);
+      bounds(); place(); saveBabyPosition();
+      const r = panel.getBoundingClientRect();
+      setPanelPosition((innerWidth-r.width)/2,
+        Math.max(8, (innerHeight-r.height)/2), true);
+      refreshMonitorPicker();
+      publishRegions();
+      if (!initializing) feedback('Bebê e painel agora estão no '+target.label+'.');
+      return true;
+    } catch {
+      if (!initializing) feedback('Não foi possível acessar o monitor escolhido agora.');
+      refreshMonitorPicker();
+      return false;
+    } finally {
+      pendingMonitorId = null;
+    }
+  }
+  void desktop.desktopLayout().then(async layout => {
+    let preferred = null;
+    try { preferred = localStorage.getItem(monitorKey); } catch {}
+    // Delay restoring saved coordinates until the selected monitor is active.
+    if (preferred && preferred !== layout.activeId &&
+        layout.displays.some(d => d.id === preferred)) {
+      pendingMonitorId = preferred;
+      const result = await desktop.moveToMonitor(preferred).catch(() => null);
+      pendingMonitorId = null;
+      applyDesktopLayout(result?.ok ? result.layout : layout);
+    } else applyDesktopLayout(layout);
+  }).catch(() => {});
   $('monitor-select').addEventListener('change', event => {
-    const target = displayedMonitors().find(d => d.id === event.target.value);
-    if (!target) return;
-    x = target.x+(target.width-BABY_WIDTH)/2;
-    y = target.y+(target.height-BABY_HEIGHT)/2;
-    panel.style.height=Math.min(610,Math.max(180,target.height-20))+'px';
-    panel.style.maxHeight=Math.max(180,target.height-20)+'px';
-    bounds(); place(); saveBabyPosition();
-    refreshMonitorPicker();
-    const r = panel.getBoundingClientRect();
-    setPanelPosition(target.x+(target.width-r.width)/2,
-      target.y+Math.max(10,(target.height-r.height)/2),true);
-    publishRegions();
-    feedback('Bebê e painel movidos para '+target.label+'.');
+    void selectMonitor(event.target.value);
   });
   const panelHeader = $('panel-move-header');
   panelHeader.addEventListener('pointerdown', event => {
@@ -783,6 +846,12 @@
     }
   }
   const updatesPanel = $('desktop-updates');
+  $('update-quick').addEventListener('click', () => {
+    panelVisible(true);
+    updatesPanel.open = true;
+    updatesPanel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    void desktop.checkUpdate();
+  });
   const updateStates = Object.freeze({
     idle: ['Em dia', 'O jogo verifica novas versões automaticamente.'],
     checking: ['Verificando', 'Procurando novas versões no GitHub…'],

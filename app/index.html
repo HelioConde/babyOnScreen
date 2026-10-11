@@ -15,6 +15,11 @@
     <div class="welcome-scene" aria-hidden="true"><canvas id="welcome-preview" width="128" height="128"></canvas><span id="welcome-scene-icon" class="welcome-scene-icon">👶</span><span class="welcome-scene-sparkles">✦ · ♡ · ✦</span></div>
     <h2 id="welcome-title">Sua amiguinha chegou!</h2>
     <p id="welcome-description">Uma nova companheira para a sua área de trabalho.</p>
+    <div class="welcome-name-field" id="welcome-name-field">
+      <label for="welcome-baby-name">Como vai se chamar sua bebê?</label>
+      <input id="welcome-baby-name" type="text" maxlength="20" autocomplete="off" placeholder="Escolha um nome carinhoso">
+      <small>É opcional. Você pode mudar o nome depois nas Preferências.</small>
+    </div>
     <div id="welcome-hint" class="welcome-hint">As necessidades ficam pausadas durante o guia.</div>
     <div id="welcome-progress" class="welcome-progress" role="progressbar" aria-label="Progresso do tutorial" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1"><span></span></div>
     <div class="welcome-controls">
@@ -24,7 +29,7 @@
     </div>
   </section>
   <header class="panel-header" id="panel-move-header" title="Segure e arraste para mover o painel"><button type="button" id="panel-move-handle" class="panel-move-handle" aria-label="Mover painel: arraste ou use as teclas de seta" title="Arrastar painel">⠿</button><div class="avatar">👶</div><div class="panel-title"><small id="desktop-name-label">MINHA AMIGUINHA</small><h1>Baby On Screen</h1><p id="phase-name">Recém-nascida</p></div><button type="button" class="round" id="close-panel" aria-label="Fechar painel">×</button></header>
-  <div class="monitor-controls"><label for="monitor-select">🖥️ Monitor</label><select id="monitor-select" aria-label="Mover bebê e painel para outro monitor"><option value="">Monitor principal</option></select><small>Arraste a bebê entre telas ou mova a caixa pelo topo.</small></div>
+  <div class="monitor-controls"><label for="monitor-select">🖥️ Monitor</label><select id="monitor-select" aria-label="Mover bebê e painel para outro monitor"><option value="">Monitor principal</option></select><small>Escolha o monitor para mover a janela do jogo. Arraste a caixa pelo topo.</small><button id="update-quick" type="button" class="update-quick">↻ Atualizações automáticas</button></div>
   <div class="day-period" id="day-period" data-period="manha"><span id="day-period-icon">☀️</span><div><strong id="day-period-label">Manhã</strong><small id="day-period-activity">Acordar, brincar e aprender</small></div><span class="day-period-hint">Ciclo do dia</span></div>
   <div class="level-row"><span id="life-day">Dia 1</span><strong id="level">Nível 1</strong><span id="care-count">0 cuidados</span></div>
   <div class="mood" id="mood"><span id="mood-icon">🥰</span><div><strong id="mood-title">Estou feliz!</strong><small id="mood-description">Obrigada por cuidar de mim</small></div></div>

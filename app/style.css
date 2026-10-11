@@ -153,6 +153,15 @@ h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#765c82;ma
 .monitor-controls select{flex:1;min-width:112px;max-width:210px;padding:6px 8px;border-radius:8px;
   background:#fff;border:1px solid #ded0eb;font-size:11px;color:#654a83}
 .monitor-controls small{flex-basis:100%;font-size:10px;color:#856e9c}
+.update-quick{border:1px solid #e3d3ef;border-radius:8px;background:white;
+  padding:7px 10px;color:#7554a2;font-weight:800;font-size:10px;cursor:pointer}
+.welcome-name-field{display:grid;gap:6px;margin:8px 0 12px;padding:10px;
+  background:#fffafef5;border:1px solid #ead6ee;border-radius:12px}
+.welcome-name-field[hidden]{display:none}
+.welcome-name-field label{color:#6c4e81;font-weight:800;font-size:12px}
+.welcome-name-field input{width:100%;padding:10px;border:1px solid #d8c4e9;
+  background:white;border-radius:9px;font-size:13px;color:#4e345e;user-select:text}
+.welcome-name-field small{font-size:10px;color:#826c90}
 
 /* Keep the panel fixed when expandable preferences change their content. */
 .panel{height:min(610px,calc(100vh - 40px));max-height:calc(100vh - 20px);

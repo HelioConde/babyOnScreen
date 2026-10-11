@@ -184,3 +184,21 @@ test('Web mostra os mesmos quatro períodos do relógio compartilhado',()=>{
   assert.match(js,/syncDayPeriod\(\)/);
   assert.match(js,/E\.waitLabel\(ms\)/);
 });
+
+test('nome da bebê faz parte do tutorial e é salvo no progresso compartilhado',()=>{
+  const htmlPC=fs.readFileSync(path.join(root,'app/index.html'),'utf8');
+  const desktop=fs.readFileSync(path.join(root,'app/renderer.js'),'utf8');
+  assert.match(htmlPC,/id="welcome-baby-name"/);
+  assert.match(htmlPC,/id="welcome-name-field"/);
+  assert.match(desktop,/game = E.renameBaby\(game, event.target.value\)/);
+  assert.match(desktop,/\$\('desktop-name-input'\)\.value = game\.babyName/);
+  assert.match(desktop,/\$\('welcome-name-field'\)\.hidden = welcomeIndex !== 0/);
+});
+test('o monitor é selecionado por mudança NATIVA de janela, não apenas CSS',()=>{
+  const desktop=fs.readFileSync(path.join(root,'app/renderer.js'),'utf8');
+  const preload=fs.readFileSync(path.join(root,'app/preload.cjs'),'utf8');
+  assert.match(desktop,/await desktop\.moveToMonitor\(id\)/);
+  assert.match(desktop,/result\.layout\?\.activeId !== id/);
+  assert.match(desktop,/localStorage\.setItem\(monitorKey, layout\.activeId\)/);
+  assert.match(preload,/baby:desktop:move/);
+});
