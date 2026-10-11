@@ -64,6 +64,15 @@ async function drag(page, source, target) {
     assert.match(await page.locator('#care-count').textContent(), /1 cuidado/);
     await drag(page, '[data-item="toy"]', '#baby');
     assert.match(await page.locator('#feedback').textContent(), /brincou|brincar/i);
+    assert.equal(await page.locator('#happiness-bar').count(), 1);
+    assert.ok(await page.locator('#care-suggestion').textContent());
+    const dailyReward = page.locator('[data-claim-daily="play"]');
+    assert.equal(await dailyReward.count(), 1, 'daily play reward should unlock after playing');
+    await dailyReward.click();
+    assert.match(await page.locator('#daily-count').textContent(), /1\/3 resgatados/);
+    assert.ok(await page.evaluate(() =>
+      JSON.parse(localStorage.getItem('baby-on-screen-web-v1')).daily.claimed.includes('play')),
+      'daily goal reward saved to localStorage');
     await page.waitForFunction(() => {
       const sprite = document.getElementById('baby-sprite');
       const pixels = sprite.getContext('2d').getImageData(0, 0, sprite.width, sprite.height).data;

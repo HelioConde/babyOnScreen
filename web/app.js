@@ -83,7 +83,7 @@
   let lastFrameAt = 0, lastTime = performance.now(), lastUIAt = 0;
   let nextTurn = 0, nextSpeech = 10000, lastCry = 0, busyUntil = 0, crySince = 0;
   let frameIndex = 1, animationStage = E.ageStage(game).id, memoryCount = -1;
-  let lastUrgency = 'calm', toastTimer = null, lastMilestoneSignature = '', activeSchoolQuestion = null;
+  let lastUrgency = 'calm', toastTimer = null, lastMilestoneSignature = '', lastDailySignature = '', activeSchoolQuestion = null;
   let careAction = 'idle', spriteState = '', spriteRefreshAt = 0;
   let lastHorizontalDirection = vx >= 0 ? 'right' : 'left';
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -562,6 +562,59 @@
     updateUI();
     save();
   });
+  function renderDaily() {
+    const today = E.dailyStatus(game);
+    const signature = today.date + ':' + today.goals.map(g => [g.id, g.progress, g.claimed].join(':')).join('|');
+    if (signature === lastDailySignature) return;
+    lastDailySignature = signature;
+    const count = today.goals.filter(g => g.claimed).length;
+    $('daily-count').textContent = count + '/' + today.goals.length + ' resgatados';
+    const list = $('daily-list');
+    list.replaceChildren();
+    for (const goal of today.goals) {
+      const row = document.createElement('article');
+      row.className = 'daily-task' + (goal.complete ? ' daily-complete' : '');
+      const title = document.createElement('strong');
+      title.textContent = (goal.claimed ? '✓ ' : '') + goal.title;
+      const description = document.createElement('span');
+      description.textContent = goal.detail;
+      const progress = document.createElement('div');
+      progress.className = 'daily-task-progress';
+      const counter = document.createElement('small');
+      counter.textContent = goal.progress + '/' + goal.target;
+      const reward = document.createElement('small');
+      reward.textContent = '+' + goal.xp + ' XP';
+      progress.append(counter, reward);
+      row.append(title, description, progress);
+      if (goal.complete && !goal.claimed) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.claimDaily = goal.id;
+        button.textContent = 'Resgatar';
+        row.append(button);
+      }
+      if (goal.claimed) {
+        const done = document.createElement('small');
+        done.className = 'daily-claimed';
+        done.textContent = 'Recompensa recebida';
+        row.append(done);
+      }
+      list.append(row);
+    }
+  }
+  $('daily-list').addEventListener('click', event => {
+    const button = event.target.closest('button[data-claim-daily]');
+    if (!button) return;
+    const result = E.claimDaily(game, button.dataset.claimDaily);
+    if (!result.claimed) return;
+    game = result.state;
+    lastDailySignature = '';
+    toast('Rotina: ' + result.title + ' · +' + result.xp + ' XP');
+    setFeedback('Rotina concluída! ' + result.title + ': +' + result.xp + ' XP e alegria extra.');
+    renderDaily();
+    updateUI();
+    save();
+  });
   function updateUI() {
     updateStage();
     for (const key of Object.keys(E.defaults)) {
@@ -580,6 +633,18 @@
       button.classList.toggle('cooling', label.endsWith('s'));
     }
     const urgent = E.urgency(game);
+    const mood = Math.round(game.happiness);
+    $('happiness-bar').value = mood;
+    $('happiness-value').textContent = mood + '%';
+    $('happiness-bar').setAttribute('aria-valuetext', mood + '% de felicidade');
+    const careMap = { food: 'feed', energy: 'sleep', hygiene: 'diaper', health: 'medicine' };
+    const itemName = careMap[urgent.need];
+    const remaining = Math.ceil(Math.max(0, (game.cooldowns[itemName] || 0) - Date.now()) / 1000);
+    $('care-suggestion').textContent = urgent.level === 'calm'
+      ? (mood < 55 ? 'Ela precisa de carinho. Brinque, desenhe ou envie uma cartinha!' : 'Tudo tranquilo! Brinque, faça um desenho ou descubra novas conquistas.')
+      : remaining > 0
+        ? 'Ela precisa de ' + names[urgent.need] + '. O próximo cuidado estará pronto em ' + remaining + 's.'
+        : 'Ela precisa de ' + names[urgent.need] + ': use ' + E.actions[itemName].label.toLowerCase() + '.';
     if (urgent.level !== lastUrgency) {
       lastUrgency = urgent.level;
       if (urgent.level === 'crying') {
@@ -597,6 +662,7 @@
       urgent.level === 'asking' ? '💭 Precisa de ' + names[urgent.need] : '💗 Tudo tranquilo';
     renderMemories();
     renderMissions();
+    renderDaily();
   }
 
   function syncSoundControls() {

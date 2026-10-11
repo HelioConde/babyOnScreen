@@ -61,3 +61,11 @@ test('a escola da fase criança funciona também na Web', () => {
   assert.match(script, /E\.schoolQuestions/);
   assert.match(script, /E\.school\(game, subject\)/);
 });
+
+test('rotina diária e indicador de felicidade aparecem no jogo Web', () => {
+  for (const id of ['daily-panel','daily-list','daily-count','happiness-bar',
+    'happiness-value','care-suggestion']) assert.ok(html.includes('id="' + id + '"'));
+  assert.match(script, /E\.dailyStatus\(game\)/);
+  assert.match(script, /E\.claimDaily\(game, button\.dataset\.claimDaily\)/);
+  assert.match(script, /game\.happiness/);
+});

@@ -76,6 +76,11 @@
           </div>
           <div class="play-dock" id="play-dock">
             <div class="dock-heading"><div><strong>Caixinha de cuidados</strong><small>Arraste até a bebê · toque e depois toque na bebê no celular</small></div><span class="game-time" id="game-time" title="O tempo e as necessidades continuam avançando enquanto o jogo estiver aberto ou fora de foco">0 min de vida</span></div>
+
+            <div class="wellbeing-bar" aria-label="Humor e sugestão de cuidado">
+              <div class="wellbeing-meter"><span>💕 Felicidade</span><progress id="happiness-bar" max="100" value="80">80%</progress><output id="happiness-value" for="happiness-bar">80%</output></div>
+              <p id="care-suggestion">Sua amiguinha está tranquila. Que tal brincar um pouco?</p>
+            </div>
             <div class="inventory" id="inventory">
               <button type="button" class="item" data-item="feed" data-care="feed" aria-label="Mamadeira, arraste para o bebê"><img src="../assets/icons/bottle.svg" alt="" width="33" height="33"><strong>Mamadeira</strong><small data-remaining="feed">Quando pedir</small></button>
               <button type="button" class="item" data-item="sleep" data-care="sleep" aria-label="Berço, arraste para o bebê"><img src="../assets/icons/crib.svg" alt="" width="33" height="33"><strong>Berço</strong><small data-remaining="sleep">Quando pedir</small></button>
@@ -98,6 +103,10 @@
                 <button type="button" id="school-web-close" class="school-web-close">Encerrar aula</button>
               </div>
             </section>
+            <details class="daily-panel" id="daily-panel" open>
+              <summary><span>🌷 Rotina do dia <small>Novos objetivos todos os dias</small></span><span id="daily-count">0/3 resgatados</span></summary>
+              <div class="daily-list" id="daily-list"><p>Preparando a rotina...</p></div>
+            </details>
             <section class="missions-panel" aria-labelledby="missions-title">
               <div class="missions-heading"><div><span class="mission-eyebrow">✦ AVENTURAS DO DIA A DIA</span><h3 id="missions-title">Pequenas conquistas</h3></div><span class="missions-count" id="missions-count">0/6 concluídas</span></div>
               <div id="missions-list" class="missions-list"><p>Carregando suas missões...</p></div>
