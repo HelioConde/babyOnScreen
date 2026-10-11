@@ -195,12 +195,16 @@
     },null).display;
   }
   function setPanelPosition(left, top, persist = false) {
+    // A hidden panel has a 0x0 rect; measure it without making it visible.
+    const wasHidden = panel.hidden;
+    if (wasHidden) { panel.hidden = false; panel.style.visibility = 'hidden'; }
     const r = panel.getBoundingClientRect();
     const px = E.clamp(left, 8, Math.max(8, innerWidth-r.width-8));
     const py = E.clamp(top, 8, Math.max(8, innerHeight-r.height-8));
     panel.style.right = 'auto'; panel.style.bottom = 'auto';
     panel.style.left = Math.round(px) + 'px';
     panel.style.top = Math.round(py) + 'px';
+    if (wasHidden) { panel.hidden = true; panel.style.visibility = ''; }
     publishRegions();
     if (persist && desktopLayout?.bounds) {
       try { localStorage.setItem(panelPositionKey, JSON.stringify({
@@ -214,6 +218,15 @@
       x:desktopLayout.bounds.x+x,y:desktopLayout.bounds.y+y
     })); } catch {}
   }
+  function positionLauncher(monitor) {
+    if (!monitor) return;
+    const launcher = $('launcher');
+    const r = launcher.getBoundingClientRect();
+    launcher.style.right = 'auto';
+    launcher.style.bottom = 'auto';
+    launcher.style.left = Math.round(monitor.x+Math.max(8,monitor.width-r.width-19))+'px';
+    launcher.style.top = Math.round(monitor.y+Math.max(8,monitor.height-r.height-19))+'px';
+  }
   function refreshMonitorPicker() {
     const select = $('monitor-select');
     const selected = nearestMonitor(x+BABY_WIDTH/2,y+BABY_HEIGHT/2);
@@ -224,7 +237,7 @@
       option.textContent = d.label;
       select.append(option);
     }
-    if (selected) select.value = selected.id;
+    if (selected) { select.value = selected.id; positionLauncher(selected); }
   }
   function applyDesktopLayout(layout) {
     if (!layout?.bounds || !Array.isArray(layout.displays)) return;
@@ -265,6 +278,7 @@
     x = target.x+(target.width-BABY_WIDTH)/2;
     y = target.y+(target.height-BABY_HEIGHT)/2;
     bounds(); place(); saveBabyPosition();
+    refreshMonitorPicker();
     const r = panel.getBoundingClientRect();
     setPanelPosition(target.x+(target.width-r.width)/2,
       target.y+Math.max(10,(target.height-r.height)/2),true);
