@@ -175,3 +175,12 @@ test('relógio diário e painel estável com preferências expansíveis', () => 
   assert.match(css,/overflow-anchor:none/);
   assert.match(pc,/if \(on && panel\.style\.left === ''\)/);
 });
+
+test('Web mostra os mesmos quatro períodos do relógio compartilhado',()=>{
+  const html=fs.readFileSync(path.join(root,'web/index.html'),'utf8');
+  const js=fs.readFileSync(path.join(root,'web/app.js'),'utf8');
+  assert.match(html,/id="web-day-period"/);
+  assert.match(js,/E\.timePeriod\(\)/);
+  assert.match(js,/syncDayPeriod\(\)/);
+  assert.match(js,/E\.waitLabel\(ms\)/);
+});

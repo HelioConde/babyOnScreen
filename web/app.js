@@ -60,7 +60,7 @@
       return val && typeof val === 'object' ? val : fallback;
     } catch { return fallback; }
   }
-  const newWebGame = () => { const baby = E.initial(); baby.needs.food = 69; return baby; };
+  const newWebGame = () => E.initial();
   const oldOptions = read(optionsKey, {});
   let options = {
     sound: oldOptions.sound === true,
@@ -185,7 +185,7 @@
   }
   function remainingLabel(name) {
     const ms = Math.max(0, (game.cooldowns[name] || 0) - Date.now());
-    if (ms > 0) return Math.ceil(ms / 1000) + 's';
+    if (ms > 0) return E.waitLabel(ms);
     const action = E.actions[name];
     if (action && game.needs[action.need] > 74) return 'Quando pedir';
     return 'Pronto!';
@@ -620,6 +620,7 @@
     save();
   });
   function updateUI() {
+    syncDayPeriod();
     updateStage();
     for (const key of Object.keys(E.defaults)) {
       const n = Math.round(game.needs[key]);
@@ -634,7 +635,7 @@
       const button = el.closest('.item');
       button.classList.toggle('ready', label === 'Pronto!');
       button.classList.toggle('waiting', label === 'Quando pedir');
-      button.classList.toggle('cooling', label.endsWith('s'));
+      button.classList.toggle('cooling', /\d+(min|s)/.test(label));
     }
     const urgent = E.urgency(game);
     const mood = Math.round(game.happiness);
@@ -643,11 +644,11 @@
     $('happiness-bar').setAttribute('aria-valuetext', mood + '% de felicidade');
     const careMap = { food: 'feed', energy: 'sleep', hygiene: 'diaper', health: 'medicine' };
     const itemName = careMap[urgent.need];
-    const remaining = Math.ceil(Math.max(0, (game.cooldowns[itemName] || 0) - Date.now()) / 1000);
+    const remaining = Math.max(0, (game.cooldowns[itemName] || 0) - Date.now());
     $('care-suggestion').textContent = urgent.level === 'calm'
       ? (mood < 55 ? 'Ela precisa de carinho. Brinque, desenhe ou envie uma cartinha!' : 'Tudo tranquilo! Brinque, faça um desenho ou descubra novas conquistas.')
       : remaining > 0
-        ? 'Ela precisa de ' + names[urgent.need] + '. O próximo cuidado estará pronto em ' + remaining + 's.'
+        ? 'Ela precisa de ' + names[urgent.need] + '. O próximo cuidado estará pronto em ' + E.waitLabel(remaining) + '.'
         : 'Ela precisa de ' + names[urgent.need] + ': use ' + E.actions[itemName].label.toLowerCase() + '.';
     if (urgent.level !== lastUrgency) {
       lastUrgency = urgent.level;
@@ -688,6 +689,20 @@
     if (options.sound) play('rindo');
     save();
   }
+  let lastPeriodId='';
+  function syncDayPeriod() {
+    const period=E.timePeriod();
+    if (period.id !== lastPeriodId) {
+      lastPeriodId=period.id;
+      options.night=period.id==='madrugada'||period.id==='noite';
+      $('stage').dataset.dayPeriod=period.id;
+      $('web-day-period').dataset.period=period.id;
+      $('web-day-icon').textContent=period.icon;
+      $('web-day-label').textContent=period.label;
+      $('web-day-activity').textContent=period.activity;
+      syncLight();
+    }
+  }
   function syncLight() {
     $('stage').classList.toggle('night-mode', options.night);
     $('scene-light').textContent = options.night ? '☀' : '☾';
@@ -700,7 +715,7 @@
     setFeedback(options.night ? 'A noite chegou ao quartinho. Bons sonhos! 🌙' : 'O sol voltou ao quartinho! ☀️');
     save();
   });
-  syncLight();
+  syncDayPeriod();
   $('sound').addEventListener('click', toggleSound);
   $('scene-sound').addEventListener('click', toggleSound);
   syncSoundControls();
