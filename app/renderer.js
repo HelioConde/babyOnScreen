@@ -27,8 +27,8 @@
       description:'Acompanhe alimentação, energia, higiene e saúde. Arraste mamadeira, berço, fralda ou remédio até a bebê, ou selecione o item e clique nela.',
       hint:'Brinquedos, cartinhas e desenhos também criam lembranças.'},
     {title:'Ela não atrapalha seu PC',icon:'🖥️',
-      description:'A janela é transparente: você ainda pode clicar nos programas por trás. Use “Minha amiguinha” para abrir ou fechar o painel.',
-      hint:'Para ocultar, use o painel. Para retornar ou sair, use o ícone na bandeja do Windows.'},
+      description:'O jogo funciona sobre a área de trabalho, inclusive entre monitores. Arraste a bebê para outra tela ou use o seletor Monitor. Pegue o painel pelo topo para movê-lo.',
+      hint:'As áreas vazias continuam transparentes aos cliques. O botão Minha amiguinha fica na mesma tela da personagem.'},
     {title:'Cresçam juntas!',icon:'🌟',
       description:'Cuidados e brincadeiras rendem experiência, missões e novas fases. O progresso é salvo automaticamente e pode ser exportado nas preferências.',
       hint:'Você pode pausar ou reduzir a velocidade a qualquer momento. Bom jogo!'}

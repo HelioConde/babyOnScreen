@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## [0.0.4] — 11/10/2026
+
+- Overlay transparente cobre a união de todos os monitores conectados, inclusive posicionados à esquerda ou acima do principal.
+- Bebê pode ser arrastada livremente entre monitores; novo seletor Monitor centraliza bebê e painel na tela escolhida.
+- Painel de cuidados pode ser arrastado pelo cabeçalho e ajustado pelo teclado com as setas.
+- Posições são lembradas sem alterar o save da bebê; controles são realocados se um monitor for desconectado.
+- Botão Minha amiguinha fica na mesma tela da personagem.
+- Testes de geometria com coordenadas negativas, layout de várias telas, clique transparente e movimentação real do painel.
+- Links permanentes para Setup e Portable preservados; atualização automática continua disponível aos usuários da 0.0.3.
+
 ## [0.0.3] — 11/10/2026
 
 - Links de download permanentes para Setup e Portable, com nomes fixos nas releases seguintes e preservação dos nomes versionados.

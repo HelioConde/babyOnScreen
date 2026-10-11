@@ -11,6 +11,14 @@
 
 **Estes endereços não mudam entre as versões**: por exemplo, da 0.0.3 para a 0.0.4 ou posteriores. Cada release manterá tanto o nome versionado para histórico quanto o nome fixo para download direto. Links permanentes apontam para a **última release estável**; betas ainda precisam ser baixadas pela página específica da beta.
 
+## 🖥️ Vários monitores e painel móvel (0.0.4)
+
+Na versão Windows é possível **arrastar a bebê até outro monitor** e **mover a caixa de cuidados** pelo cabeçalho, usando o botão ⠿ como alça. No painel, o seletor **Monitor** leva tanto a bebê quanto o painel para a tela escolhida. O botão “Minha amiguinha” acompanha a tela da personagem e continua disponível.
+
+O jogo guarda a posição escolhida, mantém a passagem de cliques nas áreas transparentes e tenta reposicionar os controles para um monitor disponível caso outro seja desconectado. O movimento automático da bebê permanece limitado ao monitor atual; para mudar de tela, arraste-a ou use o seletor. O suporte a diferentes escalas de DPI precisa ser conferido em uso real.
+
+**SmartScreen:** o aviso “Fornecedor desconhecido” acontece porque os instaladores ainda **não têm assinatura digital Authenticode**. As alterações de interface não removem esse aviso. A solução para a distribuição futura é assinar os executáveis com um certificado de publicação confiável e desenvolver reputação no SmartScreen. Não desative a segurança global do Windows.
+
 ## Versão 0.0.3 — atualizações automáticas para Windows
 
 A partir da versão **0.0.3**, o aplicativo instalado via Setup pode verificar, baixar e instalar futuras releases oficiais automaticamente. Consulte [Baby On Screen 0.0.3](https://github.com/HelioConde/babyOnScreen/releases/tag/v0.0.3).
