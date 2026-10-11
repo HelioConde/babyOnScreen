@@ -1,5 +1,14 @@
 # Histórico de versões
 
+## [0.0.5] — 11/10/2026
+
+- Ciclo de quatro períodos: madrugada (0–6h), manhã (6–12h), tarde (12–18h) e noite (18–24h), compartilhado pelas regras Web e Windows.
+- Mostrador do período em ambas as versões; Web ajusta automaticamente a iluminação ao período, mantendo alternância manual possível.
+- Mamadeira, berço e fralda com intervalo mínimo de 25 minutos reais e necessidades reabastecidas a 100% após cada cuidado.
+- Redução da velocidade de desgaste para suportar vídeos e episódios, mesmo com velocidade acelerada no navegador.
+- Painel do desktop com altura estável e rolagem interna: abrir opções expansíveis não o envia para outro monitor.
+- Testes de relógio, cooldown, ritmo de necessidades e regressão visual do painel.
+
 ## [0.0.4] — 11/10/2026
 
 - Overlay transparente cobre a união de todos os monitores conectados, inclusive posicionados à esquerda ou acima do principal.

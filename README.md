@@ -11,6 +11,14 @@
 
 **Estes endereços não mudam entre as versões**: por exemplo, da 0.0.3 para a 0.0.4 ou posteriores. Cada release manterá tanto o nome versionado para histórico quanto o nome fixo para download direto. Links permanentes apontam para a **última release estável**; betas ainda precisam ser baixadas pela página específica da beta.
 
+## 0.0.5 — quatro períodos e cuidados para acompanhar um episódio
+
+O ciclo acompanha o horário local e é dividido em **Madrugada (00h–06h), Manhã (06h–12h), Tarde (12h–18h) e Noite (18h–00h)**. A Web mostra a iluminação correspondente ao período, e o Windows exibe a rotina atual no painel. Os horários são uma referência local por enquanto; em futuras salas com amigos, um servidor poderá definir o relógio compartilhado.
+
+**Mamadeira, berço e fralda:** após cada cuidado bem-sucedido, a necessidade volta a 100% e a próxima utilização só fica disponível depois de **25 minutos reais**. O desgaste foi reduzido inclusive para a velocidade 2× no navegador, permitindo assistir a um vídeo ou episódio sem interrupções frequentes. Brincadeiras e outras interações mantêm seus próprios intervalos.
+
+**Painel Windows:** abrir Preferências, Rotina e outras caixas não deve deslocar o painel para outro monitor. A janela mantém altura e posição fixas e seu conteúdo interno rola normalmente.
+
 ## 🖥️ Baby On Screen 0.0.4 — vários monitores e painel móvel
 
 Na versão Windows é possível **arrastar a bebê até outro monitor** e **mover a caixa de cuidados** pelo cabeçalho, usando o botão ⠿ como alça. No painel, o seletor **Monitor** leva tanto a bebê quanto o painel para a tela escolhida. O botão “Minha amiguinha” acompanha a tela da personagem e continua disponível.
