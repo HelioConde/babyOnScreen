@@ -62,3 +62,14 @@ test('necessidades descem gradualmente em um minuto real na Web', () => {
   assert.ok(after.needs.hygiene >= 82, 'higiene não deve cair mais de 3 pontos/minuto');
   assert.ok(after.needs.health >= 94, 'saúde estável sem necessidades críticas');
 });
+
+test('nome da personagem é seguro, opcional e acompanha a transferência de progresso', () => {
+  const original = E.initial();
+  const named = E.renameBaby(original, '   Luna   do   Sol   ');
+  assert.equal(named.babyName, 'Luna do Sol');
+  assert.equal(original.babyName, '');
+  assert.equal(E.importSave(E.exportSave(named)).babyName, 'Luna do Sol');
+  assert.equal(E.sanitize({babyName: 42}).babyName, '');
+  assert.equal(E.renameBaby(named, '   ').babyName, '');
+  assert.equal(E.renameBaby(named, 'A'.repeat(120)).babyName.length, 20);
+});

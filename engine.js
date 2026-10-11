@@ -119,6 +119,9 @@
     const v = typeof value === 'number' ? value : Number(value);
     return Number.isFinite(v) ? clamp(v, lo, hi) : fallback;
   }
+  function normalizeBabyName(value) {
+    return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim().slice(0, 20) : '';
+  }
   function dayKey(now) {
     const d = new Date(finite(now, Date.now(), 0, 9999999999999));
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') +
@@ -133,7 +136,7 @@
   }
   function initial(now) {
     return {
-      schemaVersion: VERSION, needs: { ...defaults }, happiness: 80, xp: 0, careCount: 0,
+      schemaVersion: VERSION, needs: { ...defaults }, babyName: '', happiness: 80, xp: 0, careCount: 0,
       interactions: 0, lastCare: '', lifeSeconds: 0, activeSeconds: 0,
       skills: { play: 0, bond: 0, creativity: 0, reading: 0, numbers: 0, arts: 0 },
       schoolVisits: 0, memories: [], memoryCounts: {}, cooldowns: {}, achievements: [], claimedMilestones: [],
@@ -181,7 +184,7 @@
     return {
       schemaVersion: VERSION,
       daily,
-      needs, happiness: finite(v.happiness, 80, 0, 100),
+      needs, babyName: normalizeBabyName(v.babyName), happiness: finite(v.happiness, 80, 0, 100),
       xp: Math.floor(finite(v.xp, 0, 0, 1000000)),
       careCount: Math.floor(finite(v.careCount, 0, 0, 1000000)),
       interactions: Math.floor(finite(v.interactions, 0, 0, 1000000)),
@@ -382,6 +385,11 @@
     addMemory(s, 'Missão concluída: ' + goal.title);
     return { state: s, claimed: true, xp: goal.xp, title: goal.title, achievements: unlock(s) };
   }
+  function renameBaby(input, name) {
+    const s = sanitize(input);
+    s.babyName = normalizeBabyName(name);
+    return s;
+  }
   function dailyStatus(input, now = Date.now()) {
     const s = sanitize(input), today = dayKey(now);
     const record = s.daily.date === today ? s.daily : emptyDaily(today);
@@ -433,6 +441,6 @@
   return Object.freeze({
     VERSION, defaults, stages, actions, activities, schoolSubjects, schoolQuestions, milestones, dailyGoals, speech,
     initial, sanitize, tick, advanceClock, care, interact, school, ageStage, ageDays, level, concern, urgency,
-    speak, ready, exportSave, importSave, memorySummary, milestoneStatus, claimMilestone, dailyStatus, claimDaily, clamp
+    speak, ready, exportSave, importSave, memorySummary, milestoneStatus, claimMilestone, dailyStatus, claimDaily, renameBaby, clamp
   });
 });
