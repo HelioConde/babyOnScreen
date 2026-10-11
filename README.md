@@ -116,3 +116,6 @@ No primeiro acesso ao aplicativo Windows, um guia de **5 passos** aparece automa
 - tutorial acessível novamente por **? Como jogar** no rodapé do painel;
 - a janela transparente continua permitindo interação com outros aplicativos fora das regiões ativas do jogo.
 O teste da beta abre o Electron real, navega pelas cinco telas, verifica o armazenamento e captura a apresentação no Windows.
+
+### Beta 1.1.0-beta.5 — tutorial com a personagem de verdade
+A apresentação inicial usa uma prévia animada dos mesmos quadros do canvas principal, com limpeza, transparência e estilo pixel art compartilhados com a versão Web. O teste Windows confirma pixels visíveis na prévia, além dos cinco passos interativos.

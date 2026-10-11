@@ -120,3 +120,9 @@ h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#765c82;ma
 .panel-footer .welcome-reopen{background:#fff9fe;border:1px solid #eaddef;color:#8354a4}
 @media(max-height:600px){.welcome-scene{height:60px}.welcome-scene-icon{font-size:36px}.welcome-tour>p{min-height:0}.welcome-tour{padding:11px}}
 @media(prefers-reduced-motion:reduce){.welcome-scene-icon{animation:none}.welcome-progress span{transition:none}}
+
+/* Welcome uses the SAME cleaned, animated pink-bow sprite as Web and desktop. */
+.welcome-scene{height:106px}
+#welcome-preview{width:100px;height:100px;image-rendering:pixelated;filter:drop-shadow(0 4px 3px #90688b55)}
+.welcome-scene-icon{position:absolute;left:calc(50% + 43px);top:27px;font-size:26px}
+@media(max-height:600px){.welcome-scene{height:82px}#welcome-preview{height:79px;width:79px}.welcome-scene-icon{left:calc(50% + 34px);top:17px}}

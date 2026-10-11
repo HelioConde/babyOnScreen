@@ -129,3 +129,11 @@ test('tutorial de início aparece dentro do painel overlay sem alterar o progres
   assert.match(css,/\.welcome-tour\[hidden\]\{display:none\}/);
   assert.ok(!desktopJS.includes('game = E.initial(); welcome'));
 });
+
+test('o tutorial inicial reutiliza a animação real da bebê, sem emojis substitutos', () => {
+  const htmlPC=fs.readFileSync(path.join(root,'app','index.html'),'utf8');
+  const jsPC=fs.readFileSync(path.join(root,'app','renderer.js'),'utf8');
+  assert.match(htmlPC,/id="welcome-preview" width="128" height="128"/);
+  assert.match(jsPC,/previewContext\.drawImage\(live, 0, 0, preview\.width, preview\.height\)/);
+  assert.match(jsPC,/welcome\.classList\.add\('welcome-sprite-ready'\)/);
+});

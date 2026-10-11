@@ -12,6 +12,8 @@
   const gameKey = 'baby-on-screen-v1', optionsKey = 'baby-on-screen-options-v1';
   const tourKey = 'baby-on-screen-guide-v1';
   const welcome = $('welcome-tour');
+  const preview = $('welcome-preview'), previewContext = preview.getContext('2d');
+  let lastWelcomeDraw = 0;
   const welcomeSteps = Object.freeze([
     {title:'Sua amiguinha chegou! 💕',icon:'👶',
       description:'Ela mora na sua área de trabalho, como um mascote virtual. Anda, reage e faz companhia enquanto você usa o computador.',
@@ -608,6 +610,16 @@
     }
     place();
     syncSprite(now);
+    // Display the very same cleaned game animation in the first-run guide.
+    if (!welcome.hidden && previewContext && now - lastWelcomeDraw > 150) {
+      const live = $('baby-sprite');
+      if (!live.hidden) {
+        previewContext.clearRect(0, 0, preview.width, preview.height);
+        previewContext.drawImage(live, 0, 0, preview.width, preview.height);
+        welcome.classList.add('welcome-sprite-ready');
+      }
+      lastWelcomeDraw = now;
+    }
     if (now - lastDraw > 750) { render(); lastDraw = now; }
     requestAnimationFrame(animate);
   }
