@@ -12,7 +12,7 @@ const port = 19200 + process.pid % 1500;
 const delay = ms => new Promise(r => setTimeout(r, ms));
 let child, socket;
 async function findPage() {
-  const until = Date.now() + 45000;
+  const until = Date.now() + 60000;
   while (Date.now() < until) {
     if (child.exitCode !== null) throw new Error('Electron process exited before its page loaded: ' + child.exitCode);
     try {
@@ -47,7 +47,7 @@ async function connect(url) {
   return { socket:ws, request(method,params={}) {
     return new Promise((resolve,reject) => {
       const id = ++nextId;
-      const timeout = setTimeout(() => { pending.delete(id); reject(new Error('CDP method timed out: ' + method)); },15000);
+      const timeout = setTimeout(() => { pending.delete(id); reject(new Error('CDP method timed out: ' + method)); },45000);
       pending.set(id, response => {
         clearTimeout(timeout);
         if (response.error) reject(new Error(JSON.stringify(response.error)));

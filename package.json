@@ -2,7 +2,7 @@
   "name": "baby-on-screen",
   "version": "0.0.5",
   "private": true,
-  "description": "A tiny virtual baby companion for the Windows desktop.",
+  "description": "A virtual desktop baby companion with gentle care, a four-period daily cycle and automatic Windows updates.",
   "main": "app/main.cjs",
   "scripts": {
     "start": "electron .",
