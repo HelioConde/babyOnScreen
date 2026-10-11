@@ -104,10 +104,10 @@ test('Web e Windows mostram o MESMO sprite sem escala ou atlas divergente', () =
   assert.match(desktopJS, /const BABY_WIDTH = window\.BabySpritePresentation\.size/);
   assert.match(desktopJS, /const BABY_HEIGHT = window\.BabySpritePresentation\.size/);
   assert.match(script, /const BABY_SIZE = window\.BabySpritePresentation\.size/);
-  for (const source of [html,pcHTML]) {
-    assert.match(source,/\.\.\/app\/sprite-cleaner\.js/);
-    assert.match(source,/\.\.\/app\/sprite-manifest\.js/);
-    assert.match(source,/\.\.\/app\/sprite-integration\.js/);
+  // Both load identical files; the relative URL differs by folder.
+  for (const filename of ['sprite-cleaner.js','sprite-manifest.js','sprite-integration.js']) {
+    assert.ok(html.includes('../app/' + filename), 'Web loads shared ' + filename);
+    assert.ok(pcHTML.includes('./' + filename), 'Windows loads shared ' + filename);
   }
   assert.match(desktopJS, /!draggingBaby && !draggingItem/);
   assert.match(desktopJS, /innerWidth - BABY_WIDTH - 4/);
