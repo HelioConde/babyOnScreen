@@ -47,3 +47,13 @@ h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#765c82;ma
 .baby.sprite-ready::after{display:none}
 
 .extras .speed-controls{display:flex;align-items:center;gap:7px}.extras .speed-controls output{font-size:11px;font-weight:900;color:#76529e;min-width:26px;text-align:right}.extras .speed-note{padding:0;margin:-2px 0 6px;color:#987da5;font-size:10px}
+
+/* Missões compactas do companheiro Windows. */
+#desktop-missions-count{float:right;font-size:10px;color:#9070ae}
+.desktop-missions-list{display:grid;gap:7px;padding:8px 0}
+.desktop-mission{background:#fff;border:1px solid #eddfed;border-radius:10px;padding:10px;display:grid;gap:4px}
+.desktop-mission strong{font-size:11px;color:#6a517b}
+.desktop-mission small{font-size:10px;color:#907b9b}
+.desktop-mission.mission-done{border-color:#a3d6bd;background:#f6fff9}
+.desktop-mission button{border:0;border-radius:8px;background:#906bbb;color:white;padding:8px;font-size:10px;font-weight:900;cursor:pointer}
+.desktop-mission button:focus-visible{outline:3px solid #6d499b;outline-offset:2px}

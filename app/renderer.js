@@ -55,6 +55,7 @@
     const offlineSeconds = Math.min(180, Math.max(0, (Date.now() - game.savedAt) / 1000));
     game = E.tick(game, offlineSeconds * options.speed, { active: false });
   }
+  let milestoneSignature = '';
   let x = innerWidth * .3, y = innerHeight * .44, dx = .8, dy = .6, dir = 'front';
   let frame = 1, lastTime = performance.now(), lastFrame = 0, lastDraw = 0, nextTurn = 0;
   let nextSpeech = 8000, lastCry = 0, busyUntil = 0, draggingBaby = false;
@@ -331,6 +332,52 @@
       feedback('Progresso importado! Bem-vinda de volta, amiguinha.');
     } catch (error) { feedback('Erro ao importar: ' + error.message); }
   });
+  function renderMissions() {
+    const goals = E.milestoneStatus(game);
+    const signature = goals.map(m => [m.id, m.progress, m.claimed].join(':')).join('|');
+    if (milestoneSignature === signature) return;
+    milestoneSignature = signature;
+    $('desktop-missions-count').textContent = goals.filter(m => m.claimed).length + '/' + goals.length;
+    const list = $('desktop-missions-list');
+    list.replaceChildren();
+    const available = goals.filter(m => !m.claimed).sort((a, b) => Number(b.complete) - Number(a.complete));
+    if (!available.length) {
+      const done = document.createElement('p');
+      done.textContent = '🎉 Todas as missões foram resgatadas! Continue cuidando dela.';
+      list.append(done);
+      return;
+    }
+    for (const goal of available) {
+      const item = document.createElement('div');
+      item.className = 'desktop-mission' + (goal.complete ? ' mission-done' : '');
+      const title = document.createElement('strong');
+      title.textContent = goal.title;
+      const detail = document.createElement('small');
+      detail.textContent = goal.detail + ' · ' + goal.progress + '/' + goal.target;
+      item.append(title, detail);
+      if (goal.complete) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.claimMilestone = goal.id;
+        button.textContent = 'Resgatar +' + goal.xp + ' XP';
+        item.append(button);
+      }
+      list.append(item);
+    }
+  }
+  $('desktop-missions-list').addEventListener('click', event => {
+    const button = event.target.closest('button[data-claim-milestone]');
+    if (!button) return;
+    const result = E.claimMilestone(game, button.dataset.claimMilestone);
+    if (!result.claimed) return;
+    game = result.state;
+    milestoneSignature = '';
+    lastMemoryCount = -1;
+    feedback('✦ ' + result.title + ': +' + result.xp + ' XP e felicidade!');
+    voice('feliz');
+    render();
+    save();
+  });
   function render() {
     const age = E.ageStage(game);
     if (age.id !== lastStage) {
@@ -384,6 +431,7 @@
     $('school-section').hidden = age.id !== 'child';
     $('school-stats').textContent = game.schoolVisits + ' aulas · leitura ' + game.skills.reading +
       ' · números ' + game.skills.numbers + ' · artes ' + game.skills.arts;
+    renderMissions();
     $('skills').textContent = 'Brincadeiras ' + game.skills.play + ' · Vínculo ' + game.skills.bond +
       ' · Criatividade ' + game.skills.creativity + ' · Escola ' + game.schoolVisits + ' aulas';
     const album = E.memorySummary(game);
