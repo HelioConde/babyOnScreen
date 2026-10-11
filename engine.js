@@ -40,6 +40,23 @@
     numbers: { label: 'Números', skill: 'numbers' },
     arts: { label: 'Artes', skill: 'arts' }
   });
+  const schoolQuestions = Object.freeze({
+    reading: Object.freeze([
+      { question: 'Com qual letra começa BOLA?', answers: ['B', 'D', 'P'], correct: 0 },
+      { question: 'Com qual letra começa CASA?', answers: ['C', 'S', 'A'], correct: 0 },
+      { question: 'Qual palavra combina com 📚?', answers: ['Livro', 'Bola', 'Água'], correct: 0 }
+    ]),
+    numbers: Object.freeze([
+      { question: 'Quanto é 2 + 3?', answers: ['4', '5', '6'], correct: 1 },
+      { question: 'Quanto é 1 + 4?', answers: ['3', '5', '7'], correct: 1 },
+      { question: 'Quanto é 6 - 2?', answers: ['4', '6', '3'], correct: 0 }
+    ]),
+    arts: Object.freeze([
+      { question: 'Qual cor aparece ao misturar azul e amarelo?', answers: ['Verde', 'Vermelho', 'Rosa'], correct: 0 },
+      { question: 'Qual material usamos para pintar?', answers: ['Pincel', 'Garfo', 'Copo'], correct: 0 },
+      { question: 'Que forma tem três lados?', answers: ['Círculo', 'Triângulo', 'Quadrado'], correct: 1 }
+    ])
+  });
   const speech = Object.freeze({
     newborn: {
       idle: ['Gugu... 🩷', 'Da... da!', 'Agu... agu!', 'Bababá!'],
@@ -353,7 +370,7 @@
     return sanitize(parsed.progress);
   }
   return Object.freeze({
-    VERSION, defaults, stages, actions, activities, schoolSubjects, milestones, speech,
+    VERSION, defaults, stages, actions, activities, schoolSubjects, schoolQuestions, milestones, speech,
     initial, sanitize, tick, advanceClock, care, interact, school, ageStage, ageDays, level, concern, urgency,
     speak, ready, exportSave, importSave, memorySummary, milestoneStatus, claimMilestone, clamp
   });

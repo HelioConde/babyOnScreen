@@ -12,23 +12,7 @@
   const gameKey = 'baby-on-screen-v1', optionsKey = 'baby-on-screen-options-v1';
   const names = { food: 'alimentação', energy: 'energia', hygiene: 'higiene', health: 'saúde' };
   const source = document.currentScript ? document.currentScript.src : window.location.href;
-  const lessons = {
-    reading: [
-      { question: 'Com qual letra começa BOLA?', answers: ['B', 'D', 'P'], correct: 0 },
-      { question: 'Com qual letra começa CASA?', answers: ['C', 'S', 'A'], correct: 0 },
-      { question: 'Qual palavra combina com 📚?', answers: ['Livro', 'Bola', 'Água'], correct: 0 }
-    ],
-    numbers: [
-      { question: 'Quanto é 2 + 3?', answers: ['4', '5', '6'], correct: 1 },
-      { question: 'Quanto é 1 + 4?', answers: ['3', '5', '7'], correct: 1 },
-      { question: 'Quanto é 6 - 2?', answers: ['4', '6', '3'], correct: 0 }
-    ],
-    arts: [
-      { question: 'Qual cor aparece quando misturamos azul e amarelo?', answers: ['Verde', 'Vermelho', 'Rosa'], correct: 0 },
-      { question: 'Qual material usamos para pintar?', answers: ['Pincel', 'Garfo', 'Copo'], correct: 0 },
-      { question: 'Que forma tem três lados?', answers: ['Círculo', 'Triângulo', 'Quadrado'], correct: 1 }
-    ]
-  };
+  const lessons = E.schoolQuestions;
   const success = {
     feed: 'Mamadeira entregue! Ela ficou satisfeita. 🍼',
     sleep: 'Uma soneca gostosa! 🌙',

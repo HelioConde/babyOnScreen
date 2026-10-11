@@ -211,3 +211,14 @@ test('missões de brincar, cartinha e desenho usam ações reais do jogo', () =>
   }
   assert.equal(status.find(m => m.id === 'baby-stage').complete, false);
 });
+
+test('escola usa perguntas compartilhadas entre Windows e Web', () => {
+  for (const subject of ['reading', 'numbers', 'arts']) {
+    assert.ok(E.schoolQuestions[subject].length >= 3);
+    for (const question of E.schoolQuestions[subject]) {
+      assert.ok(question.question.length > 10);
+      assert.ok(question.answers.length >= 3);
+      assert.ok(question.correct >= 0 && question.correct < question.answers.length);
+    }
+  }
+});
