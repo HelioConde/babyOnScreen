@@ -45,7 +45,6 @@ jobs:
           path: dist/*.exe
           if-no-files-found: error
       - name: Smoke test actual Windows Electron UI
-        continue-on-error: true
         run: node scripts/windows-app-smoke.cjs
       - name: Upload Windows UI snapshot
         if: always()

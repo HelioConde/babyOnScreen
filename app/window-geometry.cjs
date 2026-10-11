@@ -17,7 +17,7 @@ function isCursorOverRegion(cursor, bounds, regions) {
 }
 function virtualDesktopBounds(displays) {
   if (!Array.isArray(displays) || !displays.length) return null;
-  const rectangles = displays.map(d => d?.bounds || d).filter(r =>
+  const rectangles = displays.map(d => d?.workArea || d?.bounds || d).filter(r =>
     r && ['x','y','width','height'].every(k => Number.isFinite(r[k])) && r.width > 0 && r.height > 0
   );
   if (!rectangles.length) return null;
@@ -30,14 +30,18 @@ function virtualDesktopBounds(displays) {
 function displayList(displays, windowBounds) {
   const list = Array.isArray(displays) ? displays : [];
   const origin = windowBounds || virtualDesktopBounds(list) || {x:0,y:0};
-  return list.filter(d=>d?.bounds && Number.isFinite(d.bounds.x) &&
-      Number.isFinite(d.bounds.y) && d.bounds.width>0 && d.bounds.height>0)
-    .map((d,index)=>({
-      id:String(d.id),
-      label:'Monitor '+(index+1)+(d.id === displays[0]?.id ? ' (principal)' : ''),
-      x:d.bounds.x-origin.x, y:d.bounds.y-origin.y,
-      width:d.bounds.width, height:d.bounds.height,
-      primary:index===0
-    }));
+  return list.filter(d=>{
+      const r=d?.workArea || d?.bounds;
+      return r && Number.isFinite(r.x) && Number.isFinite(r.y) &&
+        Number.isFinite(r.width) && Number.isFinite(r.height) && r.width>0 && r.height>0;
+    }).map((d,index)=>{
+      const r=d.workArea || d.bounds;
+      return {
+        id:String(d.id),
+        label:'Monitor '+(index+1)+(index===0 ? ' (principal)' : ''),
+        x:r.x-origin.x,y:r.y-origin.y,width:r.width,height:r.height,
+        primary:index===0
+      };
+    });
 }
 module.exports = Object.freeze({ sanitizeRegions, isCursorOverRegion, virtualDesktopBounds, displayList });

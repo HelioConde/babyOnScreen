@@ -76,3 +76,20 @@ test('overlay window includes the entire display union and keeps secure IPC', ()
   assert.match(preload,/desktopLayout: \(\) => ipcRenderer\.invoke\('baby:desktop:layout'\)/);
   assert.match(main,/setIgnoreMouseEvents\(ignore, \{ forward: true \}\)/);
 });
+
+test('available monitor work areas exclude taskbar and match the overlay region', () => {
+  const { virtualDesktopBounds, displayList } = require('../app/window-geometry.cjs');
+  const devices = [
+    {id:1,bounds:{x:0,y:0,width:1920,height:1080},workArea:{x:0,y:0,width:1920,height:1030}},
+    {id:2,bounds:{x:1920,y:0,width:2560,height:1440},workArea:{x:1920,y:42,width:2560,height:1398}}
+  ];
+  const union=virtualDesktopBounds(devices);
+  assert.deepEqual(union,{x:0,y:0,width:4480,height:1440});
+  const monitors=displayList(devices,union);
+  assert.equal(monitors[0].height,1030);
+  assert.equal(monitors[1].y,42);
+  assert.equal(monitors[1].height,1398);
+  assert.ok(monitors.every(d=>d.x>=0&&d.y>=0&&d.x+d.width<=union.width&&d.y+d.height<=union.height));
+  assert.deepEqual(virtualDesktopBounds([{id:1,bounds:{x:0,y:0,width:1024,height:768},
+    workArea:{x:0,y:0,width:1024,height:720}}]),{x:0,y:0,width:1024,height:720});
+});
