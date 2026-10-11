@@ -335,7 +335,19 @@
   async function selectMonitor(id, initializing = false) {
     const target = displayedMonitors().find(d => d.id === id);
     if (!target) return false;
-    if (desktopLayout?.activeId === id) return true;
+    if (desktopLayout?.activeId === id) {
+      // Selecting the current monitor is also a useful "bring baby back"
+      // action when the player has lost track of the character.
+      x = Math.round(innerWidth * .5 - BABY_WIDTH / 2);
+      y = Math.round(innerHeight * .48 - BABY_HEIGHT / 2);
+      bounds(); place(); saveBabyPosition();
+      const r = panel.getBoundingClientRect();
+      setPanelPosition((innerWidth-r.width)/2,
+        Math.max(8,(innerHeight-r.height)/2),true);
+      refreshMonitorPicker();
+      publishRegions();
+      return true;
+    }
     pendingMonitorId = id;
     try {
       const result = await desktop.moveToMonitor(id);
