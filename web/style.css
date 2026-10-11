@@ -101,3 +101,5 @@ background:#fff;color:#82609d;font-size:11px;font-weight:800;cursor:pointer}
 /* Landing page uses the same resolution/style as the sprite gallery. */
 .phases .stage-image{width:94px;height:94px;object-fit:contain;margin:0 0 14px;image-rendering:auto}
 .desktop-illustration img{width:142px;height:142px;object-fit:contain;image-rendering:auto}
+
+.speed-label output{font-size:11px;min-width:25px;font-weight:900;color:#76529e;text-align:right}.tools-settings .speed-note{font-size:10px;color:#9d86a6;margin:0 0 3px 2px;line-height:1.4}

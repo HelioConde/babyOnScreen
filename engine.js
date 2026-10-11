@@ -7,7 +7,9 @@
   'use strict';
   const VERSION = 2;
   const defaults = Object.freeze({ food: 85, energy: 85, hygiene: 85, health: 95 });
-  const rates = Object.freeze({ food: .055, energy: .045, hygiene: .039, health: .005 });
+  // Percent points lost per game-second. 3 game seconds = 1 real second on Web at 1x.
+  // At normal Web speed, food falls ~3.24 points/minute instead of ~9.9.
+  const rates = Object.freeze({ food: .018, energy: .015, hygiene: .013, health: .002 });
   const stages = Object.freeze([
     { id: 'newborn', title: 'Recém-nascida', minutes: 0, cares: 0, sprite: 'newborn', description: 'Descobrindo o mundo' },
     { id: 'baby', title: 'Bebê curiosa', minutes: 10, cares: 8, sprite: 'baby', description: 'Aprendendo sons' },
@@ -214,7 +216,7 @@
     if (active) { s.activeSeconds += dt; s.lifeSeconds += dt; }
     for (const key of Object.keys(rates)) {
       let drain = rates[key] * dt;
-      if (key === 'health' && (s.needs.food < 25 || s.needs.energy < 20 || s.needs.hygiene < 20)) drain += .020 * dt;
+      if (key === 'health' && (s.needs.food < 25 || s.needs.energy < 20 || s.needs.hygiene < 20)) drain += .010 * dt;
       s.needs[key] = clamp(s.needs[key] - drain, 0, 100);
     }
     const unhappy = urgency(s).level !== 'calm';
@@ -228,8 +230,11 @@
     const seconds = clamp(Number(elapsedSeconds) || 0, 0, 7200);
     const state = sanitize(input);
     if (!seconds || opts.paused === true) return state;
-    const scaled = seconds * 3; // Preserve the web game's current 3x game-time rate.
-    const needsSeconds = Math.min(scaled, 180);
+    // Speed applies to both life progression and need decay, including throttled tabs.
+    const speed = finite(opts.speed, 1, .5, 2);
+    const scaled = seconds * 3 * speed;
+    // Limit decay after long absences; respect the chosen speed even at the cap.
+    const needsSeconds = Math.min(scaled, 180 * speed);
     const next = tick(state, needsSeconds, { active: false });
     next.activeSeconds = clamp(next.activeSeconds + scaled, 0, 100000000);
     next.lifeSeconds = clamp(next.lifeSeconds + scaled, 0, 100000000);

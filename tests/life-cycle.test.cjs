@@ -157,3 +157,27 @@ test('relógio offline preserva progresso no arquivo exportado e novas conquista
   assert.equal(copy.activeSeconds, next.activeSeconds);
   assert.ok(copy.achievements.includes('first-steps'));
 });
+
+test('ritmo do jogo altera proporcionalmente consumo e avanço do relógio', () => {
+  const state = E.initial(1000);
+  const slow = E.advanceClock(state, 60, { speed: .5 });
+  const normal = E.advanceClock(state, 60, { speed: 1 });
+  const fast = E.advanceClock(state, 60, { speed: 2 });
+  assert.equal(slow.activeSeconds, 90);
+  assert.equal(normal.activeSeconds, 180);
+  assert.equal(fast.activeSeconds, 360);
+  assert.ok(slow.needs.food > normal.needs.food && normal.needs.food > fast.needs.food);
+  const drop = s => state.needs.food - s.needs.food;
+  assert.ok(Math.abs(drop(slow) * 2 - drop(normal)) < 1e-8);
+  assert.ok(Math.abs(drop(normal) * 2 - drop(fast)) < 1e-8);
+  assert.equal(E.advanceClock(state, 60, { paused: true, speed: 2 }).needs.food, state.needs.food);
+  assert.equal(state.activeSeconds, 0, 'o estado inicial continua imutável');
+});
+test('retorno de uma ausência longa respeita a velocidade mesmo com limite de desgaste', () => {
+  const state = E.initial(1000);
+  const slow = E.advanceClock(state, 7200, { speed: .5 });
+  const fast = E.advanceClock(state, 7200, { speed: 2 });
+  assert.ok(slow.needs.food > fast.needs.food);
+  assert.equal(slow.activeSeconds, 10800);
+  assert.equal(fast.activeSeconds, 43200);
+});

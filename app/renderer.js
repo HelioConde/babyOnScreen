@@ -44,14 +44,17 @@
       return parsed && typeof parsed === 'object' ? parsed : fallback;
     } catch { return fallback; }
   }
-  let game = E.sanitize(read(gameKey, E.initial()));
-  // Resume existing save without granting free progress while the application is closed.
-  game = E.tick(game, Math.min(180, Math.max(0, (Date.now() - game.savedAt) / 1000)), { active: false });
   const stored = read(optionsKey, {});
   const options = {
     sound: stored.sound !== false, paused: stored.paused === true,
     speed: E.clamp(Number(stored.speed) || 1, .5, 2)
   };
+  let game = E.sanitize(read(gameKey, E.initial()));
+  // A closed/paused app does not burn through needs; resume at the chosen speed.
+  if (!options.paused) {
+    const offlineSeconds = Math.min(180, Math.max(0, (Date.now() - game.savedAt) / 1000));
+    game = E.tick(game, offlineSeconds * options.speed, { active: false });
+  }
   let x = innerWidth * .3, y = innerHeight * .44, dx = .8, dy = .6, dir = 'front';
   let frame = 1, lastTime = performance.now(), lastFrame = 0, lastDraw = 0, nextTurn = 0;
   let nextSpeech = 8000, lastCry = 0, busyUntil = 0, draggingBaby = false;
@@ -292,9 +295,14 @@
   $('sound').checked = options.sound;
   $('pause').checked = options.paused;
   $('speed').value = String(options.speed);
+  $('speed-value').textContent = options.speed.toLocaleString('pt-BR') + '×';
   $('sound').addEventListener('change', e => { options.sound = e.target.checked; save(); });
   $('pause').addEventListener('change', e => { options.paused = e.target.checked; save(); });
-  $('speed').addEventListener('input', e => { options.speed = Number(e.target.value); save(); });
+  $('speed').addEventListener('input', e => {
+    options.speed = E.clamp(Number(e.target.value), .5, 2);
+    $('speed-value').textContent = options.speed.toLocaleString('pt-BR') + '×';
+    save();
+  });
   $('reset').addEventListener('click', () => {
     if (!window.confirm('Apagar o progresso e iniciar outra história?')) return;
     game = E.initial(); lastStage = ''; lastMemoryCount = -1;
@@ -406,7 +414,7 @@
     const dt = Math.min(.12, Math.max(0, (now - lastTime) / 1000));
     lastTime = now;
     if (!options.paused) {
-      game = E.tick(game, dt);
+      game = E.tick(game, dt * options.speed);
       if (!draggingBaby && !draggingItem && now > busyUntil && !reduced.matches) {
         if (now > nextTurn) {
           const direction = Math.random() * Math.PI * 2;

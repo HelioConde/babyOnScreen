@@ -53,3 +53,12 @@ test('níveis progridem até 20', () => {
   baby.xp = 99999;
   assert.equal(E.level(baby), 20);
 });
+
+test('necessidades descem gradualmente em um minuto real na Web', () => {
+  const before = E.initial();
+  const after = E.advanceClock(before, 60);
+  assert.ok(after.needs.food >= 81, 'fome não deve cair mais de 4 pontos/minuto');
+  assert.ok(after.needs.energy >= 82, 'energia não deve cair mais de 3 pontos/minuto');
+  assert.ok(after.needs.hygiene >= 82, 'higiene não deve cair mais de 3 pontos/minuto');
+  assert.ok(after.needs.health >= 94, 'saúde estável sem necessidades críticas');
+});

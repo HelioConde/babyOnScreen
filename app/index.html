@@ -55,7 +55,8 @@
     <summary>⚙️ Preferências e salvamento</summary>
     <label><input type="checkbox" id="sound"> Ativar sons</label>
     <label><input type="checkbox" id="pause"> Pausar o tempo</label>
-    <label>Velocidade <input type="range" id="speed" min="0.5" max="2" step="0.25" value="1"></label>
+    <label>Velocidade <span class="speed-controls"><input type="range" id="speed" min="0.5" max="2" step="0.25" value="1"><output id="speed-value" for="speed">1×</output></span></label>
+    <p class="speed-note">Também controla o tempo e o desgaste das necessidades.</p>
     <div class="utility-buttons"><button id="export" type="button">↓ Exportar</button><label class="import-label" for="import-file">↑ Importar<input type="file" accept=".json,application/json" id="import-file"></label><button id="reset" type="button">↺ Recomeçar</button></div>
   </details>
   <footer class="panel-footer"><small id="version">Baby On Screen</small><button type="button" id="hide">Ocultar personagem</button></footer>

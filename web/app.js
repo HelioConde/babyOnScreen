@@ -72,7 +72,7 @@
   // Restore at most 2 real hours after a closed tab. Longer gaps are bounded
   // to avoid abrupt growth or depleted needs when returning much later.
   let game = E.advanceClock(storedGame, (startedAt - storedGame.savedAt) / 1000,
-    { paused: options.paused });
+    { paused: options.paused, speed: options.speed });
   game.savedAt = startedAt;
   let lastClockAt = startedAt;
   let x = Math.round(stage.clientWidth / 2 - 48), y = Math.round(stage.clientHeight - 120);
@@ -110,7 +110,7 @@
   function syncClock(now = Date.now()) {
     const elapsed = Math.max(0, (now - lastClockAt) / 1000);
     lastClockAt = Math.max(lastClockAt, now);
-    if (!options.paused && elapsed > 0) game = E.advanceClock(game, elapsed);
+    if (!options.paused && elapsed > 0) game = E.advanceClock(game, elapsed, { speed: options.speed });
     return elapsed;
   }
 
@@ -497,7 +497,12 @@
     setFeedback(options.paused ? 'O tempo e os movimentos estão pausados.' : 'Sua amiguinha voltou a brincar!');
     save();
   });
-  $('speed').addEventListener('input', e => { options.speed = Number(e.target.value); save(); });
+  $('speed').addEventListener('input', e => {
+    syncClock(); // Settle the previous elapsed time at the previous speed.
+    options.speed = E.clamp(Number(e.target.value), .5, 2);
+    $('speed-value').textContent = options.speed.toLocaleString('pt-BR') + '×';
+    save();
+  });
   $('export').addEventListener('click', () => {
     save();
     const blob = new Blob([E.exportSave(game)], { type: 'application/json' });
@@ -596,6 +601,7 @@
   $('pause').textContent = options.paused ? '▶ Continuar' : '⏸ Pausar';
   $('pause').setAttribute('aria-pressed', String(options.paused));
   $('speed').value = String(options.speed);
+  $('speed-value').textContent = options.speed.toLocaleString('pt-BR') + '×';
   animationStage = '';
   bounds(); place(); updateUI(); speak('return');
   requestAnimationFrame(loop);

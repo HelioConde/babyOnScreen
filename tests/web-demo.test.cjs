@@ -29,3 +29,10 @@ test('web demo script can be parsed by Node', () => {
   const vm = require('node:vm');
   assert.doesNotThrow(() => new vm.Script(script, { filename: 'web/app.js' }));
 });
+
+test('o controle de velocidade explica e aplica a redução das necessidades', () => {
+  assert.match(html, /id="speed-value"/);
+  assert.match(html, /alimentação, energia, higiene e saúde diminuem mais devagar/);
+  assert.match(script, /E\.advanceClock\(game, elapsed, \{ speed: options\.speed \}\)/);
+  assert.match(script, /syncClock\(\); \/\/ Settle the previous elapsed time at the previous speed/);
+});
