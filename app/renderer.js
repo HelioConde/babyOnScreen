@@ -10,6 +10,26 @@
   }) || null;
 
   const gameKey = 'baby-on-screen-v1', optionsKey = 'baby-on-screen-options-v1';
+  const tourKey = 'baby-on-screen-guide-v1';
+  const welcome = $('welcome-tour');
+  const welcomeSteps = Object.freeze([
+    {title:'Sua amiguinha chegou! 💕',icon:'👶',
+      description:'Ela mora na sua área de trabalho, como um mascote virtual. Anda, reage e faz companhia enquanto você usa o computador.',
+      hint:'O guia pausa as necessidades para você aprender com calma.'},
+    {title:'Pegue, mova e faça carinho',icon:'🖱️',
+      description:'Segure o botão esquerdo sobre a bebê e arraste para outro lugar. Um clique rápido faz carinho e abre o painel.',
+      hint:'Experimente movimentar a bebê sem arrastar outros programas.'},
+    {title:'Cuide quando ela precisar',icon:'🍼',
+      description:'Acompanhe alimentação, energia, higiene e saúde. Arraste mamadeira, berço, fralda ou remédio até a bebê, ou selecione o item e clique nela.',
+      hint:'Brinquedos, cartinhas e desenhos também criam lembranças.'},
+    {title:'Ela não atrapalha seu PC',icon:'🖥️',
+      description:'A janela é transparente: você ainda pode clicar nos programas por trás. Use “Minha amiguinha” para abrir ou fechar o painel.',
+      hint:'Para ocultar, use o painel. Para retornar ou sair, use o ícone na bandeja do Windows.'},
+    {title:'Cresçam juntas!',icon:'🌟',
+      description:'Cuidados e brincadeiras rendem experiência, missões e novas fases. O progresso é salvo automaticamente e pode ser exportado nas preferências.',
+      hint:'Você pode pausar ou reduzir a velocidade a qualquer momento. Bom jogo!'}
+  ]);
+  let welcomeIndex = 0;
   const names = { food: 'alimentação', energy: 'energia', hygiene: 'higiene', health: 'saúde' };
   const source = document.currentScript ? document.currentScript.src : window.location.href;
   const lessons = E.schoolQuestions;
@@ -58,7 +78,7 @@
     if (!spriteLayer || now < spriteRefreshAt) return;
     spriteRefreshAt = now + 180;
     const stage = E.ageStage(game).id;
-    const moving = !draggingBaby && !draggingItem && !options.paused && !reduced.matches && now >= busyUntil;
+    const moving = welcome.hidden && !draggingBaby && !draggingItem && !options.paused && !reduced.matches && now >= busyUntil;
     if (moving && Math.abs(dx) > .08) lastHorizontalDirection = dx > 0 ? 'right' : 'left';
     const direction = stage === 'child'
       ? (({front:'down',back:'up',left:'left',right:'right'})[dir] || 'down')
@@ -96,9 +116,62 @@
     thought.textContent = text; game.lastSpoken = text;
     nextSpeech = performance.now() + (E.urgency(game).level === 'crying' ? 8000 : 13000 + Math.random() * 9000);
   }
-  function panelVisible(on) {
-    panel.hidden = !on; publishRegions();
+  function updateWelcome() {
+    const step = welcomeSteps[welcomeIndex];
+    $('welcome-title').textContent = step.title;
+    $('welcome-description').textContent = step.description;
+    $('welcome-hint').textContent = step.hint;
+    $('welcome-scene-icon').textContent = step.icon;
+    $('welcome-count').textContent = 'Passo ' + (welcomeIndex + 1) + ' de ' + welcomeSteps.length;
+    $('welcome-progress').setAttribute('aria-valuenow', String(welcomeIndex + 1));
+    $('welcome-progress').firstElementChild.style.width =
+      ((welcomeIndex + 1) / welcomeSteps.length * 100) + '%';
+    $('welcome-prev').disabled = welcomeIndex === 0;
+    $('welcome-next').textContent = welcomeIndex === welcomeSteps.length - 1
+      ? 'Começar a cuidar 💕' : 'Próximo →';
   }
+  function closeWelcome() {
+    if (welcome.hidden) return;
+    welcome.hidden = true;
+    try { localStorage.setItem(tourKey, 'completed'); }
+    catch { /* A presentation preference must not block playing. */ }
+    publishRegions();
+  }
+  function openWelcome() {
+    welcomeIndex = 0;
+    updateWelcome();
+    welcome.hidden = false;
+    panelVisible(true);
+    panel.scrollTop = 0;
+    $('welcome-next').focus({ preventScroll: true });
+  }
+  function panelVisible(on) {
+    if (!on && !welcome.hidden) closeWelcome();
+    panel.hidden = !on;
+    publishRegions();
+  }
+  $('welcome-next').addEventListener('click', () => {
+    if (welcomeIndex === welcomeSteps.length - 1) {
+      closeWelcome(); $('welcome-reopen').focus(); return;
+    }
+    welcomeIndex++;
+    updateWelcome();
+    panel.scrollTop = 0;
+  });
+  $('welcome-prev').addEventListener('click', () => {
+    welcomeIndex = Math.max(0, welcomeIndex - 1);
+    updateWelcome();
+    panel.scrollTop = 0;
+  });
+  $('welcome-skip').addEventListener('click', () => {
+    closeWelcome(); $('welcome-reopen').focus();
+  });
+  $('welcome-reopen').addEventListener('click', openWelcome);
+  welcome.addEventListener('keydown', event => {
+    if (event.key === 'Escape') { event.preventDefault(); closeWelcome(); $('welcome-reopen').focus(); }
+    else if (event.key === 'ArrowRight') { event.preventDefault(); $('welcome-next').click(); }
+    else if (event.key === 'ArrowLeft') { event.preventDefault(); $('welcome-prev').click(); }
+  });
   $('launcher').addEventListener('click', () => panelVisible(panel.hidden));
   $('close-panel').addEventListener('click', () => panelVisible(false));
   $('hide').addEventListener('click', () => { save(); desktop.hide(); });
@@ -505,7 +578,7 @@
   function animate(now) {
     const dt = Math.min(.12, Math.max(0, (now - lastTime) / 1000));
     lastTime = now;
-    if (!options.paused) {
+    if (!options.paused && welcome.hidden) {
       game = E.tick(game, dt * options.speed);
       if (!draggingBaby && !draggingItem && now > busyUntil && !reduced.matches) {
         if (now > nextTurn) {
@@ -539,5 +612,7 @@
     requestAnimationFrame(animate);
   }
   render(); bounds(); place(); panelVisible(false); speak('return');
+  try { if (localStorage.getItem(tourKey) !== 'completed') openWelcome(); }
+  catch { openWelcome(); }
   requestAnimationFrame(animate);
 })();

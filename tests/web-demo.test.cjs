@@ -112,3 +112,20 @@ test('Web e Windows mostram o MESMO sprite sem escala ou atlas divergente', () =
   assert.match(desktopJS, /!draggingBaby && !draggingItem/);
   assert.match(desktopJS, /innerWidth - BABY_WIDTH - 4/);
 });
+
+test('tutorial de início aparece dentro do painel overlay sem alterar o progresso', () => {
+  const htmlPC = fs.readFileSync(path.join(root,'app','index.html'),'utf8');
+  const desktopJS = fs.readFileSync(path.join(root,'app','renderer.js'),'utf8');
+  const css = fs.readFileSync(path.join(root,'app','style.css'),'utf8');
+  for (const id of ['welcome-tour','welcome-title','welcome-count','welcome-next',
+    'welcome-prev','welcome-skip','welcome-reopen','welcome-progress']) {
+    assert.ok(htmlPC.includes('id="' + id + '"'), id);
+  }
+  assert.match(desktopJS,/baby-on-screen-guide-v1/);
+  assert.match(desktopJS,/welcomeSteps = Object\.freeze/);
+  assert.match(desktopJS,/openWelcome\(\)/);
+  assert.match(desktopJS,/!options\.paused && welcome\.hidden/);
+  assert.match(desktopJS,/localStorage\.setItem\(tourKey, 'completed'\)/);
+  assert.match(css,/\.welcome-tour\[hidden\]\{display:none\}/);
+  assert.ok(!desktopJS.includes('game = E.initial(); welcome'));
+});

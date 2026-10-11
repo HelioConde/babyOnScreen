@@ -89,6 +89,42 @@ async function main() {
     await delay(500);
   }
   console.log('Windows Electron runtime state:',JSON.stringify(state));
+  // A fresh install must display an interactive guide inside the real overlay.
+  const intro = await cdp.request('Runtime.evaluate', {
+    expression:'(() => ({panel:!document.getElementById("panel").hidden,' +
+      'visible:!document.getElementById("welcome-tour").hidden,' +
+      'count:document.getElementById("welcome-count").textContent,' +
+      'title:document.getElementById("welcome-title").textContent}))()',
+    returnByValue:true
+  });
+  const introState=intro.result?.value;
+  console.log('First-start tutorial:',JSON.stringify(introState));
+  assert.equal(introState?.panel,true);
+  assert.equal(introState?.visible,true);
+  assert.match(introState.count,/Passo 1 de 5/);
+  assert.match(introState.title,/amiguinha chegou/);
+  const shotIntro = await cdp.request('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+  fs.writeFileSync(path.join(root,'dist','windows-onboarding-smoke.png'),Buffer.from(shotIntro.data,'base64'));
+  const checked = await cdp.request('Runtime.evaluate', {
+    expression:'(() => {const steps=[];for(let i=0;i<4;i++){' +
+      'document.getElementById("welcome-next").click();steps.push(document.getElementById("welcome-count").textContent);}' +
+      'const finalLabel=document.getElementById("welcome-next").textContent;' +
+      'document.getElementById("welcome-next").click();' +
+      'const persisted=localStorage.getItem("baby-on-screen-guide-v1");' +
+      'const dismissed=document.getElementById("welcome-tour").hidden;' +
+      'document.getElementById("welcome-reopen").click();' +
+      'const reopened=!document.getElementById("welcome-tour").hidden;' +
+      'document.getElementById("welcome-skip").click();' +
+      'return {steps,finalLabel,persisted,dismissed,reopened};})()',
+    returnByValue:true
+  });
+  const guide=checked.result?.value;
+  console.log('Tour navigation:',JSON.stringify(guide));
+  assert.equal(guide?.steps?.join('|'),'Passo 2 de 5|Passo 3 de 5|Passo 4 de 5|Passo 5 de 5');
+  assert.match(guide.finalLabel,/Começar a cuidar/);
+  assert.equal(guide.persisted,'completed');
+  assert.equal(guide.dismissed,true);
+  assert.equal(guide.reopened,true);
   assert.ok(state?.game && state?.desktop && state?.sprite);
   assert.equal(state.width,128); assert.equal(state.height,128);
   assert.equal(state.canvasW,128); assert.equal(state.canvasH,128);
@@ -106,7 +142,7 @@ async function main() {
   // Open the real overlay panel and use the name control, without native click injection.
   const panelCheck = await cdp.request('Runtime.evaluate', {
     expression: '(() => {' +
-      'document.getElementById("launcher").click();' +
+      'if(document.getElementById("panel").hidden) document.getElementById("launcher").click();' +
       'const input=document.getElementById("desktop-name-input");' +
       'input.value="Luna"; input.dispatchEvent(new Event("input",{bubbles:true}));' +
       'const panel=document.getElementById("panel"); const r=panel.getBoundingClientRect();' +

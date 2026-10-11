@@ -93,3 +93,30 @@ h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#765c82;ma
 .panel-title small,.level-row,.panel-footer small{color:#806c87}
 .extras summary{font-size:12px}
 #desktop-name-input{min-height:32px}
+
+/* First-run tutorial lives inside the existing click-through-aware overlay panel. */
+.welcome-tour{background:linear-gradient(145deg,#fff1f9,#f7efff 65%,#fff8eb);border:1px solid #e9caed;border-radius:17px;padding:14px;margin:-3px 0 16px;box-shadow:0 8px 26px #b894bb29}
+.welcome-tour[hidden]{display:none}
+.welcome-top{display:flex;justify-content:space-between;gap:7px;align-items:center}
+.welcome-kicker{font-size:9px;font-weight:900;letter-spacing:.065em;color:#a15b9f}
+.welcome-count{font-size:10px;font-weight:800;color:#815d9e;white-space:nowrap;background:#fff9ff;padding:5px 8px;border-radius:14px}
+.welcome-scene{display:flex;align-items:center;justify-content:center;position:relative;height:87px;margin:10px 0;background:radial-gradient(ellipse at 50% 90%,#e7cdea 0 31%,transparent 32%),linear-gradient(#fffafd,#f1e8ff);border-radius:13px;overflow:hidden}
+.welcome-scene-icon{font-size:49px;line-height:1;filter:drop-shadow(0 5px 3px #a47ca64d);animation:welcome-float 2.2s ease-in-out infinite}
+.welcome-scene-sparkles{position:absolute;right:17px;top:12px;font-size:13px;color:#d78bba;letter-spacing:5px}
+@keyframes welcome-float{50%{transform:translateY(-5px)}}
+.welcome-tour h2{font-size:18px;text-transform:none;letter-spacing:0;line-height:1.3;margin:8px 0;color:#5d3f70}
+.welcome-tour>p{font-size:12px;line-height:1.55;color:#6a597b;min-height:73px;margin:0 0 10px}
+.welcome-hint{background:#fffafdf0;border-left:3px solid #cc9bd1;border-radius:8px;color:#80678a;font-size:11px;line-height:1.45;padding:9px 10px;min-height:46px}
+.welcome-progress{height:6px;border-radius:99px;overflow:hidden;background:#e7d6ee;margin:12px 0}
+.welcome-progress span{display:block;background:linear-gradient(90deg,#df8fbc,#9671cc);height:100%;width:20%;transition:width .2s ease-out;border-radius:99px}
+.welcome-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.welcome-controls button{padding:9px 10px;border-radius:10px;font-size:11px;font-weight:800;min-height:36px}
+.welcome-skip{background:transparent;border:1px solid transparent;color:#947d9e}
+.welcome-prev{background:white;border:1px solid #e3d3eb;color:#735889}
+.welcome-prev:disabled{opacity:.4;cursor:default}
+.welcome-next{margin-left:auto;background:#9565c8;border:1px solid #9565c8;color:#fff}
+.welcome-next:hover{background:#794da9}
+.panel-footer{gap:6px;flex-wrap:wrap}
+.panel-footer .welcome-reopen{background:#fff9fe;border:1px solid #eaddef;color:#8354a4}
+@media(max-height:600px){.welcome-scene{height:60px}.welcome-scene-icon{font-size:36px}.welcome-tour>p{min-height:0}.welcome-tour{padding:11px}}
+@media(prefers-reduced-motion:reduce){.welcome-scene-icon{animation:none}.welcome-progress span{transition:none}}

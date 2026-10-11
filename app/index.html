@@ -10,6 +10,19 @@
 <div id="thought" class="thought" role="status" aria-live="polite">Gugu! 💕</div>
 <button id="launcher" class="launcher" type="button" aria-label="Abrir o painel do bebê"><img src="../assets/icons/heart.svg" width="25" height="25" alt=""> <span>Minha amiguinha</span></button>
 <aside id="panel" class="panel" aria-label="Painel do Baby On Screen" hidden>
+  <section id="welcome-tour" class="welcome-tour" role="region" aria-labelledby="welcome-title" hidden>
+    <div class="welcome-top"><span class="welcome-kicker">✦ GUIA DA SUA AMIGUINHA</span><span id="welcome-count" class="welcome-count" aria-live="polite">Passo 1 de 5</span></div>
+    <div class="welcome-scene" aria-hidden="true"><span id="welcome-scene-icon" class="welcome-scene-icon">👶</span><span class="welcome-scene-sparkles">✦ · ♡ · ✦</span></div>
+    <h2 id="welcome-title">Sua amiguinha chegou!</h2>
+    <p id="welcome-description">Uma nova companheira para a sua área de trabalho.</p>
+    <div id="welcome-hint" class="welcome-hint">As necessidades ficam pausadas durante o guia.</div>
+    <div id="welcome-progress" class="welcome-progress" role="progressbar" aria-label="Progresso do tutorial" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1"><span></span></div>
+    <div class="welcome-controls">
+      <button type="button" id="welcome-skip" class="welcome-skip">Pular guia</button>
+      <button type="button" id="welcome-prev" class="welcome-prev" disabled>Voltar</button>
+      <button type="button" id="welcome-next" class="welcome-next">Próximo →</button>
+    </div>
+  </section>
   <header class="panel-header"><div class="avatar">👶</div><div class="panel-title"><small id="desktop-name-label">MINHA AMIGUINHA</small><h1>Baby On Screen</h1><p id="phase-name">Recém-nascida</p></div><button type="button" class="round" id="close-panel" aria-label="Fechar painel">×</button></header>
   <div class="level-row"><span id="life-day">Dia 1</span><strong id="level">Nível 1</strong><span id="care-count">0 cuidados</span></div>
   <div class="mood" id="mood"><span id="mood-icon">🥰</span><div><strong id="mood-title">Estou feliz!</strong><small id="mood-description">Obrigada por cuidar de mim</small></div></div>
@@ -71,7 +84,7 @@
     <label>Nome da bebê <input id="desktop-name-input" type="text" maxlength="20" autocomplete="off" placeholder="Um nome especial"></label>
     <div class="utility-buttons"><button id="export" type="button">↓ Exportar</button><label class="import-label" for="import-file">↑ Importar<input type="file" accept=".json,application/json" id="import-file"></label><button id="reset" type="button">↺ Recomeçar</button></div>
   </details>
-  <footer class="panel-footer"><small id="version">Baby On Screen</small><button type="button" id="hide">Ocultar personagem</button></footer>
+  <footer class="panel-footer"><small id="version">Baby On Screen</small><button type="button" id="welcome-reopen" class="welcome-reopen">? Como jogar</button><button type="button" id="hide">Ocultar personagem</button></footer>
 </aside>
 <div id="drag-ghost" class="drag-ghost" hidden><img id="drag-icon" alt="" src="../assets/icons/bottle.svg"></div>
 </body></html>

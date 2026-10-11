@@ -107,3 +107,12 @@ As duas versões usam o **mesmo manifesto de sprites** em `app/sprite-manifest.j
 - controles de movimento, posicionamento e arrastar respeitam o novo tamanho sem alterar as necessidades ou o progresso salvo.
 
 Baixe a **beta.3** depois do workflow de compilação ser aprovado. Versões anteriores não têm a apresentação de sprites idêntica.
+
+### Beta 1.1.0-beta.4 — apresentação inicial do overlay
+No primeiro acesso ao aplicativo Windows, um guia de **5 passos** aparece automaticamente no painel: apresentação da bebê, arrastar e carinho, cuidados, transparência/bandeja do Windows, progressão e salvamento. A abordagem é inspirada na descoberta progressiva de controles dos mascotes de desktop como Desktop Mate e Shimeji, com texto e arte próprios.
+- Botões **Próximo**, **Voltar**, **Pular guia** e **Começar a cuidar**; setas esquerda/direita e Escape com foco no guia;
+- o tempo e a movimentação automática ficam pausados durante a apresentação, sem modificar a velocidade escolhida;
+- conclusão gravada na preferência local `baby-on-screen-guide-v1`, independente do save da bebê;
+- tutorial acessível novamente por **? Como jogar** no rodapé do painel;
+- a janela transparente continua permitindo interação com outros aplicativos fora das regiões ativas do jogo.
+O teste da beta abre o Electron real, navega pelas cinco telas, verifica o armazenamento e captura a apresentação no Windows.
