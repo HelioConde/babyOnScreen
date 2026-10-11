@@ -34,7 +34,14 @@ function updatePassThrough(ignore) {
 }
 function pollMouse() {
   if (!win || win.isDestroyed() || !win.isVisible()) return;
-  if (dragging) { updatePassThrough(false); return; }
+  if (dragging) {
+    updatePassThrough(false);
+    // Keep mouse drags alive across monitor boundaries even if Chromium
+    // momentarily stops delivering pointermove in a transparent window.
+    if (!win.webContents.isDestroyed())
+      win.webContents.send('baby:cursor', screen.getCursorScreenPoint());
+    return;
+  }
   const p = screen.getCursorScreenPoint();
   const inside = geometry.isCursorOverRegion(p, win.getBounds(), hitRegions);
   updatePassThrough(!inside);

@@ -12,6 +12,12 @@ contextBridge.exposeInMainWorld('babyDesktop', Object.freeze({
     ipcRenderer.on('baby:desktop-layout', listener);
     return () => ipcRenderer.removeListener('baby:desktop-layout', listener);
   },
+  onCursorMove: callback => {
+    if (typeof callback !== 'function') return () => {};
+    const listener = (_event, point) => callback(point);
+    ipcRenderer.on('baby:cursor', listener);
+    return () => ipcRenderer.removeListener('baby:cursor', listener);
+  },
   version: () => ipcRenderer.invoke('baby:version'),
   updateStatus: () => ipcRenderer.invoke('baby:update:get'),
   checkUpdate: () => ipcRenderer.invoke('baby:update:check'),

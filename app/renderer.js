@@ -69,7 +69,7 @@
   let x = innerWidth * .3, y = innerHeight * .44, dx = .8, dy = .6, dir = 'front';
   let frame = 1, lastTime = performance.now(), lastFrame = 0, lastDraw = 0, nextTurn = 0;
   let nextSpeech = 8000, lastCry = 0, busyUntil = 0, draggingBaby = false;
-  let pressX = 0, pressY = 0, offsetX = 0, offsetY = 0;
+  let pressX = 0, pressY = 0, offsetX = 0, offsetY = 0, mouseDraggingBaby = false;
   let desktopLayout = null, movingPanel = null;
   let savedBabyPosition = null, savedPanelPosition = null;
   try {
@@ -308,7 +308,8 @@
   panelHeader.addEventListener('pointerdown', event => {
     if (event.button !== 0 || event.target.closest('button:not(#panel-move-handle)')) return;
     const r = panel.getBoundingClientRect();
-    movingPanel = {startX:event.clientX,startY:event.clientY,left:r.left,top:r.top,id:event.pointerId};
+    movingPanel = {startX:event.clientX,startY:event.clientY,left:r.left,top:r.top,
+      id:event.pointerId,mouse:event.pointerType==='mouse'};
     panelHeader.setPointerCapture(event.pointerId);
     desktop.setDragging(true);
     event.preventDefault();
@@ -328,6 +329,21 @@
   }
   panelHeader.addEventListener('pointerup',stopMovingPanel);
   panelHeader.addEventListener('pointercancel',stopMovingPanel);
+  // Screen coordinates come from Electron's main process (logical DIP).
+  // Mouse dragging can therefore continue while crossing monitor edges,
+  // even when a transparent window misses a DOM pointermove frame.
+  desktop.onCursorMove(point => {
+    if (!desktopLayout?.bounds || !point ||
+        !Number.isFinite(point.x) || !Number.isFinite(point.y)) return;
+    const cx=point.x-desktopLayout.bounds.x,cy=point.y-desktopLayout.bounds.y;
+    if (movingPanel?.mouse) {
+      setPanelPosition(movingPanel.left+cx-movingPanel.startX,
+        movingPanel.top+cy-movingPanel.startY);
+    } else if (draggingBaby && mouseDraggingBaby) {
+      x=cx-offsetX; y=cy-offsetY;
+      bounds(); place(); publishRegions();
+    }
+  });
   $('panel-move-handle').addEventListener('keydown', event => {
     const delta = {ArrowLeft:[-24,0],ArrowRight:[24,0],
       ArrowUp:[0,-24],ArrowDown:[0,24]}[event.key];
@@ -403,7 +419,8 @@
   }
   baby.addEventListener('pointerdown', e => {
     if (e.button !== 0) return;
-    draggingBaby = true; pressX = e.clientX; pressY = e.clientY;
+    draggingBaby = true; mouseDraggingBaby = e.pointerType === 'mouse';
+    pressX = e.clientX; pressY = e.clientY;
     offsetX = e.clientX - x; offsetY = e.clientY - y;
     baby.setPointerCapture(e.pointerId);
     desktop.setDragging(true);
@@ -416,7 +433,7 @@
   });
   function releaseBaby(e, cancel) {
     if (!draggingBaby) return;
-    draggingBaby = false; desktop.setDragging(false);
+    draggingBaby = false; mouseDraggingBaby = false; desktop.setDragging(false);
     try { baby.releasePointerCapture(e.pointerId); } catch { /* pointer already released */ }
     if (!cancel && Math.hypot(e.clientX - pressX, e.clientY - pressY) < 8) {
       panelVisible(true);
@@ -477,7 +494,8 @@
       const r = panel.getBoundingClientRect(); setPanelPosition(r.left,r.top,true);
     }
     if (draggingBaby || draggingItem) {
-      draggingBaby = false; draggingItem = null; ghost.hidden = true;
+      draggingBaby = false; mouseDraggingBaby = false;
+      draggingItem = null; ghost.hidden = true;
       desktop.setDragging(false);
       baby.classList.remove('drop-target');
       document.querySelectorAll('.item.dragging').forEach(i => i.classList.remove('dragging'));

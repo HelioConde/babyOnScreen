@@ -153,3 +153,14 @@ test('Windows overlay lets the player drag the control panel and switch monitors
   assert.match(script,/nearestMonitor\(x\+BABY_WIDTH\/2,y\+BABY_HEIGHT\/2\)/);
   assert.match(css,/\.panel-header\{cursor:grab/);
 });
+
+test('overlay keeps mouse drag responsive across monitor edges using global DIP cursor', () => {
+  const main=fs.readFileSync(path.join(root,'app','main.cjs'),'utf8');
+  const preload=fs.readFileSync(path.join(root,'app','preload.cjs'),'utf8');
+  const renderer=fs.readFileSync(path.join(root,'app','renderer.js'),'utf8');
+  assert.match(main,/webContents\.send\('baby:cursor', screen\.getCursorScreenPoint\(\)\)/);
+  assert.match(preload,/onCursorMove: callback =>/);
+  assert.match(renderer,/desktop\.onCursorMove\(point =>/);
+  assert.match(renderer,/movingPanel\.left\+cx-movingPanel\.startX/);
+  assert.match(renderer,/x=cx-offsetX; y=cy-offsetY/);
+});
