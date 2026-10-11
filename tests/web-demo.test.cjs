@@ -88,3 +88,13 @@ test('nome da bebê pode ser alterado em Web e Windows e salvo no motor comparti
   assert.match(script, /E\.renameBaby\(game, e\.target\.value\)/);
   assert.match(desktop, /E\.renameBaby\(game, event\.target\.value\)/);
 });
+
+test('Windows mantém sprite legível e a área de arrasto acompanha seu tamanho', () => {
+  const pcHTML = fs.readFileSync(path.join(root,'app','index.html'),'utf8');
+  const pcCSS = fs.readFileSync(path.join(root,'app','style.css'),'utf8');
+  const desktopJS = fs.readFileSync(path.join(root,'app','renderer.js'),'utf8');
+  assert.match(pcHTML, /id="baby-sprite" width="96" height="106"/);
+  assert.match(pcCSS, /\.baby\{width:96px;height:106px\}/);
+  assert.match(desktopJS, /const BABY_WIDTH = 96, BABY_HEIGHT = 106/);
+  assert.match(desktopJS, /innerWidth - BABY_WIDTH - 4/);
+});

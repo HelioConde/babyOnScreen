@@ -40,6 +40,7 @@
     game = E.tick(game, offlineSeconds * options.speed, { active: false });
   }
   let milestoneSignature = '', dailySignature = '';
+  const BABY_WIDTH = 96, BABY_HEIGHT = 106;
   let x = innerWidth * .3, y = innerHeight * .44, dx = .8, dy = .6, dir = 'front';
   let frame = 1, lastTime = performance.now(), lastFrame = 0, lastDraw = 0, nextTurn = 0;
   let nextSpeech = 8000, lastCry = 0, busyUntil = 0, draggingBaby = false;
@@ -101,12 +102,12 @@
   $('close-panel').addEventListener('click', () => panelVisible(false));
   $('hide').addEventListener('click', () => { save(); desktop.hide(); });
   const bounds = () => {
-    x = E.clamp(x, 3, Math.max(3, innerWidth - 68));
-    y = E.clamp(y, 15, Math.max(15, innerHeight - 80));
+    x = E.clamp(x, 3, Math.max(3, innerWidth - BABY_WIDTH - 4));
+    y = E.clamp(y, 15, Math.max(15, innerHeight - BABY_HEIGHT - 8));
   };
   function place() {
     baby.style.transform = 'translate3d(' + Math.round(x) + 'px,' + Math.round(y) + 'px,0)';
-    thought.style.transform = 'translate3d(' + Math.round(E.clamp(x + 51, 4, Math.max(4, innerWidth - 200))) + 'px,' + Math.round(Math.max(4, y - 45)) + 'px,0)';
+    thought.style.transform = 'translate3d(' + Math.round(E.clamp(x + BABY_WIDTH - 12, 4, Math.max(4, innerWidth - 200))) + 'px,' + Math.round(Math.max(4, y - 45)) + 'px,0)';
   }
   function region(element, margin) {
     const r = element.getBoundingClientRect();
@@ -512,8 +513,8 @@
           nextTurn = now + 3000 + Math.random() * 2000;
         }
         x += dx * dt * 30 * options.speed; y += dy * dt * 30 * options.speed;
-        if (x <= 3 || x >= innerWidth - 68) dx *= -1;
-        if (y <= 15 || y >= innerHeight - 80) dy *= -1;
+        if (x <= 3 || x >= innerWidth - BABY_WIDTH - 4) dx *= -1;
+        if (y <= 15 || y >= innerHeight - BABY_HEIGHT - 8) dy *= -1;
         bounds();
       }
     }

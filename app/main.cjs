@@ -1,6 +1,7 @@
 'use strict';
 const { app, BrowserWindow, Tray, Menu, nativeImage, screen, ipcMain, session } = require('electron');
 const path = require('node:path');
+const geometry = require('./window-geometry.cjs');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 let win = null;
@@ -31,9 +32,7 @@ function pollMouse() {
   if (!win || win.isDestroyed() || !win.isVisible()) return;
   if (dragging) { updatePassThrough(false); return; }
   const p = screen.getCursorScreenPoint();
-  const b = win.getBounds();
-  const x = p.x - b.x, y = p.y - b.y;
-  const inside = hitRegions.some(r => x >= r.x && x <= r.x + r.width && y >= r.y && y <= r.y + r.height);
+  const inside = geometry.isCursorOverRegion(p, win.getBounds(), hitRegions);
   updatePassThrough(!inside);
 }
 function createWindow() {
@@ -84,10 +83,7 @@ function createTray() {
 }
 ipcMain.on('baby:regions', (event, regions) => {
   if (!validSender(event) || !Array.isArray(regions)) return;
-  hitRegions = regions.slice(0, 40).filter(r => r && ['x', 'y', 'width', 'height'].every(k => Number.isFinite(r[k])) &&
-    r.width >= 0 && r.height >= 0 && r.width < 2000 && r.height < 2000).map(r => ({
-      x: r.x, y: r.y, width: r.width, height: r.height
-    }));
+  hitRegions = geometry.sanitizeRegions(regions);
 });
 ipcMain.on('baby:dragging', (event, value) => {
   if (!validSender(event) || typeof value !== 'boolean') return;
