@@ -280,6 +280,12 @@
   $('sound').checked = options.sound;
   $('pause').checked = options.paused;
   $('speed').value = String(options.speed);
+  $('desktop-name-input').value = game.babyName;
+  $('desktop-name-input').addEventListener('input', event => {
+    game = E.renameBaby(game, event.target.value);
+    $('desktop-name-label').textContent = game.babyName || 'MINHA AMIGUINHA';
+    save();
+  });
   $('speed-value').textContent = options.speed.toLocaleString('pt-BR') + '×';
   $('sound').addEventListener('change', e => { options.sound = e.target.checked; save(); });
   $('pause').addEventListener('change', e => { options.paused = e.target.checked; save(); });
@@ -291,6 +297,7 @@
   $('reset').addEventListener('click', () => {
     if (!window.confirm('Apagar o progresso e iniciar outra história?')) return;
     game = E.initial(); lastStage = ''; lastMemoryCount = -1;
+    $('desktop-name-input').value = game.babyName;
     unselect(); render(); speak('return'); save();
     feedback('Sua nova história começou! Gugu! 💕');
   });
@@ -312,6 +319,7 @@
       const incoming = E.importSave(await file.text());
       if (!window.confirm('Substituir seu progresso atual por este arquivo?')) return;
       game = incoming; lastStage = ''; lastMemoryCount = -1;
+      $('desktop-name-input').value = game.babyName;
       render(); speak('return'); save();
       feedback('Progresso importado! Bem-vinda de volta, amiguinha.');
     } catch (error) { feedback('Erro ao importar: ' + error.message); }
@@ -412,6 +420,8 @@
       baby.classList.remove('newborn', 'baby-stage', 'toddler', 'child');
       baby.classList.add(age.id === 'baby' ? 'baby-stage' : age.id);
     }
+    $('desktop-name-label').textContent = game.babyName || 'MINHA AMIGUINHA';
+    baby.setAttribute('aria-label', (game.babyName || 'Bebê') + '. Arraste para mover ou toque para carinho.');
     $('phase-name').textContent = age.title;
     $('life-day').textContent = 'Dia ' + E.ageDays(game);
     $('level').textContent = 'Nível ' + E.level(game);

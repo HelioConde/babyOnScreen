@@ -72,3 +72,6 @@ h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#765c82;ma
 .desktop-daily-item button{border:0;border-radius:8px;padding:8px;font-size:10px;font-weight:900;color:white;background:#6d9875;cursor:pointer}
 .desktop-daily-item button:focus-visible{outline:3px solid #558d62;outline-offset:2px}
 .desktop-daily-claimed{font-weight:900;color:#588866!important}
+
+#desktop-name-input{padding:6px 8px;border:1px solid #dbcde1;border-radius:7px;max-width:170px;width:50%;color:#594c62;background:white}
+#desktop-name-input:focus-visible{outline:3px solid #9871c6;outline-offset:2px}

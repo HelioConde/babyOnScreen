@@ -230,3 +230,8 @@ background:#fff;color:#82609d;font-size:11px;font-weight:800;cursor:pointer}
 .game-shell button:focus-visible,.game-shell select:focus-visible,.game-shell input:focus-visible,.daily-panel summary:focus-visible{outline:3px solid #7c51b4;outline-offset:3px}
 @media(max-width:900px){.daily-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:630px){.wellbeing-bar{align-items:stretch;gap:7px;margin-top:10px}.wellbeing-meter{min-width:0}.wellbeing-meter progress{flex:1;max-width:130px}.daily-list{grid-template-columns:1fr}.daily-panel{padding:12px}.daily-task{padding:11px}.daily-panel summary{font-size:13px}.daily-task button{min-height:36px}}
+
+/* Optional pet identity: never lose accessibility or break the nursery layout. */
+.baby-name-setting{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:13px 0 0;color:#705d85;font-size:12px;font-weight:900}
+.baby-name-setting input{padding:9px 12px;min-height:37px;min-width:170px;max-width:245px;border-radius:9px;border:1px solid #decee7;background:white;color:#573e66;font-size:12px}
+.baby-name-setting input:focus-visible{outline:3px solid #9271bc;outline-offset:2px}

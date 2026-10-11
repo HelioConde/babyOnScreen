@@ -31,7 +31,7 @@
         <div class="hero-orbit"></div><span class="star s1">✦</span><span class="star s2">✳</span>
         <div class="hero-character" id="hero-character" aria-hidden="true"></div>
         <span class="hero-quote" id="hero-quote">Gugu! 💕</span>
-        <span class="hero-caption">sua nova amiguinha ✨</span>
+        <span class="hero-caption" id="baby-hero-caption">sua nova amiguinha ✨</span>
       </div>
     </section>
     <section class="game-section" id="jogar">
@@ -39,7 +39,7 @@
         <div class="intro"><p class="eyebrow">✳ SEU CANTINHO DE BRINCADEIRAS</p><h2>Vamos cuidar da nossa <em>pequena?</em></h2><p>Arraste um objeto até a bebê quando ela pedir. As necessidades mudam com o tempo, e cada cuidado ajuda sua amiga a crescer.</p></div>
         <div class="game-shell" aria-label="Jogo Baby On Screen">
           <div class="game-header">
-            <div class="character-profile"><div class="profile-avatar" id="profile-avatar">👶</div><div><small>MINHA AMIGUINHA</small><h3 id="phase-name">Recém-nascida</h3><p id="phase-desc">Descobrindo o mundo</p></div></div>
+            <div class="character-profile"><div class="profile-avatar" id="profile-avatar">👶</div><div><small id="baby-name-label">MINHA AMIGUINHA</small><h3 id="phase-name">Recém-nascida</h3><p id="phase-desc">Descobrindo o mundo</p></div></div>
             <div class="game-meta">
               <div><small>IDADE SIMULADA</small><strong id="life-day">Dia 1</strong></div>
               <div><small>EVOLUÇÃO</small><strong id="level">Nível 1</strong></div>
@@ -111,7 +111,7 @@
               <div class="missions-heading"><div><span class="mission-eyebrow">✦ AVENTURAS DO DIA A DIA</span><h3 id="missions-title">Pequenas conquistas</h3></div><span class="missions-count" id="missions-count">0/6 concluídas</span></div>
               <div id="missions-list" class="missions-list"><p>Carregando suas missões...</p></div>
             </section>
-            <details class="tools-settings"><summary>⚙️ Preferências e salvamento</summary><div class="game-actions"><button id="sound" type="button" aria-pressed="false" class="light-button">🔇 Som desligado</button><button id="pause" type="button" aria-pressed="false" class="light-button">⏸ Pausar</button><label class="speed-label" title="Controla o tempo, a perda das necessidades e o movimento">Velocidade <input type="range" id="speed" min="0.5" max="2" step="0.25" value="1"><output id="speed-value" for="speed">1×</output></label><button id="export" type="button" class="light-button">↓ Salvar progresso</button><label class="light-button upload-label" for="import-file">↑ Importar progresso<input id="import-file" type="file" accept=".json,application/json" hidden></label><button id="reset" type="button" class="light-button danger">↺ Recomeçar</button></div><p class="speed-note">Velocidade menor = alimentação, energia, higiene e saúde diminuem mais devagar.</p></details>
+            <details class="tools-settings"><summary>⚙️ Preferências e salvamento</summary><div class="game-actions"><button id="sound" type="button" aria-pressed="false" class="light-button">🔇 Som desligado</button><button id="pause" type="button" aria-pressed="false" class="light-button">⏸ Pausar</button><label class="speed-label" title="Controla o tempo, a perda das necessidades e o movimento">Velocidade <input type="range" id="speed" min="0.5" max="2" step="0.25" value="1"><output id="speed-value" for="speed">1×</output></label><button id="export" type="button" class="light-button">↓ Salvar progresso</button><label class="light-button upload-label" for="import-file">↑ Importar progresso<input id="import-file" type="file" accept=".json,application/json" hidden></label><button id="reset" type="button" class="light-button danger">↺ Recomeçar</button></div><p class="speed-note">Velocidade menor = alimentação, energia, higiene e saúde diminuem mais devagar.</p><label class="baby-name-setting">Nome da bebê <input id="baby-name-input" type="text" maxlength="20" autocomplete="off" placeholder="Escolha um nome (opcional)"></label></details>
           </div>
         </div>
         <div class="memory-row"><details><summary>📖 Álbum de memórias <span id="memory-count">0 lembranças</span></summary><div id="memories" class="memory-list"><p>As primeiras lembranças aparecerão aqui...</p></div></details><p class="demo-disclaimer">Na Web, a personagem vive dentro do jogo. No PC, ela pode passear pela área de trabalho. O progresso fica salvo somente neste navegador até você exportá-lo.</p></div>

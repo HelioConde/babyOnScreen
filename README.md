@@ -81,3 +81,6 @@ Ao alcançar a fase **Criança**, aparece um minijogo de escola também na Web: 
 A experiência Web e o painel Windows compartilham uma pequena rotina renovável por data local: dois cuidados, uma brincadeira e uma atividade criativa. Na fase Criança, a rotina inclui uma aula escolar. Cada atividade contabiliza somente ações realmente concluídas, e cada recompensa pode ser resgatada uma vez por dia. O save JSON preserva os resgates e permite continuar nas duas plataformas.
 
 A felicidade agora aparece com uma barra na Web e no Windows; as recomendações Web indicam quando cuidar das necessidades ou brincar. O jogo permanece offline, sem sincronização em nuvem.
+
+## Personalização da personagem
+O nome da bebê pode ser definido em **Preferências e salvamento** na Web e no Windows. É opcional, tem até 20 caracteres e fica registrado no mesmo progresso JSON usado para transferir a personagem entre plataformas. A interface atualiza o nome sem perder os cuidados ou as conquistas.

@@ -28,6 +28,15 @@ async function drag(page, source, target) {
     await page.locator('#baby').waitFor();
     assert.match(await page.title(), /Baby On Screen/);
     assert.match(await page.locator('#phase-name').textContent(), /Recém-nascida/);
+    await page.locator('.tools-settings summary').click();
+    await page.locator('#baby-name-input').fill('Luna');
+    assert.match(await page.locator('#baby-name-label').textContent(), /Luna/);
+    assert.match(await page.locator('#baby-hero-caption').textContent(), /Luna/);
+    assert.equal(await page.evaluate(() => {
+      const stored = JSON.parse(localStorage.getItem('baby-on-screen-web-v1'));
+      return window.BabyEngine.importSave(window.BabyEngine.exportSave(stored)).babyName;
+    }), 'Luna', 'nickname must survive export/import');
+    await page.locator('.tools-settings summary').click();
     // The imported PNG animation must actually load, not just leave the CSS fallback.
     await page.waitForFunction(() => {
       const baby = document.getElementById('baby');

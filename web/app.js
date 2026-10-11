@@ -368,6 +368,9 @@
     $('school-web').hidden = stageInfo.id !== 'child';
     $('school-web-stats').textContent = game.schoolVisits +
       (game.schoolVisits === 1 ? ' aula concluída' : ' aulas concluídas');
+    $('baby-name-label').textContent = game.babyName || 'MINHA AMIGUINHA';
+    $('baby-hero-caption').textContent = game.babyName ? game.babyName + ' ✨' : 'sua nova amiguinha ✨';
+    baby.setAttribute('aria-label', (game.babyName || 'Bebê') + '. Arraste para mover, toque para carinho ou solte nela um item.');
     $('phase-name').textContent = stageInfo.title;
     $('phase-desc').textContent = stageInfo.description;
     $('life-day').textContent = 'Dia ' + E.ageDays(game);
@@ -708,6 +711,13 @@
     setFeedback(options.paused ? 'O tempo e os movimentos estão pausados.' : 'Sua amiguinha voltou a brincar!');
     save();
   });
+  $('baby-name-input').value = game.babyName;
+  $('baby-name-input').addEventListener('input', e => {
+    game = E.renameBaby(game, e.target.value);
+    $('baby-name-label').textContent = game.babyName || 'MINHA AMIGUINHA';
+    $('baby-hero-caption').textContent = game.babyName ? game.babyName + ' ✨' : 'sua nova amiguinha ✨';
+    save();
+  });
   $('speed').addEventListener('input', e => {
     syncClock(); // Settle the previous elapsed time at the previous speed.
     options.speed = E.clamp(Number(e.target.value), .5, 2);
@@ -733,6 +743,7 @@
       const loaded = E.importSave(await file.text());
       if (!window.confirm('Substituir o progresso atual pelo progresso deste arquivo?')) return;
       game = loaded; lastClockAt = Date.now(); game.savedAt = lastClockAt;
+      $('baby-name-input').value = game.babyName;
       animationStage = ''; memoryCount = -1; lastUrgency = 'calm';
       speak('return'); updateUI(); save();
       setFeedback('Progresso importado! Bem-vinda de volta, amiguinha! 💕');
@@ -741,6 +752,7 @@
   $('reset').addEventListener('click', () => {
     if (!window.confirm('Apagar o progresso desta bebê e começar uma nova história?')) return;
     game = newWebGame(); lastClockAt = Date.now(); game.savedAt = lastClockAt;
+    $('baby-name-input').value = game.babyName;
     animationStage = ''; memoryCount = -1; lastUrgency = 'calm';
     clearSelected(); updateUI(); speak('return'); save();
     setFeedback('Uma nova vida começou! Gugu dada! 💕');

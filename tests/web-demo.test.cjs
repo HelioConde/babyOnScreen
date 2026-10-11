@@ -78,3 +78,13 @@ test('rotina diária e felicidade também aparecem no painel Windows', () => {
   assert.match(jsPC, /E\.dailyStatus\(game\)/);
   assert.match(jsPC, /E\.claimDaily\(game, button\.dataset\.claimDaily\)/);
 });
+
+test('nome da bebê pode ser alterado em Web e Windows e salvo no motor compartilhado', () => {
+  const pc = fs.readFileSync(path.join(root,'app','index.html'),'utf8');
+  const desktop = fs.readFileSync(path.join(root,'app','renderer.js'),'utf8');
+  assert.match(html, /id="baby-name-input"/);
+  assert.match(html, /id="baby-name-label"/);
+  assert.match(pc, /id="desktop-name-input"/);
+  assert.match(script, /E\.renameBaby\(game, e\.target\.value\)/);
+  assert.match(desktop, /E\.renameBaby\(game, event\.target\.value\)/);
+});
