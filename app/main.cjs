@@ -89,7 +89,7 @@ function moveToDisplay(id) {
   win.setBounds(desired, false);
   const landed = String(screen.getDisplayMatching(win.getBounds()).id) === id;
   const layout = desktopLayout();
-  if (landed) sendDesktopLayout();
+  if (landed) { sendDesktopLayout(); refreshTrayMenu(); }
   return { ok: landed, reason: landed ? '' : 'move-failed', layout };
 }
 function updateDesktopBounds() {
@@ -102,6 +102,7 @@ function updateDesktopBounds() {
     win.setBounds(next);
   }
   sendDesktopLayout();
+  refreshTrayMenu();
 }
 function createWindow() {
   const bounds = allDesktopBounds();
@@ -139,15 +140,23 @@ function createWindow() {
   if (cursorTimer) clearInterval(cursorTimer);
   cursorTimer = setInterval(pollMouse, 65);
 }
-function createTray() {
-  let icon = nativeImage.createFromPath(path.join(PROJECT_ROOT, 'sprits', 'char1.png'));
-  if (!icon.isEmpty()) icon = icon.crop({ x: 54, y: 0, width: 45, height: 45 }).resize({ width: 20, height: 20 });
-  if (icon.isEmpty()) icon = nativeImage.createFromDataURL('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9ayfQUQAAAAASUVORK5CYII=');
-  tray = new Tray(icon);
-  tray.setToolTip('Baby On Screen');
-  const menu = Menu.buildFromTemplate([
+function refreshTrayMenu() {
+  if (!tray || tray.isDestroyed()) return;
+  const displayMenu = screen.getAllDisplays().map((d,index) => ({
+    label: 'Monitor ' + (index + 1) + (d.id === screen.getPrimaryDisplay().id ? ' (principal)' : ''),
+    type: 'radio',
+    checked: !!win && !win.isDestroyed() && currentDisplay().id === d.id,
+    click: () => {
+      showOrCreateWindow();
+      const result = moveToDisplay(String(d.id));
+      if (!result.ok) console.warn('Baby On Screen: não foi possível mover a janela para o monitor', d.id);
+      refreshTrayMenu();
+    }
+  }));
+  tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Mostrar bebê', click: showOrCreateWindow },
     { label: 'Ocultar bebê', click: () => win && win.hide() },
+    { label: 'Mover para monitor', submenu: displayMenu },
     { label: 'Verificar atualizações', click: () => {
       showOrCreateWindow();
       if (win && !win.isDestroyed()) win.webContents.send('baby:update:show');
@@ -155,8 +164,15 @@ function createTray() {
     } },
     { type: 'separator' },
     { label: 'Sair do jogo', click: () => { intentionalQuit = true; app.quit(); } }
-  ]);
-  tray.setContextMenu(menu);
+  ]));
+}
+function createTray() {
+  let icon = nativeImage.createFromPath(path.join(PROJECT_ROOT, 'sprits', 'char1.png'));
+  if (!icon.isEmpty()) icon = icon.crop({ x: 54, y: 0, width: 45, height: 45 }).resize({ width: 20, height: 20 });
+  if (icon.isEmpty()) icon = nativeImage.createFromDataURL('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9ayfQUQAAAAASUVORK5CYII=');
+  tray = new Tray(icon);
+  tray.setToolTip('Baby On Screen');
+  refreshTrayMenu();
   tray.on('double-click', showOrCreateWindow);
 }
 ipcMain.handle('baby:desktop:layout', event =>

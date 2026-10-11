@@ -106,3 +106,11 @@ test('Windows switches the NATIVE overlay window instead of just changing CSS co
   assert.match(preload,/moveToMonitor: id => typeof id === 'string'/);
   assert.match(main,/return screen\.getPrimaryDisplay\(\)\.workArea/);
 });
+
+test('menu da bandeja permite recuperar a bebê no monitor 2',()=>{
+  const fs=require('node:fs'),path=require('node:path');
+  const main=fs.readFileSync(path.resolve(__dirname,'../app/main.cjs'),'utf8');
+  assert.match(main,/label: 'Mover para monitor', submenu: displayMenu/);
+  assert.match(main,/const result = moveToDisplay\(String\(d\.id\)\)/);
+  assert.match(main,/refreshTrayMenu\(\)/);
+});
