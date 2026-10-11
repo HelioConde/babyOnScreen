@@ -19,7 +19,7 @@ test('Windows installer and portable have separate artifact filenames', () => {
 
 test('release 0.0.2 is documented and publishes Setup + Portable after tests', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
-  assert.equal(pkg.version,'0.0.2');
+  assert.match(pkg.version,/^\d+\.\d+\.\d+$/);
   const workflow = fs.readFileSync(path.join(root,'.github/workflows/publish-release-0.0.2.yml'),'utf8');
   assert.match(workflow,/permissions:\s*\n\s*contents: write/);
   assert.match(workflow,/npm run check/);
@@ -45,4 +45,21 @@ test('new updater exposes only safe IPC actions through the sandboxed preload', 
   assert.match(preload, /baby:update:status/);
   assert.match(renderer, /desktop\.installUpdate\(\)/);
   assert.match(renderer, /save\(\); \/\/ Save baby data/);
+});
+
+test('future Windows releases embed GitHub update feed with strong checksums', () => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
+  assert.equal(pkg.version,'0.0.3');
+  assert.equal(pkg.dependencies['electron-updater'],'6.8.9');
+  assert.equal(pkg.build.publish[0].provider,'github');
+  assert.equal(pkg.build.publish[0].owner,'HelioConde');
+  assert.equal(pkg.build.publish[0].repo,'babyOnScreen');
+  const workflow = fs.readFileSync(path.join(root,'.github/workflows/release-windows.yml'),'utf8');
+  assert.match(workflow,/latest\.yml/);
+  assert.match(workflow,/gh release create/);
+  assert.match(workflow,/npm run check/);
+  assert.match(workflow,/npm test/);
+  assert.match(workflow,/verify-update-feed\.ps1/);
+  assert.match(workflow,/windows-app-smoke\.cjs/);
+  assert.ok(fs.existsSync(path.join(root,'docs/RELEASE_0.0.3.md')));
 });
