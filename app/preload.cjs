@@ -5,6 +5,13 @@ contextBridge.exposeInMainWorld('babyDesktop', Object.freeze({
     if (Array.isArray(regions)) ipcRenderer.send('baby:regions', regions);
   },
   setDragging: value => { if (typeof value === 'boolean') ipcRenderer.send('baby:dragging', value); },
+  desktopLayout: () => ipcRenderer.invoke('baby:desktop:layout'),
+  onDesktopLayout: callback => {
+    if (typeof callback !== 'function') return () => {};
+    const listener = (_event, layout) => callback(layout);
+    ipcRenderer.on('baby:desktop-layout', listener);
+    return () => ipcRenderer.removeListener('baby:desktop-layout', listener);
+  },
   version: () => ipcRenderer.invoke('baby:version'),
   updateStatus: () => ipcRenderer.invoke('baby:update:get'),
   checkUpdate: () => ipcRenderer.invoke('baby:update:check'),

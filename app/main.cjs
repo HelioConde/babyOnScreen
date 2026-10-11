@@ -46,8 +46,35 @@ function showOrCreateWindow() {
   }
   createWindow();
 }
+function allDesktopBounds() {
+  return geometry.virtualDesktopBounds(screen.getAllDisplays()) || screen.getPrimaryDisplay().bounds;
+}
+function desktopLayout() {
+  if (!win || win.isDestroyed()) return { bounds: allDesktopBounds(), displays: [] };
+  const displays = screen.getAllDisplays();
+  const primary = screen.getPrimaryDisplay();
+  const sorted = [primary, ...displays.filter(d => d.id !== primary.id)];
+  return {
+    bounds: win.getBounds(),
+    displays: geometry.displayList(sorted, win.getBounds())
+  };
+}
+function sendDesktopLayout() {
+  if (win && !win.isDestroyed() && !win.webContents.isDestroyed())
+    win.webContents.send('baby:desktop-layout', desktopLayout());
+}
+function updateDesktopBounds() {
+  if (!win || win.isDestroyed()) return;
+  const next = allDesktopBounds();
+  const old = win.getBounds();
+  if (old.x !== next.x || old.y !== next.y ||
+      old.width !== next.width || old.height !== next.height) {
+    win.setBounds(next);
+  }
+  sendDesktopLayout();
+}
 function createWindow() {
-  const bounds = screen.getPrimaryDisplay().bounds;
+  const bounds = allDesktopBounds();
   win = new BrowserWindow({
     ...bounds,
     title: 'Baby On Screen',
@@ -71,7 +98,7 @@ function createWindow() {
   win.setIgnoreMouseEvents(true, { forward: true });
   passthrough = true;
   win.loadFile(path.join(__dirname, 'index.html'));
-  win.once('ready-to-show', () => win && win.showInactive());
+  win.once('ready-to-show', () => { if (win) { win.showInactive(); sendDesktopLayout(); } });
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', event => event.preventDefault());
   win.on('closed', () => {
@@ -102,6 +129,8 @@ function createTray() {
   tray.setContextMenu(menu);
   tray.on('double-click', showOrCreateWindow);
 }
+ipcMain.handle('baby:desktop:layout', event =>
+  validSender(event) ? desktopLayout() : { bounds: allDesktopBounds(), displays: [] });
 ipcMain.on('baby:regions', (event, regions) => {
   if (!validSender(event) || !Array.isArray(regions)) return;
   hitRegions = geometry.sanitizeRegions(regions);
@@ -136,11 +165,9 @@ app.whenReady().then(() => {
     }
   });
   updateService.start();
-  screen.on('display-metrics-changed', () => {
-    if (win && !win.isDestroyed()) win.setBounds(screen.getPrimaryDisplay().bounds);
-  });
-  screen.on('display-added', () => { if (win) win.setBounds(screen.getPrimaryDisplay().bounds); });
-  screen.on('display-removed', () => { if (win) win.setBounds(screen.getPrimaryDisplay().bounds); });
+  screen.on('display-metrics-changed', updateDesktopBounds);
+  screen.on('display-added', updateDesktopBounds);
+  screen.on('display-removed', updateDesktopBounds);
 });
 app.on('before-quit', () => { intentionalQuit = true; updateService?.dispose(); if (cursorTimer) clearInterval(cursorTimer); });
 app.on('window-all-closed', () => { if (intentionalQuit || process.platform !== 'win32') app.quit(); });

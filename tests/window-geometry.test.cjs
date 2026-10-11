@@ -48,3 +48,31 @@ test('Windows tray can recreate a closed window instead of leaving a dead tray i
   assert.match(main, /tray\.on\('double-click', showOrCreateWindow\)/);
   assert.match(main, /if \(cursorTimer\) \{ clearInterval\(cursorTimer\); cursorTimer = null; \}/);
 });
+
+test('virtual desktop covers multiple monitors, including negative x and y', () => {
+  const { virtualDesktopBounds, displayList } = require('../app/window-geometry.cjs');
+  const displays = [
+    {id:1,bounds:{x:0,y:0,width:1920,height:1080}},
+    {id:2,bounds:{x:-1280,y:-400,width:1280,height:1024}},
+    {id:3,bounds:{x:1920,y:350,width:2560,height:1440}}
+  ];
+  assert.deepEqual(virtualDesktopBounds(displays),{x:-1280,y:-400,width:5760,height:2190});
+  const list = displayList(displays,virtualDesktopBounds(displays));
+  assert.equal(list.length,3);
+  assert.deepEqual([list[0].x,list[0].y],[1280,400]);
+  assert.deepEqual([list[1].x,list[1].y],[0,0]);
+  assert.deepEqual([list[2].x,list[2].y],[3200,750]);
+  assert.equal(list[0].primary,true);
+  assert.equal(virtualDesktopBounds([]),null);
+});
+test('overlay window includes the entire display union and keeps secure IPC', () => {
+  const fs=require('node:fs'),path=require('node:path');
+  const main=fs.readFileSync(path.resolve(__dirname,'../app/main.cjs'),'utf8');
+  const preload=fs.readFileSync(path.resolve(__dirname,'../app/preload.cjs'),'utf8');
+  assert.match(main,/virtualDesktopBounds\(screen\.getAllDisplays\(\)\)/);
+  assert.match(main,/ipcMain\.handle\('baby:desktop:layout'/);
+  assert.match(main,/screen\.on\('display-added', updateDesktopBounds\)/);
+  assert.match(main,/screen\.on\('display-removed', updateDesktopBounds\)/);
+  assert.match(preload,/desktopLayout: \(\) => ipcRenderer\.invoke\('baby:desktop:layout'\)/);
+  assert.match(main,/setIgnoreMouseEvents\(ignore, \{ forward: true \}\)/);
+});
