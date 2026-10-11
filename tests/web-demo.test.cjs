@@ -89,12 +89,26 @@ test('nome da bebê pode ser alterado em Web e Windows e salvo no motor comparti
   assert.match(desktop, /E\.renameBaby\(game, event\.target\.value\)/);
 });
 
-test('Windows mantém sprite legível e a área de arrasto acompanha seu tamanho', () => {
+test('Web e Windows mostram o MESMO sprite sem escala ou atlas divergente', () => {
   const pcHTML = fs.readFileSync(path.join(root,'app','index.html'),'utf8');
   const pcCSS = fs.readFileSync(path.join(root,'app','style.css'),'utf8');
+  const webCSS = fs.readFileSync(path.join(root,'web','style.css'),'utf8');
   const desktopJS = fs.readFileSync(path.join(root,'app','renderer.js'),'utf8');
-  assert.match(pcHTML, /id="baby-sprite" width="96" height="106"/);
-  assert.match(pcCSS, /\.baby\{width:96px;height:106px\}/);
-  assert.match(desktopJS, /const BABY_WIDTH = 96, BABY_HEIGHT = 106/);
+  const spriteManifest = fs.readFileSync(path.join(root,'app','sprite-manifest.js'),'utf8');
+  const common = /id="baby-sprite" width="128" height="128"/;
+  assert.match(html,common); assert.match(pcHTML,common);
+  assert.match(pcCSS, /\.baby\{width:128px;height:128px\}/);
+  assert.match(pcCSS, /#baby-sprite\{width:128px;height:128px;transform:scale\(1\.06\)/);
+  assert.match(webCSS, /\.game-stage \.baby #baby-sprite\{width:128px;height:128px;transform:scale\(1\.06\)/);
+  assert.match(spriteManifest, /BabySpritePresentation = Object\.freeze\(\{ size: 128, zoom: 1\.06 \}\)/);
+  assert.match(desktopJS, /const BABY_WIDTH = window\.BabySpritePresentation\.size/);
+  assert.match(desktopJS, /const BABY_HEIGHT = window\.BabySpritePresentation\.size/);
+  assert.match(script, /const BABY_SIZE = window\.BabySpritePresentation\.size/);
+  for (const source of [html,pcHTML]) {
+    assert.match(source,/\.\.\/app\/sprite-cleaner\.js/);
+    assert.match(source,/\.\.\/app\/sprite-manifest\.js/);
+    assert.match(source,/\.\.\/app\/sprite-integration\.js/);
+  }
+  assert.match(desktopJS, /!draggingBaby && !draggingItem/);
   assert.match(desktopJS, /innerWidth - BABY_WIDTH - 4/);
 });

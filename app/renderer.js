@@ -40,7 +40,8 @@
     game = E.tick(game, offlineSeconds * options.speed, { active: false });
   }
   let milestoneSignature = '', dailySignature = '';
-  const BABY_WIDTH = 96, BABY_HEIGHT = 106;
+  const BABY_WIDTH = window.BabySpritePresentation.size;
+  const BABY_HEIGHT = window.BabySpritePresentation.size;
   let x = innerWidth * .3, y = innerHeight * .44, dx = .8, dy = .6, dir = 'front';
   let frame = 1, lastTime = performance.now(), lastFrame = 0, lastDraw = 0, nextTurn = 0;
   let nextSpeech = 8000, lastCry = 0, busyUntil = 0, draggingBaby = false;
@@ -57,7 +58,7 @@
     if (!spriteLayer || now < spriteRefreshAt) return;
     spriteRefreshAt = now + 180;
     const stage = E.ageStage(game).id;
-    const moving = !draggingBaby && !options.paused && !reduced.matches && now >= busyUntil;
+    const moving = !draggingBaby && !draggingItem && !options.paused && !reduced.matches && now >= busyUntil;
     if (moving && Math.abs(dx) > .08) lastHorizontalDirection = dx > 0 ? 'right' : 'left';
     const direction = stage === 'child'
       ? (({front:'down',back:'up',left:'left',right:'right'})[dir] || 'down')

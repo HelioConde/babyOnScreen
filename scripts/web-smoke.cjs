@@ -63,8 +63,11 @@ async function drag(page, source, target) {
     const stageBounds = await page.locator('#stage').boundingBox();
     assert.ok(babyBounds && stageBounds && babyBounds.y - stageBounds.y >= 110,
       'baby should stay clear of the stage title and crying indicator');
-    assert.ok(babyBounds.width >= 120 && babyBounds.height >= 120,
-      'the baby must have a comfortable visual and pointer target');
+    assert.equal(babyBounds.width, 128, 'Web sprite must use the shared 128px hit box');
+    assert.equal(babyBounds.height, 128, 'Web sprite must use the shared 128px hit box');
+    assert.deepEqual(await page.evaluate(() => ({
+      size: window.BabySpritePresentation.size, zoom: window.BabySpritePresentation.zoom
+    })), {size:128,zoom:1.06}, 'shared display settings must load in Web');
     await page.locator('.game-shell').scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(OUT, 'desktop-before-interaction.png'), fullPage: true, animations: 'disabled' });
     const foodBefore = Number(await page.locator('#food').getAttribute('value'));

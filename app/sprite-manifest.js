@@ -4,6 +4,9 @@
    older-child artwork is produced; it must never fall back to the blocky SVG. */
 (function (global) {
   "use strict";
+  // Shared by Web and Windows. Changing the presentation only here must not
+  // leave the overlay smaller or distort the art relative to the Web version.
+  global.BabySpritePresentation = Object.freeze({ size: 128, zoom: 1.06 });
   const sequence = (category, ids, fps = 5, flipX = false) => Object.freeze({
     category,
     files: ids.map(id => "element_" + String(id).padStart(3, "0") + ".png"),

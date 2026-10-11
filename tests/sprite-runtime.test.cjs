@@ -110,3 +110,17 @@ test('controller draws available frames and falls back when image loading fails'
   assert.equal(controller.active, false);
   controller.destroy();
 });
+
+test('Web and Windows use one approved sprite presentation for every phase', () => {
+  const context = runtimeContext();
+  run(context,'app/sprite-manifest.js');
+  assert.equal(context.BabySpritePresentation.size,128);
+  assert.equal(context.BabySpritePresentation.zoom,1.06);
+  assert.ok(Object.isFrozen(context.BabySpritePresentation));
+  for (const stage of ['newborn','baby','toddler','child']) {
+    assert.ok(context.BabySpriteManifest[stage].idle);
+    assert.ok(context.BabySpriteManifest[stage].walk);
+  }
+  assert.equal(context.BabySpriteManifest.newborn.walk.left.filename,'crawl_sheet.webp');
+  assert.equal(context.BabySpriteManifest.newborn.walk.right.flipX,true);
+});

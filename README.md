@@ -98,3 +98,12 @@ A validação automática não substitui uma sessão manual de uso no Windows 10
 Esta revisão amplia os sprites no Windows, melhora regiões de clique em monitores secundários, reabre a janela pelo ícone da bandeja se ela for fechada, separa de forma segura os arquivos **Setup** e **Portable** e acrescenta testes de inicialização da janela e do painel do aplicativo real. Essa versão substitui os pacotes da beta.1. Use sempre os executáveis identificados como **1.1.0-beta.2**.
 
 Para a aprovação final de uso diário, ainda é necessário testar pessoalmente transparência, passar cliques para janelas atrás do jogo, mudança de DPI, dois monitores e fechamento/retorno pela bandeja. Os testes automáticos do GitHub não substituem essa etapa.
+
+### Beta 1.1.0-beta.3 — sprites iguais aos da Web
+As duas versões usam o **mesmo manifesto de sprites** em `app/sprite-manifest.js`, incluindo as animações `crawl_sheet.webp`, mamadeira, berço, fralda, brinquedo, cartinha, desenho e evolução.
+- Desenho e área de clique do bebê padronizados em **128 × 128**, com ampliação visual **1,06×** e transparência preservada na janela do Windows;
+- sprites carregados pelo mesmo `sprite-controller.js` e `sprite-cleaner.js` em Web e Windows, com `image-rendering: pixelated`;
+- verificação Windows exige um **quadro real visível no canvas** (`sprite-ready` e pixels opacos), não apenas existência do manifesto;
+- controles de movimento, posicionamento e arrastar respeitam o novo tamanho sem alterar as necessidades ou o progresso salvo.
+
+Baixe a **beta.3** depois do workflow de compilação ser aprovado. Versões anteriores não têm a apresentação de sprites idêntica.

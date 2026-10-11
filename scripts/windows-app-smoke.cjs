@@ -73,6 +73,10 @@ async function main() {
     'desktop:typeof window.babyDesktop?.setHitRegions==="function",' +
     'sprite:!!window.BabySpriteManifest?.child, width:r?.width,height:r?.height,' +
     'canvasW:c?.width,canvasH:c?.height,' +
+    'size:window.BabySpritePresentation?.size,zoom:window.BabySpritePresentation?.zoom,' +
+    'ready:b?.classList.contains("sprite-ready"),hidden:c?.hidden,' +
+    'opaque:(()=>{try{const p=c.getContext("2d").getImageData(0,0,c.width,c.height).data;' +
+    'let n=0;for(let i=3;i<p.length;i+=4)if(p[i]>0)n++;return n;}catch{return 0;}})(),' +
     'quests:document.querySelectorAll("#desktop-daily-list .desktop-daily-item").length,' +
     'missions:document.querySelectorAll("#desktop-missions-list .desktop-mission").length,' +
     'transparent:getComputedStyle(document.body).backgroundColor==="rgba(0, 0, 0, 0)",' +
@@ -81,13 +85,17 @@ async function main() {
   for(let i=0;i<35;i++){
     const res=await cdp.request('Runtime.evaluate',{expression:script,returnByValue:true});
     state=res.result?.value;
-    if(state?.quests>=3 && state?.missions>=3) break;
+    if(state?.quests>=3 && state?.missions>=3 && state?.ready && state?.opaque>200) break;
     await delay(500);
   }
   console.log('Windows Electron runtime state:',JSON.stringify(state));
   assert.ok(state?.game && state?.desktop && state?.sprite);
-  assert.ok(state.width>=96 && state.height>=106);
-  assert.equal(state.canvasW,96); assert.equal(state.canvasH,106);
+  assert.equal(state.width,128); assert.equal(state.height,128);
+  assert.equal(state.canvasW,128); assert.equal(state.canvasH,128);
+  assert.equal(state.size,128); assert.equal(state.zoom,1.06);
+  assert.equal(state.ready,true,'PC must load the SAME atlas animation as Web, not CSS fallback');
+  assert.equal(state.hidden,false);
+  assert.ok(state.opaque>200,'actual PNG/WebP frame must be visible on the canvas');
   assert.ok(state.quests>=3 && state.missions>=3);
   assert.equal(state.transparent,true); assert.equal(state.noNode,true);
   const result=await cdp.request('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});

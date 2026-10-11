@@ -76,7 +76,8 @@
     { paused: options.paused, speed: options.speed });
   game.savedAt = startedAt;
   let lastClockAt = startedAt;
-  let x = Math.round(stage.clientWidth / 2 - 64), y = Math.round(stage.clientHeight - 144);
+  const BABY_SIZE = window.BabySpritePresentation.size;
+  let x = Math.round(stage.clientWidth / 2 - BABY_SIZE / 2), y = Math.round(stage.clientHeight - BABY_SIZE - 16);
   let vx = 0.88, vy = .48, facing = 'front';
   let draggingBaby = false, itemDrag = null, selectedItem = null;
   let babyPressX = 0, babyPressY = 0, babyOffsetX = 0, babyOffsetY = 0;
@@ -154,7 +155,7 @@
   }
   function playArea() {
     // Keep the character on the main rug, in front of the furniture, at all screen sizes.
-    const size = 128;
+    const size = BABY_SIZE;
     const left = Math.min(Math.round(stage.clientWidth * .22), Math.max(8, stage.clientWidth - size - 8));
     const right = Math.max(left, stage.clientWidth - size - left);
     const top = Math.min(145, Math.max(110, stage.clientHeight - size - 6));

@@ -76,14 +76,19 @@ h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#765c82;ma
 #desktop-name-input{padding:6px 8px;border:1px solid #dbcde1;border-radius:7px;max-width:170px;width:50%;color:#594c62;background:white}
 #desktop-name-input:focus-visible{outline:3px solid #9871c6;outline-offset:2px}
 
-/* Desktop companion: crisp, readable 96 × 106 sprite and accurate pointer bounds. */
-.baby{width:96px;height:106px}
-#baby-sprite{width:96px;height:106px}
-.baby:not(.sprite-ready)::after{left:7px;top:5px;width:82px;height:96px;image-rendering:pixelated}
+/* Exact match for web/style.css's playable sprite presentation.
+   Canvas, bounding box, fallback and zoom must change together. */
+.baby{width:128px;height:128px}
+#baby-sprite{width:128px;height:128px;transform:scale(1.06);transform-origin:50% 90%;image-rendering:pixelated}
+.baby:not(.sprite-ready)::after{
+  left:10px;top:10px;width:108px;height:108px;
+  transform:scale(1.06);transform-origin:50% 90%;
+  image-rendering:pixelated
+}
 .baby.baby-stage:not(.sprite-ready)::after,
 .baby.toddler:not(.sprite-ready)::after,
-.baby.child:not(.sprite-ready)::after{left:7px;top:5px;width:82px;height:96px}
-.baby.crying::before{left:77px}
+.baby.child:not(.sprite-ready)::after{left:10px;top:10px;width:108px;height:108px}
+.baby.crying::before{left:102px}
 .item small{font-size:10px;color:#786483}
 .panel-title small,.level-row,.panel-footer small{color:#806c87}
 .extras summary{font-size:12px}
