@@ -45,7 +45,8 @@
             "x64"
           ]
         }
-      ]
+      ],
+      "verifyUpdateCodeSignature": false
     },
     "nsis": {
       "artifactName": "Baby-On-Screen-Setup-${version}-${arch}.${ext}",
@@ -55,6 +56,21 @@
     },
     "portable": {
       "artifactName": "Baby-On-Screen-Portable-${version}-${arch}.${ext}"
-    }
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "HelioConde",
+        "repo": "babyOnScreen",
+        "releaseType": "release"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HelioConde/babyOnScreen.git"
+  },
+  "dependencies": {
+    "electron-updater": "6.8.9"
   }
 }

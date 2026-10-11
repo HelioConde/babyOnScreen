@@ -6,5 +6,21 @@ contextBridge.exposeInMainWorld('babyDesktop', Object.freeze({
   },
   setDragging: value => { if (typeof value === 'boolean') ipcRenderer.send('baby:dragging', value); },
   version: () => ipcRenderer.invoke('baby:version'),
+  updateStatus: () => ipcRenderer.invoke('baby:update:get'),
+  checkUpdate: () => ipcRenderer.invoke('baby:update:check'),
+  installUpdate: () => ipcRenderer.invoke('baby:update:install'),
+  openLatestRelease: () => ipcRenderer.invoke('baby:update:release'),
+  onUpdateStatus: callback => {
+    if (typeof callback !== 'function') return () => {};
+    const listener = (_event, status) => callback(status);
+    ipcRenderer.on('baby:update:status', listener);
+    return () => ipcRenderer.removeListener('baby:update:status', listener);
+  },
+  onUpdateShow: callback => {
+    if (typeof callback !== 'function') return () => {};
+    const listener = () => callback();
+    ipcRenderer.on('baby:update:show', listener);
+    return () => ipcRenderer.removeListener('baby:update:show', listener);
+  },
   hide: () => ipcRenderer.send('baby:hide')
 }));

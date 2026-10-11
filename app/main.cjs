@@ -2,6 +2,8 @@
 const { app, BrowserWindow, Tray, Menu, nativeImage, screen, ipcMain, session } = require('electron');
 const path = require('node:path');
 const geometry = require('./window-geometry.cjs');
+const { createUpdateService } = require('./updates.cjs');
+const { shell } = require('electron');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 let win = null;
@@ -11,6 +13,7 @@ let dragging = false;
 let passthrough = true;
 let cursorTimer = null;
 let intentionalQuit = false;
+let updateService = null;
 
 if (!app.requestSingleInstanceLock()) {
   app.quit();
@@ -88,6 +91,11 @@ function createTray() {
   const menu = Menu.buildFromTemplate([
     { label: 'Mostrar bebê', click: showOrCreateWindow },
     { label: 'Ocultar bebê', click: () => win && win.hide() },
+    { label: 'Verificar atualizações', click: () => {
+      showOrCreateWindow();
+      if (win && !win.isDestroyed()) win.webContents.send('baby:update:show');
+      void updateService?.check();
+    } },
     { type: 'separator' },
     { label: 'Sair do jogo', click: () => { intentionalQuit = true; app.quit(); } }
   ]);
@@ -104,16 +112,35 @@ ipcMain.on('baby:dragging', (event, value) => {
   if (dragging) updatePassThrough(false);
 });
 ipcMain.handle('baby:version', event => validSender(event) ? app.getVersion() : '');
+ipcMain.handle('baby:update:get', event => validSender(event) ? updateService?.getStatus() || { phase: 'unavailable' } : { phase: 'unavailable' });
+ipcMain.handle('baby:update:check', event => validSender(event) ? updateService?.check() || { phase: 'unavailable' } : { phase: 'unavailable' });
+ipcMain.handle('baby:update:install', event => validSender(event) ? updateService?.install() === true : false);
+ipcMain.handle('baby:update:release', event => {
+  if (!validSender(event)) return false;
+  return shell.openExternal('https://github.com/HelioConde/babyOnScreen/releases/latest').then(() => true, () => false);
+});
 ipcMain.on('baby:hide', event => { if (validSender(event)) win.hide(); });
 app.whenReady().then(() => {
   session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
   createWindow();
   createTray();
+  const isPortable = !!process.env.PORTABLE_EXECUTABLE_FILE;
+  const unpacked = /[\\/]win-unpacked[\\/]/i.test(process.execPath);
+  const development = !app.isPackaged || unpacked || process.platform !== 'win32';
+  updateService = createUpdateService({
+    app, portable: isPortable, development,
+    autoUpdater: (development || isPortable) ? null : require('electron-updater').autoUpdater,
+    broadcast: status => {
+      if (win && !win.isDestroyed() && !win.webContents.isDestroyed())
+        win.webContents.send('baby:update:status', status);
+    }
+  });
+  updateService.start();
   screen.on('display-metrics-changed', () => {
     if (win && !win.isDestroyed()) win.setBounds(screen.getPrimaryDisplay().bounds);
   });
   screen.on('display-added', () => { if (win) win.setBounds(screen.getPrimaryDisplay().bounds); });
   screen.on('display-removed', () => { if (win) win.setBounds(screen.getPrimaryDisplay().bounds); });
 });
-app.on('before-quit', () => { intentionalQuit = true; if (cursorTimer) clearInterval(cursorTimer); });
+app.on('before-quit', () => { intentionalQuit = true; updateService?.dispose(); if (cursorTimer) clearInterval(cursorTimer); });
 app.on('window-all-closed', () => { if (intentionalQuit || process.platform !== 'win32') app.quit(); });
