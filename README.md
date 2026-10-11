@@ -93,3 +93,8 @@ O GitHub Actions gera **dois executáveis distintos** na branch `feat/revival-wi
 O workflow verifica que os dois arquivos são produzidos, não estão vazios e têm conteúdo diferente. Para baixar, abra o último workflow **Baby On Screen - Windows beta**, depois **Artifacts**. Ambos vêm juntos no arquivo compactado. Os arquivos não são assinados digitalmente, portanto o Windows pode exibir um aviso SmartScreen. Nunca desative globalmente as proteções do sistema.
 
 A validação automática não substitui uma sessão manual de uso no Windows 10/11, especialmente para transparência e interação entre monitores com DPI diferente.
+
+### Beta 1.1.0-beta.2 — revisão de qualidade
+Esta revisão amplia os sprites no Windows, melhora regiões de clique em monitores secundários, reabre a janela pelo ícone da bandeja se ela for fechada, separa de forma segura os arquivos **Setup** e **Portable** e acrescenta testes de inicialização da janela e do painel do aplicativo real. Essa versão substitui os pacotes da beta.1. Use sempre os executáveis identificados como **1.1.0-beta.2**.
+
+Para a aprovação final de uso diário, ainda é necessário testar pessoalmente transparência, passar cliques para janelas atrás do jogo, mudança de DPI, dois monitores e fechamento/retorno pela bandeja. Os testes automáticos do GitHub não substituem essa etapa.
