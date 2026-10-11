@@ -103,13 +103,18 @@ async function main() {
   assert.equal(introState?.visible,true);
   assert.match(introState.count,/Passo 1 de 5/);
   assert.match(introState.title,/amiguinha chegou/);
-  const previewCheck=await cdp.request('Runtime.evaluate',{
-    expression:'(() => {const c=document.getElementById("welcome-preview");' +
-      'const p=c.getContext("2d").getImageData(0,0,c.width,c.height).data;' +
-      'let n=0;for(let i=3;i<p.length;i+=4)if(p[i]>0)n++;' +
-      'return {width:c.width,height:c.height,visible:n,ready:document.getElementById("welcome-tour").classList.contains("welcome-sprite-ready")};})()',
-    returnByValue:true
-  });
+  let previewCheck;
+  for (let attempt=0;attempt<25;attempt++) {
+    previewCheck=await cdp.request('Runtime.evaluate',{
+      expression:'(() => {const c=document.getElementById("welcome-preview");' +
+        'const p=c.getContext("2d").getImageData(0,0,c.width,c.height).data;' +
+        'let n=0;for(let i=3;i<p.length;i+=4)if(p[i]>0)n++;' +
+        'return {width:c.width,height:c.height,visible:n,ready:document.getElementById("welcome-tour").classList.contains("welcome-sprite-ready")};})()',
+      returnByValue:true
+    });
+    if (previewCheck.result?.value?.ready && previewCheck.result.value.visible>200) break;
+    await delay(200);
+  }
   console.log('Welcome uses live game sprite:',JSON.stringify(previewCheck.result?.value));
   assert.equal(previewCheck.result.value.width,128);
   assert.equal(previewCheck.result.value.height,128);
