@@ -38,3 +38,13 @@ test('regiões inválidas, zero, exageradas e não numéricas são recusadas', (
   assert.equal(sanitizeRegions(null).length,0);
   assert.equal(sanitizeRegions(Array.from({length:90},()=>raw[0])).length,40);
 });
+
+test('Windows tray can recreate a closed window instead of leaving a dead tray icon', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const main = fs.readFileSync(path.resolve(__dirname, '../app/main.cjs'), 'utf8');
+  assert.match(main, /function showOrCreateWindow\(\)/);
+  assert.match(main, /label: 'Mostrar bebê', click: showOrCreateWindow/);
+  assert.match(main, /tray\.on\('double-click', showOrCreateWindow\)/);
+  assert.match(main, /if \(cursorTimer\) \{ clearInterval\(cursorTimer\); cursorTimer = null; \}/);
+});

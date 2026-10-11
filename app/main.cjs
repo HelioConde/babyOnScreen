@@ -16,7 +16,8 @@ if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
   app.on('second-instance', () => {
-    if (win) win.showInactive();
+    if (app.isReady()) showOrCreateWindow();
+    else app.whenReady().then(showOrCreateWindow);
   });
 }
 
@@ -34,6 +35,13 @@ function pollMouse() {
   const p = screen.getCursorScreenPoint();
   const inside = geometry.isCursorOverRegion(p, win.getBounds(), hitRegions);
   updatePassThrough(!inside);
+}
+function showOrCreateWindow() {
+  if (win && !win.isDestroyed()) {
+    win.showInactive();
+    return;
+  }
+  createWindow();
 }
 function createWindow() {
   const bounds = screen.getPrimaryDisplay().bounds;
@@ -63,7 +71,12 @@ function createWindow() {
   win.once('ready-to-show', () => win && win.showInactive());
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', event => event.preventDefault());
-  win.on('closed', () => { win = null; hitRegions = []; dragging = false; });
+  win.on('closed', () => {
+    win = null; hitRegions = []; dragging = false;
+    passthrough = true;
+    if (cursorTimer) { clearInterval(cursorTimer); cursorTimer = null; }
+  });
+  if (cursorTimer) clearInterval(cursorTimer);
   cursorTimer = setInterval(pollMouse, 65);
 }
 function createTray() {
@@ -73,13 +86,13 @@ function createTray() {
   tray = new Tray(icon);
   tray.setToolTip('Baby On Screen');
   const menu = Menu.buildFromTemplate([
-    { label: 'Mostrar bebê', click: () => win && win.showInactive() },
+    { label: 'Mostrar bebê', click: showOrCreateWindow },
     { label: 'Ocultar bebê', click: () => win && win.hide() },
     { type: 'separator' },
     { label: 'Sair do jogo', click: () => { intentionalQuit = true; app.quit(); } }
   ]);
   tray.setContextMenu(menu);
-  tray.on('double-click', () => win && win.showInactive());
+  tray.on('double-click', showOrCreateWindow);
 }
 ipcMain.on('baby:regions', (event, regions) => {
   if (!validSender(event) || !Array.isArray(regions)) return;
