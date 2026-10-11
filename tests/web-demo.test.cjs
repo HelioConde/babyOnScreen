@@ -164,3 +164,14 @@ test('overlay keeps mouse drag responsive across monitor edges using global DIP 
   assert.match(renderer,/movingPanel\.left\+cx-movingPanel\.startX/);
   assert.match(renderer,/x=cx-offsetX; y=cy-offsetY/);
 });
+
+test('relógio diário e painel estável com preferências expansíveis', () => {
+  const html=fs.readFileSync(path.join(root,'app/index.html'),'utf8');
+  const pc=fs.readFileSync(path.join(root,'app/renderer.js'),'utf8');
+  const css=fs.readFileSync(path.join(root,'app/style.css'),'utf8');
+  assert.match(html,/id="day-period"/);
+  assert.match(pc,/E\.timePeriod\(\)/);
+  assert.match(css,/\.panel\{height:min\(610px/);
+  assert.match(css,/overflow-anchor:none/);
+  assert.match(pc,/if \(on && panel\.style\.left === ''\)/);
+});

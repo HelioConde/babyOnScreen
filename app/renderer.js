@@ -12,6 +12,7 @@
   const gameKey = 'baby-on-screen-v1', optionsKey = 'baby-on-screen-options-v1';
   const positionKey = 'baby-on-screen-desktop-position-v1';
   const panelPositionKey = 'baby-on-screen-panel-position-v1';
+  let lastDayPeriod = '';
   const tourKey = 'baby-on-screen-guide-v1';
   const welcome = $('welcome-tour');
   const preview = $('welcome-preview'), previewContext = preview.getContext('2d');
@@ -157,7 +158,14 @@
   }
   function panelVisible(on) {
     if (!on && !welcome.hidden) closeWelcome();
-    panel.hidden = !on;
+    if (on && panel.style.left === '') {
+      const hidden=panel.hidden;
+      if(hidden){panel.hidden=false;panel.style.visibility='hidden';}
+      const r=panel.getBoundingClientRect();
+      setPanelPosition(r.left,r.top);
+      if(hidden){panel.hidden=true;panel.style.visibility='';}
+    }
+    panel.hidden=!on;
     publishRegions();
   }
   $('welcome-next').addEventListener('click', () => {
@@ -268,6 +276,8 @@
     }
     const monitor = nearestMonitor(x+BABY_WIDTH/2,y+BABY_HEIGHT/2);
     if (monitor) {
+      panel.style.height=Math.min(610,Math.max(180,monitor.height-20))+'px';
+      panel.style.maxHeight=Math.max(180,monitor.height-20)+'px';
       x = E.clamp(x, monitor.x+3, Math.max(monitor.x+3,monitor.x+monitor.width-BABY_WIDTH-4));
       y = E.clamp(y, monitor.y+8, Math.max(monitor.y+8,monitor.y+monitor.height-BABY_HEIGHT-8));
     }
@@ -296,6 +306,8 @@
     if (!target) return;
     x = target.x+(target.width-BABY_WIDTH)/2;
     y = target.y+(target.height-BABY_HEIGHT)/2;
+    panel.style.height=Math.min(610,Math.max(180,target.height-20))+'px';
+    panel.style.maxHeight=Math.max(180,target.height-20)+'px';
     bounds(); place(); saveBabyPosition();
     refreshMonitorPicker();
     const r = panel.getBoundingClientRect();
@@ -683,6 +695,15 @@
     save();
   });
   function render() {
+    const period=E.timePeriod();
+    if(period.id!==lastDayPeriod){
+      lastDayPeriod=period.id;
+      $('day-period').dataset.period=period.id;
+      $('day-period-icon').textContent=period.icon;
+      $('day-period-label').textContent=period.label;
+      $('day-period-activity').textContent=period.activity;
+      document.body.dataset.dayPeriod=period.id;
+    }
     const age = E.ageStage(game);
     if (age.id !== lastStage) {
       lastStage = age.id;
@@ -721,7 +742,7 @@
       const name = el.dataset.wait;
       const delay = Math.max(0, (game.cooldowns[name] || 0) - Date.now());
       const action = E.actions[name];
-      const state = delay ? Math.ceil(delay / 1000) + 's' : (action && game.needs[action.need] > 74) ? 'Quando pedir' : 'Pronto!';
+      const state = delay ? E.waitLabel(delay) : (action && game.needs[action.need] > 74) ? 'Quando pedir' : 'Pronto!';
       el.textContent = state;
       el.closest('button').classList.toggle('ready', state === 'Pronto!');
       el.closest('button').classList.toggle('cooling', delay > 0);
