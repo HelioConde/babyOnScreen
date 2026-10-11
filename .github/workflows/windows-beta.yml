@@ -52,5 +52,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: baby-windows-visual-check
-          path: dist/windows-desktop-smoke.png
+          path: dist/windows-*-smoke.png
           if-no-files-found: ignore

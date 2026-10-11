@@ -95,7 +95,28 @@ async function main() {
   assert.equal(png.toString('hex',0,8),'89504e470d0a1a0a');
   assert.ok(png.readUInt32BE(16)>=600 && png.readUInt32BE(20)>=450);
   fs.writeFileSync(screenshot,png);
-  console.log('Windows runtime smoke succeeded:',screenshot);
+  // Open the real overlay panel and use the name control, without native click injection.
+  const panelCheck = await cdp.request('Runtime.evaluate', {
+    expression: '(() => {' +
+      'document.getElementById("launcher").click();' +
+      'const input=document.getElementById("desktop-name-input");' +
+      'input.value="Luna"; input.dispatchEvent(new Event("input",{bubbles:true}));' +
+      'const panel=document.getElementById("panel"); const r=panel.getBoundingClientRect();' +
+      'const save=JSON.parse(localStorage.getItem("baby-on-screen-v1"));' +
+      'return {open:!panel.hidden,name:save.babyName,label:document.getElementById("desktop-name-label").textContent,' +
+      'right:r.right,bottom:r.bottom,width:innerWidth,height:innerHeight};' +
+    '})()',
+    returnByValue:true
+  });
+  const p=panelCheck.result?.value;
+  console.log('Windows UI panel check:',JSON.stringify(p));
+  assert.ok(p?.open && p?.name==='Luna' && p?.label==='Luna');
+  assert.ok(p.right<=p.width+2 && p.bottom<=p.height+2, 'The panel must fit on screen');
+  const panelShot = await cdp.request('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+  const panelPng=Buffer.from(panelShot.data,'base64');
+  assert.equal(panelPng.toString('hex',0,8),'89504e470d0a1a0a');
+  fs.writeFileSync(path.join(root,'dist','windows-panel-smoke.png'),panelPng);
+  console.log('Windows runtime, companion and panel verified.');
 }
 main().catch(e=>{console.error('Windows runtime smoke failed:',e);process.exitCode=1;})
 .finally(()=>{
