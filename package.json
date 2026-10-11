@@ -1,32 +1,60 @@
 {
-  "name": "baby_on_screen",
-  "version": "0.0.1",
-  "description": "A baby passing by on your computer screen, based on the game Desktop goose",
-  "main": "main.js",
+  "name": "baby-on-screen",
+  "version": "0.0.2",
+  "private": true,
+  "description": "A tiny virtual baby companion for the Windows desktop.",
+  "main": "app/main.cjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "build": "electron-builder build --win --publish never",
-    "deploy": "electron-builder build --win --publish always"
+    "test": "node --test tests/*.test.cjs",
+    "check": "node --check app/main.cjs && node --check app/window-geometry.cjs && node --check app/preload.cjs && node --check app/renderer.js && node --check engine.js && node --check web/app.js && node --check app/sprite-runtime.js && node --check app/sprite-controller.js && node --check app/sprite-integration.js && node --check app/sprite-manifest.js && node --check app/sprite-admin-catalog.js && node --check web/admin-sprites.js && node --check web/sprite-editor.js && node --check web/sprite-zip.js",
+    "build:win": "electron-builder --win --x64 --publish never"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/HelioConde/babyOnScreen.git"
-  },
-  "build": {
-    "win": {
-      "requestedExecutionLevel": "highestAvailable"
-    }
-  },
-  "author": "Hélio Conde: helio.conde.contato@gmail.com",
+  "author": "Hélio Conde",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^9.1.0",
-    "electron-builder": "^22.7.0"
+    "electron": "44.3.0",
+    "electron-builder": "26.17.0"
   },
-  "dependencies": {
-    "electron-log": "^4.2.2",
-    "electron-updater": "^4.3.1",
-    "jquery": "^3.5.1"
+  "build": {
+    "appId": "br.com.helioconde.babyonscreen",
+    "productName": "Baby On Screen",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "app/**/*",
+      "engine.js",
+      "assets/**/*",
+      "sprits/**/*",
+      "som/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "artifactName": "Baby-On-Screen-Setup-${version}-${arch}.${ext}",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "portable": {
+      "artifactName": "Baby-On-Screen-Portable-${version}-${arch}.${ext}"
+    }
   }
 }

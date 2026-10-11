@@ -1,0 +1,119 @@
+'use strict';
+const { app, BrowserWindow, Tray, Menu, nativeImage, screen, ipcMain, session } = require('electron');
+const path = require('node:path');
+const geometry = require('./window-geometry.cjs');
+
+const PROJECT_ROOT = path.resolve(__dirname, '..');
+let win = null;
+let tray = null;
+let hitRegions = [];
+let dragging = false;
+let passthrough = true;
+let cursorTimer = null;
+let intentionalQuit = false;
+
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    if (app.isReady()) showOrCreateWindow();
+    else app.whenReady().then(showOrCreateWindow);
+  });
+}
+
+function validSender(event) {
+  return !!win && !win.isDestroyed() && event.sender === win.webContents;
+}
+function updatePassThrough(ignore) {
+  if (!win || win.isDestroyed() || passthrough === ignore) return;
+  passthrough = ignore;
+  win.setIgnoreMouseEvents(ignore, { forward: true });
+}
+function pollMouse() {
+  if (!win || win.isDestroyed() || !win.isVisible()) return;
+  if (dragging) { updatePassThrough(false); return; }
+  const p = screen.getCursorScreenPoint();
+  const inside = geometry.isCursorOverRegion(p, win.getBounds(), hitRegions);
+  updatePassThrough(!inside);
+}
+function showOrCreateWindow() {
+  if (win && !win.isDestroyed()) {
+    win.showInactive();
+    return;
+  }
+  createWindow();
+}
+function createWindow() {
+  const bounds = screen.getPrimaryDisplay().bounds;
+  win = new BrowserWindow({
+    ...bounds,
+    title: 'Baby On Screen',
+    transparent: true,
+    frame: false,
+    show: false,
+    backgroundColor: '#00000000',
+    skipTaskbar: true,
+    resizable: false,
+    fullscreenable: false,
+    alwaysOnTop: true,
+    hasShadow: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: true
+    }
+  });
+  win.setAlwaysOnTop(true, 'floating');
+  win.setIgnoreMouseEvents(true, { forward: true });
+  passthrough = true;
+  win.loadFile(path.join(__dirname, 'index.html'));
+  win.once('ready-to-show', () => win && win.showInactive());
+  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  win.webContents.on('will-navigate', event => event.preventDefault());
+  win.on('closed', () => {
+    win = null; hitRegions = []; dragging = false;
+    passthrough = true;
+    if (cursorTimer) { clearInterval(cursorTimer); cursorTimer = null; }
+  });
+  if (cursorTimer) clearInterval(cursorTimer);
+  cursorTimer = setInterval(pollMouse, 65);
+}
+function createTray() {
+  let icon = nativeImage.createFromPath(path.join(PROJECT_ROOT, 'sprits', 'char1.png'));
+  if (!icon.isEmpty()) icon = icon.crop({ x: 54, y: 0, width: 45, height: 45 }).resize({ width: 20, height: 20 });
+  if (icon.isEmpty()) icon = nativeImage.createFromDataURL('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9ayfQUQAAAAASUVORK5CYII=');
+  tray = new Tray(icon);
+  tray.setToolTip('Baby On Screen');
+  const menu = Menu.buildFromTemplate([
+    { label: 'Mostrar bebê', click: showOrCreateWindow },
+    { label: 'Ocultar bebê', click: () => win && win.hide() },
+    { type: 'separator' },
+    { label: 'Sair do jogo', click: () => { intentionalQuit = true; app.quit(); } }
+  ]);
+  tray.setContextMenu(menu);
+  tray.on('double-click', showOrCreateWindow);
+}
+ipcMain.on('baby:regions', (event, regions) => {
+  if (!validSender(event) || !Array.isArray(regions)) return;
+  hitRegions = geometry.sanitizeRegions(regions);
+});
+ipcMain.on('baby:dragging', (event, value) => {
+  if (!validSender(event) || typeof value !== 'boolean') return;
+  dragging = value;
+  if (dragging) updatePassThrough(false);
+});
+ipcMain.handle('baby:version', event => validSender(event) ? app.getVersion() : '');
+ipcMain.on('baby:hide', event => { if (validSender(event)) win.hide(); });
+app.whenReady().then(() => {
+  session.defaultSession.setPermissionRequestHandler((_contents, _permission, callback) => callback(false));
+  createWindow();
+  createTray();
+  screen.on('display-metrics-changed', () => {
+    if (win && !win.isDestroyed()) win.setBounds(screen.getPrimaryDisplay().bounds);
+  });
+  screen.on('display-added', () => { if (win) win.setBounds(screen.getPrimaryDisplay().bounds); });
+  screen.on('display-removed', () => { if (win) win.setBounds(screen.getPrimaryDisplay().bounds); });
+});
+app.on('before-quit', () => { intentionalQuit = true; if (cursorTimer) clearInterval(cursorTimer); });
+app.on('window-all-closed', () => { if (intentionalQuit || process.platform !== 'win32') app.quit(); });

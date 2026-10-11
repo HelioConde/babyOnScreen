@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#fffafc">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Laboratório público de inspeção dos sprites e animações do Baby On Screen.">
+  <title>Laboratório de Sprites | Baby On Screen</title>
+  <link rel="icon" href="../sprits/char1.png" type="image/png">
+  <link rel="stylesheet" href="./admin-sprites.css">
+  <link rel="stylesheet" href="./sprite-editor.css">
+  <script defer src="../app/sprite-runtime.js"></script>
+  <script defer src="../app/sprite-cleaner.js"></script>
+  <script defer src="../app/sprite-manifest.js"></script>
+  <script defer src="../app/sprite-admin-catalog.js"></script>
+  <script defer src="./sprite-zip.js"></script>
+  <script defer src="./sprite-editor.js"></script>
+  <script defer src="./admin-sprites.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html" aria-label="Voltar ao Baby On Screen"><span class="brand-icon">👶</span> baby<span>on</span>screen<small> / sprites</small></a>
+    <div class="top-actions">
+      <span class="read-only"><span class="live-dot"></span> Laboratório público · edição local de sprites</span>
+      <a class="back-link" href="./index.html">← Voltar ao jogo</a>
+    </div>
+  </header>
+  <main class="workspace">
+    <aside class="sidebar">
+      <div class="sidebar-intro">
+        <span class="eyebrow">ASSETS &amp; ANIMAÇÕES</span>
+        <h1>Estúdio de sprites <span>✳</span></h1>
+        <p>Explore todos os desenhos, acompanhe cada quadro e encontre o que precisa melhorar.</p>
+      </div>
+      <div class="summary-cards" aria-label="Resumo dos sprites">
+        <div><strong id="asset-total">0</strong><span>Arquivos</span></div>
+        <div><strong id="animation-total">0</strong><span>Animações</span></div>
+        <div><strong id="category-total">0</strong><span>Categorias</span></div>
+      </div>
+      <section class="bulk-export" aria-label="Exportar todas as edições salvas">
+        <div class="bulk-export-title">
+          <span class="bulk-export-icon">📦</span>
+          <div><strong>Minhas edições</strong><span><b id="edited-count">—</b> sprites salvos neste navegador</span></div>
+        </div>
+        <button type="button" id="export-edits" disabled>↓ Baixar todas em um ZIP</button>
+        <p id="export-status" role="status">Buscando rascunhos salvos…</p>
+        <p class="bulk-help">Um único arquivo com todas as suas correções, preservando os nomes e pastas. Envie o ZIP aqui no ChatGPT para aplicarmos no GitHub.</p>
+      </section>
+      <div class="filter-block">
+        <label for="search">Buscar sprite</label>
+        <input id="search" type="search" placeholder="Ex.: engatinhar, 030, fralda…" autocomplete="off">
+      </div>
+      <div class="filter-block">
+        <label for="category">Categoria</label>
+        <select id="category"><option value="">Todas as categorias</option></select>
+      </div>
+      <div class="filter-pair">
+        <div class="filter-block"><label for="phase">Fase</label><select id="phase"><option value="">Todas</option></select></div>
+        <div class="filter-block"><label for="action">Ação</label><select id="action"><option value="">Todas</option></select></div>
+      </div>
+      <div class="filter-block"><label for="direction">Direção</label><select id="direction"><option value="">Todas as direções</option></select></div>
+      <button type="button" id="reset-filters" class="reset-filters">↺ Limpar filtros</button>
+      <div class="sidebar-note">
+        <strong>Como funciona?</strong>
+        <p><b>Biblioteca</b> mostra todos os arquivos do GitHub. <b>Animações</b> mostra somente as sequências usadas pelo jogo.</p>
+        <p>Abra <b>Editar sprite</b> para apagar resíduos e restaurar pixels. As correções ficam neste navegador. Para publicar todas de uma vez, use <b>Minhas edições → Baixar todas em um ZIP</b>.</p>
+      </div>
+    </aside>
+    <section class="main-content">
+      <div class="content-header">
+        <div><span class="eyebrow">PAINEL DE INSPEÇÃO</span><h2>Todos os movimentos, <em>quadro a quadro.</em></h2></div>
+        <div class="view-switch" role="group" aria-label="Tipo de conteúdo">
+          <button id="view-assets" class="active" type="button" aria-pressed="true">◫ Biblioteca</button>
+          <button id="view-animations" type="button" aria-pressed="false">▷ Animações</button>
+        </div>
+      </div>
+      <div class="content-layout">
+        <section class="library-pane" aria-label="Galeria de sprites">
+          <div class="library-toolbar">
+            <div><strong id="result-count">0 resultados</strong><span id="result-hint">Escolha um sprite para inspecionar</span></div>
+            <div class="pager">
+              <button type="button" id="page-prev" aria-label="Página anterior">‹</button>
+              <span id="page-info">1 / 1</span>
+              <button type="button" id="page-next" aria-label="Próxima página">›</button>
+            </div>
+          </div>
+          <div id="sprite-grid" class="sprite-grid" aria-label="Sprites disponíveis"></div>
+          <div id="grid-empty" class="empty-state" hidden><span>🔎</span><strong>Nenhum sprite encontrado</strong><p>Tente remover algum filtro.</p></div>
+        </section>
+        <aside class="inspector" aria-label="Prévia e controles do sprite">
+          <div class="inspector-head">
+            <span class="eyebrow">VISUALIZAÇÃO</span>
+            <span id="load-status" class="load-status" role="status">Aguardando seleção</span>
+          </div>
+          <h3 id="viewer-title">Selecione um sprite</h3>
+          <p id="viewer-subtitle">Visualize quadros, direções e detalhes técnicos.</p>
+          <div id="preview-stage" class="preview-stage checker">
+            <canvas id="preview" width="320" height="320" aria-label="Prévia ampliada do sprite"></canvas>
+            <span class="preview-caption" id="frame-label">Quadro 0 / 0</span>
+          </div>
+          <div class="playback">
+            <button id="prev-frame" type="button" aria-label="Quadro anterior">⏮</button>
+            <button id="play-pause" class="play-primary" type="button" aria-label="Pausar animação">⏸ Pausar</button>
+            <button id="next-frame" type="button" aria-label="Próximo quadro">⏭</button>
+            <label class="speed-control" for="fps"><span>FPS</span><output id="fps-value">8</output></label>
+            <input id="fps" type="range" min="1" max="24" value="8" aria-label="Quadros por segundo">
+          </div>
+          <input id="frame-scrub" type="range" min="0" max="0" value="0" aria-label="Selecionar quadro da animação">
+          <div class="option-chips">
+            <label><input type="checkbox" id="show-checker" checked> Quadriculado</label>
+            <label><input type="checkbox" id="show-cleaned"> Limpeza</label>
+            <label><input type="checkbox" id="flip-horizontal"> Espelhar</label>
+          </div>
+          <dl id="viewer-meta" class="viewer-meta"></dl>
+          <div class="frame-heading"><strong>Quadros separados</strong><span id="frames-count">0 quadros</span></div>
+          <div id="frames" class="frame-strip" aria-label="Quadros individuais"></div>
+          <div class="viewer-footer">
+            <button id="open-editor" type="button">✎ Editar sprite</button>
+            <a id="open-file" href="#" target="_blank" rel="noopener noreferrer">↗ Original</a>
+            <button id="copy-path" type="button">⧉ Copiar</button>
+          </div>
+          <p class="panel-caption">Selecione <strong>Editar sprite</strong> para retirar fragmentos sem afetar o PNG original. Use o download para aplicar sua edição no GitHub depois.</p>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <div id="sprite-editor" class="editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-title" hidden>
+    <div class="editor-window">
+      <div class="editor-top">
+        <div>
+          <span class="eyebrow">RETOQUE MANUAL · PIXEL A PIXEL</span>
+          <h2 id="editor-title">Editor de sprites</h2>
+          <p id="editor-subtitle">Carregando o arquivo original…</p>
+        </div>
+        <button id="editor-close" type="button" class="editor-close" aria-label="Fechar editor">✕</button>
+      </div>
+      <div class="editor-layout">
+        <section class="editor-workarea" aria-label="Área de edição de pixels">
+          <div class="editor-bar"><strong>🖌️ Recorte de precisão</strong><span>Borracha, restaurar e remover área</span></div>
+          <div id="editor-viewport" class="editor-viewport checker">
+            <canvas id="editor-canvas" width="256" height="256" data-tool="erase" aria-label="Clique ou arraste para apagar partes do sprite"></canvas>
+          </div>
+        </section>
+        <aside class="editor-controls" aria-label="Ferramentas de edição">
+          <h3>Ferramentas</h3>
+          <p class="editor-help">Clique ou arraste nos pixels indesejados. Use Restaurar para recuperar o cabelo ou qualquer detalhe sem redesenhar.</p>
+          <div class="editor-tool-grid" role="group" aria-label="Ferramenta ativa">
+            <button type="button" data-edit-tool="erase" class="active" aria-pressed="true">⌫ Borracha</button>
+            <button type="button" data-edit-tool="restore" aria-pressed="false">↶ Restaurar</button>
+            <button type="button" data-edit-tool="rect" aria-pressed="false">▱ Área</button>
+            <button type="button" data-edit-tool="move" aria-pressed="false">✥ Mover</button>
+          </div>
+          <label class="editor-field" for="editor-brush">Tamanho da borracha <output id="editor-brush-size">5 px</output>
+            <input type="range" id="editor-brush" min="1" max="40" value="5">
+          </label>
+          <label class="editor-field" for="editor-zoom">Zoom <output id="editor-zoom-label">2×</output>
+            <input type="range" id="editor-zoom" min="1" max="6" value="2">
+          </label>
+          <div class="editor-zoom-controls"><button type="button" id="editor-zoom-out" aria-label="Diminuir zoom">−</button><output id="editor-zoom-label-extra" hidden></output><button type="button" id="editor-zoom-in" aria-label="Aumentar zoom">+</button></div>
+          <label class="editor-option"><input type="checkbox" id="editor-before"> Mostrar imagem original</label>
+          <label class="editor-option"><input type="checkbox" id="editor-checker" checked> Fundo quadriculado</label>
+          <div class="editor-row-actions">
+            <button type="button" id="editor-undo" disabled>↶ Desfazer</button>
+            <button type="button" id="editor-redo" disabled>↷ Refazer</button>
+          </div>
+          <div class="editor-actions">
+            <button type="button" id="editor-save" class="primary">💾 Salvar no navegador</button>
+            <button type="button" id="editor-download" class="download">↓ Baixar PNG transparente</button>
+            <button type="button" id="editor-reset" class="danger">↺ Voltar ao original</button>
+          </div>
+          <p id="editor-save-status" class="editor-save-status" role="status">Selecione um sprite para começar.</p>
+          <div class="editor-notice"><strong>Onde ficam as alterações?</strong>
+            <p>O rascunho fica salvo neste navegador (IndexedDB). Você também pode exportar todas as edições de uma vez em um ZIP na barra lateral, sem baixar cada PNG separadamente.</p>
+            <p id="editor-info">Os arquivos originais nunca são modificados por esta página.</p>
+          </div>
+        </aside>
+      </div>
+      <div class="editor-footer"><span>Ctrl+Z: desfazer · Ctrl+Shift+Z: refazer · Ctrl+S: salvar</span><span>PNG com transparência real · sem alterar o GitHub automaticamente</span></div>
+    </div>
+  </div>
+</body>
+</html>
