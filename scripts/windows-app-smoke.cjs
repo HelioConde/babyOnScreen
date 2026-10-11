@@ -173,6 +173,49 @@ async function main() {
   console.log('Windows UI panel check:',JSON.stringify(p));
   assert.ok(p?.open && p?.name==='Luna' && p?.label==='Luna');
   assert.ok(p.right<=p.width+2 && p.bottom<=p.height+2, 'The panel must fit on screen');
+  const monitorState = await cdp.request('Runtime.evaluate',{
+    expression:'(async () => {const info=await window.babyDesktop.desktopLayout();' +
+      'const b=info.bounds;const screens=info.displays;' +
+      'return {origin:[b.x,b.y],screens:screens.length,screenX:screens[0]?.x,' +
+      'hasMonitorPicker:document.getElementById("monitor-select").options.length===screens.length,' +
+      'covers:screens.every(d=>d.x>=0&&d.y>=0&&d.x+d.width<=b.width+1&&d.y+d.height<=b.height+1)};})()',
+    awaitPromise:true,returnByValue:true
+  });
+  console.log('Windows monitor geometry:',JSON.stringify(monitorState.result?.value));
+  assert.ok(monitorState.result?.value?.screens>=1);
+  assert.equal(monitorState.result.value.hasMonitorPicker,true);
+  assert.equal(monitorState.result.value.covers,true);
+  const gripPosition = await cdp.request('Runtime.evaluate',{
+    expression:'(() => {const panel=document.getElementById("panel").getBoundingClientRect();' +
+      'const grip=document.getElementById("panel-move-handle").getBoundingClientRect();' +
+      'return {left:panel.left,top:panel.top,x:grip.left+grip.width/2,y:grip.top+grip.height/2};})()',
+    returnByValue:true
+  });
+  const grip=gripPosition.result.value;
+  const shift=grip.left>110?-95:95;
+  await cdp.request('Input.dispatchMouseEvent',{type:'mouseMoved',x:grip.x,y:grip.y});
+  await cdp.request('Input.dispatchMouseEvent',{type:'mousePressed',x:grip.x,y:grip.y,button:'left',clickCount:1});
+  await cdp.request('Input.dispatchMouseEvent',{type:'mouseMoved',x:grip.x+shift,y:grip.y,button:'left',buttons:1});
+  await cdp.request('Input.dispatchMouseEvent',{type:'mouseReleased',x:grip.x+shift,y:grip.y,button:'left',clickCount:1});
+  const movedPanel = await cdp.request('Runtime.evaluate',{
+    expression:'(() => {const r=document.getElementById("panel").getBoundingClientRect();' +
+      'return {x:r.left,y:r.top,stored:localStorage.getItem("baby-on-screen-panel-position-v1")};})()',
+    returnByValue:true
+  });
+  console.log('Windows dragged panel:',JSON.stringify(movedPanel.result?.value));
+  assert.ok(Math.abs(movedPanel.result.value.x-grip.left)>25,
+    'The panel should be freely draggable across the screen');
+  assert.ok(movedPanel.result.value.stored,'The panel position should survive restart');
+  const switchMonitor = await cdp.request('Runtime.evaluate',{
+    expression:'(() => {const select=document.getElementById("monitor-select");' +
+      'select.value=select.options[0].value;select.dispatchEvent(new Event("change",{bubbles:true}));' +
+      'const baby=document.getElementById("baby").getBoundingClientRect();' +
+      'return {name:select.options[0].textContent,stored:localStorage.getItem("baby-on-screen-desktop-position-v1"),' +
+      'babyLeft:baby.left,babyTop:baby.top};})()',
+    returnByValue:true
+  });
+  assert.ok(switchMonitor.result.value.stored,'Choosing a monitor should save baby position');
+  assert.ok(switchMonitor.result.value.babyLeft>=0 && switchMonitor.result.value.babyTop>=0);
   const panelShot = await cdp.request('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
   const panelPng=Buffer.from(panelShot.data,'base64');
   assert.equal(panelPng.toString('hex',0,8),'89504e470d0a1a0a');
