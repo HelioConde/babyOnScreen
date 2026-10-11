@@ -9,6 +9,9 @@ const PROJECT_ROOT = path.resolve(__dirname, '..');
 let win = null;
 let tray = null;
 let hitRegions = [];
+let visualRegions = [];
+let shapeActive = false;
+let lastShapeSignature = '';
 let dragging = false;
 let passthrough = true;
 let cursorTimer = null;
@@ -31,6 +34,27 @@ function updatePassThrough(ignore) {
   if (!win || win.isDestroyed() || passthrough === ignore) return;
   passthrough = ignore;
   win.setIgnoreMouseEvents(ignore, { forward: true });
+}
+function applyNativeShape() {
+  if (!win || win.isDestroyed() || process.platform !== 'win32' ||
+      typeof win.setShape !== 'function') return;
+  // During dragging, allow the pointer to travel across the screen without
+  // being clipped by the region. Restore minimal shapes at the end.
+  const regions = dragging ? [] : geometry.nativeVisualShape(visualRegions,win.getBounds());
+  if (!dragging && !regions.length) return; // Do not use [] on missing data.
+  const signature = JSON.stringify(regions);
+  if (signature === lastShapeSignature) return;
+  try {
+    win.setShape(regions);
+    lastShapeSignature=signature;
+    shapeActive=!dragging;
+  } catch(error) {
+    shapeActive=false;
+    // Shape is an experimental Electron API: retain a usable overlay if
+    // a particular Windows version does not support it.
+    if (lastShapeSignature !== 'unsupported') console.warn('Overlay shape unavailable:',error.message);
+    lastShapeSignature='unsupported';
+  }
 }
 function pollMouse() {
   if (!win || win.isDestroyed() || !win.isVisible()) return;
@@ -89,7 +113,7 @@ function moveToDisplay(id) {
   win.setBounds(desired, false);
   const landed = String(screen.getDisplayMatching(win.getBounds()).id) === id;
   const layout = desktopLayout();
-  if (landed) { sendDesktopLayout(); refreshTrayMenu(); }
+  if (landed) { lastShapeSignature=''; applyNativeShape(); sendDesktopLayout(); refreshTrayMenu(); }
   return { ok: landed, reason: landed ? '' : 'move-failed', layout };
 }
 function updateDesktopBounds() {
@@ -101,6 +125,8 @@ function updateDesktopBounds() {
       old.width !== next.width || old.height !== next.height) {
     win.setBounds(next);
   }
+  lastShapeSignature='';
+  applyNativeShape();
   sendDesktopLayout();
   refreshTrayMenu();
 }
@@ -128,13 +154,16 @@ function createWindow() {
   win.setAlwaysOnTop(true, 'floating');
   win.setIgnoreMouseEvents(true, { forward: true });
   passthrough = true;
+  visualRegions=[];
+  shapeActive=false;
+  lastShapeSignature='';
   win.loadFile(path.join(__dirname, 'index.html'));
   win.once('ready-to-show', () => { if (win) { win.showInactive(); sendDesktopLayout(); } });
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', event => event.preventDefault());
   win.on('closed', () => {
-    win = null; hitRegions = []; dragging = false;
-    passthrough = true;
+    win = null; hitRegions = []; visualRegions = []; dragging = false;
+    passthrough = true; shapeActive = false; lastShapeSignature='';
     if (cursorTimer) { clearInterval(cursorTimer); cursorTimer = null; }
   });
   if (cursorTimer) clearInterval(cursorTimer);
@@ -183,9 +212,22 @@ ipcMain.on('baby:regions', (event, regions) => {
   if (!validSender(event) || !Array.isArray(regions)) return;
   hitRegions = geometry.sanitizeRegions(regions);
 });
+ipcMain.on('baby:visual-regions', (event, regions) => {
+  if (!validSender(event) || !Array.isArray(regions)) return;
+  visualRegions = geometry.sanitizeRegions(regions, 16);
+  applyNativeShape();
+});
+ipcMain.handle('baby:overlay:geometry', event => validSender(event) ? {
+  shaped:shapeActive,
+  visualCount:visualRegions.length,
+  window:win.getBounds(),
+  coverage:geometry.nativeVisualShape(visualRegions,win.getBounds())
+    .reduce((sum,r)=>sum+r.width*r.height,0)/(Math.max(1,win.getBounds().width*win.getBounds().height))
+} : { shaped:false, visualCount:0 });
 ipcMain.on('baby:dragging', (event, value) => {
   if (!validSender(event) || typeof value !== 'boolean') return;
   dragging = value;
+  applyNativeShape();
   if (dragging) updatePassThrough(false);
 });
 ipcMain.handle('baby:version', event => validSender(event) ? app.getVersion() : '');

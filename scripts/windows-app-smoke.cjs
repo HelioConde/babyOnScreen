@@ -163,6 +163,22 @@ async function main() {
   assert.ok(state.opaque>200,'actual PNG/WebP frame must be visible on the canvas');
   assert.ok(state.quests>=3 && state.missions>=3);
   assert.equal(state.transparent,true); assert.equal(state.noNode,true);
+  // The real Windows overlay should not be one giant opaque occlusion area:
+  // native window region must be clipped to its few visible elements.
+  let nativeClip;
+  for(let i=0;i<18;i++) {
+    const result=await cdp.request('Runtime.evaluate',{
+      expression:'window.babyDesktop.overlayGeometry()',awaitPromise:true,returnByValue:true
+    });
+    nativeClip=result.result?.value;
+    if(nativeClip?.shaped && nativeClip?.visualCount>=2) break;
+    await delay(180);
+  }
+  console.log('Native video-safe overlay shape:',JSON.stringify(nativeClip));
+  assert.equal(nativeClip?.shaped,true,'Windows overlay must use native region clipping');
+  assert.ok(nativeClip?.visualCount>=2);
+  assert.ok(nativeClip?.coverage < .7,'overlay must not occlude the whole monitor');
+
   const result=await cdp.request('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
   const png=Buffer.from(result.data,'base64');
   assert.equal(png.toString('hex',0,8),'89504e470d0a1a0a');

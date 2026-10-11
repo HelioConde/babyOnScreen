@@ -455,7 +455,15 @@
     return { x: r.left - margin, y: r.top - margin, width: r.width + margin * 2, height: r.height + margin * 2 };
   }
   function publishRegions() {
-    desktop.setHitRegions([region(baby, 13), region($('launcher'), 5), ...(!panel.hidden ? [region(panel, 3)] : [])]);
+    const hit = [region(baby, 13),region($('launcher'), 5),
+      ...(!panel.hidden ? [region(panel, 3)] : [])];
+    desktop.setHitRegions(hit);
+    // The native HWND surface needs a *separate* drawing region. Thought
+    // bubbles remain visible without intercepting clicks into the browser.
+    // Crucially the transparent remainder is not considered an occluding
+    // window by Windows/Chromium video compositing.
+    desktop.setVisualRegions([...hit, ...(!thought.hidden ? [region(thought, 10)] : []),
+      ...(!ghost.hidden ? [region(ghost, 12)] : [])]);
   }
   function hitBaby(clientX, clientY) {
     const r = baby.getBoundingClientRect();

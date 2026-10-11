@@ -115,3 +115,32 @@ test('menu da bandeja permite recuperar a bebê no monitor 2',()=>{
   assert.match(main,/const result = moveToDisplay\(String\(d\.id\)\)/);
   assert.match(main,/refreshTrayMenu\(\)/);
 });
+
+test('a forma nativa limita a janela à bebê, caixa e balões para não ocultar vídeos',()=>{
+  const {nativeVisualShape}=require('../app/window-geometry.cjs');
+  const bounds={x:0,y:0,width:1920,height:1080};
+  const pieces=nativeVisualShape([
+    {x:-15,y:-8,width:140,height:150},
+    {x:1550,y:100,width:365,height:610},
+    {x:1880,y:1040,width:160,height:60},
+    {x:2000,y:0,width:50,height:50},
+    {x:50,y:10,width:Infinity,height:50}
+  ],bounds);
+  assert.deepEqual(pieces[0],{x:0,y:0,width:125,height:142});
+  assert.equal(pieces.length,3);
+  assert.ok(pieces.every(r=>r.x>=0&&r.y>=0&&r.x+r.width<=bounds.width&&r.y+r.height<=bounds.height));
+  const coverage=pieces.reduce((sum,p)=>sum+p.width*p.height,0)/(bounds.width*bounds.height);
+  assert.ok(coverage<.2,'HUD and baby should occupy a small part of the native screen');
+  assert.deepEqual(nativeVisualShape([],bounds),[]);
+});
+test('a janela mantém passagem de clique mas restringe a superfície visual no Windows',()=>{
+  const fs=require('node:fs'),path=require('node:path');
+  const main=fs.readFileSync(path.resolve(__dirname,'../app/main.cjs'),'utf8');
+  const preload=fs.readFileSync(path.resolve(__dirname,'../app/preload.cjs'),'utf8');
+  assert.match(main,/win\.setShape\(regions\)/);
+  assert.match(main,/shapeActive=!dragging/);
+  assert.match(main,/geometry\.nativeVisualShape\(visualRegions,win\.getBounds\(\)\)/);
+  assert.match(main,/ipcMain\.on\('baby:visual-regions'/);
+  assert.match(preload,/setVisualRegions: regions =>/);
+  assert.match(main,/setIgnoreMouseEvents\(ignore, \{ forward: true \}\)/);
+});

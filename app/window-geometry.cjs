@@ -9,6 +9,20 @@ function sanitizeRegions(raw, limit = 40) {
     Math.abs(r.x) <= 100000 && Math.abs(r.y) <= 100000
   ).map(r => ({ x: r.x, y: r.y, width: r.width, height: r.height }));
 }
+// Clip the *native Windows surface*, not just the DOM hit target. A desktop-
+ // sized translucent HWND can occlude Chromium's GPU video even if its pixels
+ // are transparent (Electron issue #49024). Small rectangles around visible
+ // elements keep the rest of the desktop genuinely uncovered.
+function nativeVisualShape(raw, bounds) {
+  if (!bounds || !Number.isFinite(bounds.width) || !Number.isFinite(bounds.height) ||
+      bounds.width <= 0 || bounds.height <= 0) return [];
+  return sanitizeRegions(raw, 16).map(r=>{
+    const x=Math.max(0,Math.floor(r.x)), y=Math.max(0,Math.floor(r.y));
+    const right=Math.min(bounds.width,Math.ceil(r.x+r.width));
+    const bottom=Math.min(bounds.height,Math.ceil(r.y+r.height));
+    return {x,y,width:Math.ceil(right-x),height:Math.ceil(bottom-y)};
+  }).filter(r=>r.width>0&&r.height>0);
+}
 function isCursorOverRegion(cursor, bounds, regions) {
   if (!cursor || !bounds || !Array.isArray(regions) ||
       !['x', 'y'].every(k => Number.isFinite(cursor[k]) && Number.isFinite(bounds[k]))) return false;
@@ -44,4 +58,4 @@ function displayList(displays, windowBounds) {
       };
     });
 }
-module.exports = Object.freeze({ sanitizeRegions, isCursorOverRegion, virtualDesktopBounds, displayList });
+module.exports = Object.freeze({ sanitizeRegions, nativeVisualShape, isCursorOverRegion, virtualDesktopBounds, displayList });

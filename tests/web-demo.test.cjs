@@ -202,3 +202,11 @@ test('o monitor é selecionado por mudança NATIVA de janela, não apenas CSS',(
   assert.match(desktop,/localStorage\.setItem\(monitorKey, layout\.activeId\)/);
   assert.match(preload,/baby:desktop:move/);
 });
+
+test('bolhas ficam visíveis sem virar região clicável nem ocultar vídeos',()=>{
+  const renderer=fs.readFileSync(path.join(root,'app/renderer.js'),'utf8');
+  assert.match(renderer,/desktop\.setVisualRegions\(\[\.\.\.hit/);
+  assert.match(renderer,/region\(thought, 10\)/);
+  assert.match(renderer,/region\(ghost, 12\)/);
+  assert.match(renderer,/desktop\.setHitRegions\(hit\)/);
+});

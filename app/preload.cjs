@@ -4,6 +4,10 @@ contextBridge.exposeInMainWorld('babyDesktop', Object.freeze({
   setHitRegions: regions => {
     if (Array.isArray(regions)) ipcRenderer.send('baby:regions', regions);
   },
+  setVisualRegions: regions => {
+    if (Array.isArray(regions)) ipcRenderer.send('baby:visual-regions', regions);
+  },
+  overlayGeometry: () => ipcRenderer.invoke('baby:overlay:geometry'),
   setDragging: value => { if (typeof value === 'boolean') ipcRenderer.send('baby:dragging', value); },
   desktopLayout: () => ipcRenderer.invoke('baby:desktop:layout'),
   moveToMonitor: id => typeof id === 'string'
