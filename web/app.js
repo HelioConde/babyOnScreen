@@ -83,7 +83,7 @@
   let lastFrameAt = 0, lastTime = performance.now(), lastUIAt = 0;
   let nextTurn = 0, nextSpeech = 10000, lastCry = 0, busyUntil = 0, crySince = 0;
   let frameIndex = 1, animationStage = E.ageStage(game).id, memoryCount = -1;
-  let lastUrgency = 'calm', toastTimer = null, lastMilestoneSignature = '';
+  let lastUrgency = 'calm', toastTimer = null, lastMilestoneSignature = '', activeSchoolQuestion = null;
   let careAction = 'idle', spriteState = '', spriteRefreshAt = 0;
   let lastHorizontalDirection = vx >= 0 ? 'right' : 'left';
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -363,6 +363,9 @@
       animationStage = stageInfo.id;
       $('hero-quote').textContent = E.speak(game, 'return', .5);
     }
+    $('school-web').hidden = stageInfo.id !== 'child';
+    $('school-web-stats').textContent = game.schoolVisits +
+      (game.schoolVisits === 1 ? ' aula concluída' : ' aulas concluídas');
     $('phase-name').textContent = stageInfo.title;
     $('phase-desc').textContent = stageInfo.description;
     $('life-day').textContent = 'Dia ' + E.ageDays(game);
@@ -432,6 +435,58 @@
       parent.append(more);
     }
   }
+  function schoolQuestion() {
+    const subject = $('school-web-subject').value;
+    const questions = E.schoolQuestions[subject] || E.schoolQuestions.reading;
+    activeSchoolQuestion = questions[Math.floor(Math.random() * questions.length)];
+    $('school-web-question').textContent = activeSchoolQuestion.question;
+    const answers = $('school-web-answers');
+    answers.replaceChildren();
+    activeSchoolQuestion.answers.forEach((answer, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = answer;
+      button.addEventListener('click', () => {
+        if (!activeSchoolQuestion) return;
+        if (index !== activeSchoolQuestion.correct) {
+          $('school-web-question').textContent = 'Quase! Tente de novo: ' + activeSchoolQuestion.question;
+          return;
+        }
+        const result = E.school(game, subject);
+        if (!result.applied) {
+          const message = result.reason === 'cooldown' ? 'Ela precisa descansar um pouco antes da próxima aula.' :
+            result.reason === 'needs-care' ? 'Antes de estudar, ela precisa comer e descansar.' :
+              'Essa aula ainda não está disponível.';
+          $('school-web-question').textContent = message;
+          setFeedback(message);
+          return;
+        }
+        game = result.state;
+        activeSchoolQuestion = null;
+        $('school-web-lesson').hidden = true;
+        $('school-web-open').setAttribute('aria-expanded', 'false');
+        $('school-web-open').textContent = 'Fazer outra atividade →';
+        setFeedback('🏫 Aula concluída! +30 XP, uma habilidade e uma lembrança especial.');
+        toast('Sua pequena aprendeu algo novo!');
+        speak('happy');
+        updateUI();
+        save();
+      });
+      answers.append(button);
+    });
+  }
+  $('school-web-open').addEventListener('click', () => {
+    const lesson = $('school-web-lesson');
+    lesson.hidden = !lesson.hidden;
+    $('school-web-open').setAttribute('aria-expanded', String(!lesson.hidden));
+    if (!lesson.hidden) schoolQuestion();
+  });
+  $('school-web-close').addEventListener('click', () => {
+    $('school-web-lesson').hidden = true;
+    $('school-web-open').setAttribute('aria-expanded', 'false');
+    activeSchoolQuestion = null;
+  });
+  $('school-web-subject').addEventListener('change', schoolQuestion);
   function renderMissions() {
     const goals = E.milestoneStatus(game);
     const signature = goals.map(m => [m.id, m.progress, m.claimed].join(':')).join('|');

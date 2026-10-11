@@ -73,3 +73,6 @@ Desenvolvido por Hélio Conde.
 O catálogo tem 565 PNGs e um atlas WebP, mas apenas quadros revisados estão vinculados às ações. Os minijogos avançados, o cenário navegável da escola e a revisão final no Windows ainda são etapas futuras.
 
 As recompensas também podem ser resgatadas no painel da versão Windows, em **Missões e recompensas**. Na Web, as primeiras recompensas de brincadeira e desenho também personalizam detalhes do quarto.
+
+### Escola no navegador
+Ao alcançar a fase **Criança**, aparece um minijogo de escola também na Web: leitura, matemática básica e artes, com três opções por pergunta, XP e novas memórias. O motor compartilhado valida necessidade de descanso/alimentação e intervalo de aula, igual ao Windows.

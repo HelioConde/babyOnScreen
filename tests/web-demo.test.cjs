@@ -52,3 +52,12 @@ test('missões também são oferecidas no painel do Windows', () => {
   assert.match(windowsJS, /E\.claimMilestone\(game, button\.dataset\.claimMilestone\)/);
   assert.match(windowsJS, /renderMissions\(\)/);
 });
+
+test('a escola da fase criança funciona também na Web', () => {
+  for (const id of ['school-web','school-web-open','school-web-subject',
+    'school-web-question','school-web-answers','school-web-close']) {
+    assert.ok(html.includes('id="' + id + '"'), id);
+  }
+  assert.match(script, /E\.schoolQuestions/);
+  assert.match(script, /E\.school\(game, subject\)/);
+});

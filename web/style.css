@@ -173,3 +173,23 @@ background:#fff;color:#82609d;font-size:11px;font-weight:800;cursor:pointer}
 
 .game-stage.room-unlocked-drawing .room-frame{background:linear-gradient(145deg,#fff1bb,#f6ced9);box-shadow:0 8px #d8abcc,0 10px 18px #bda1c055}
 .game-stage.room-unlocked-toy .room-shelf span{filter:drop-shadow(0 2px 3px #89638d44)}
+
+/* School quiz is an age-gated playable activity, not a decorative preview. */
+.school-web[hidden],.school-web-lesson[hidden]{display:none}
+.school-web{margin:15px 0;padding:17px;background:linear-gradient(120deg,#f3f9ff,#fef8ff);border:1px solid #dce9f4;border-radius:17px}
+.school-web-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.school-web-head h3{font:900 17px Nunito,sans-serif;color:#52748c;margin:4px 0 5px}
+.school-web-head p{font-size:11px;color:#708aa0;line-height:1.5;margin:0}
+.school-web-head>span{background:#e1eff9;color:#52748c;border-radius:20px;padding:7px 11px;font-size:11px;font-weight:900;white-space:nowrap}
+.school-web-open{border:0;background:#6e9cba;color:white;border-radius:10px;padding:11px 14px;font-size:12px;font-weight:900;cursor:pointer}
+.school-web-open:hover{background:#507f9e}
+.school-web-lesson{display:grid;gap:11px;background:white;border:1px solid #dfecf5;margin-top:13px;border-radius:13px;padding:13px}
+.school-web-lesson label{font-size:12px;font-weight:900;color:#6a7b94}
+.school-web-lesson select{background:#f8fbff;border:1px solid #cbdceb;border-radius:9px;color:#4f667e;min-height:37px;padding:8px 11px;font-size:12px}
+.school-web-question{font-size:14px;font-weight:900;color:#485d79;margin:2px 0}
+.school-web-answers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.school-web-answers button{border:1px solid #bcd9e8;background:#f2faff;color:#567b98;border-radius:9px;padding:10px;font-size:12px;font-weight:900;cursor:pointer}
+.school-web-answers button:hover{background:#dceefa}
+.school-web-close{justify-self:start;border:0;background:transparent;color:#7d7298;text-decoration:underline;font-size:11px;cursor:pointer;padding:7px}
+.school-web button:focus-visible,.school-web select:focus-visible{outline:3px solid #516db6;outline-offset:2px}
+@media(max-width:630px){.school-web{padding:12px}.school-web-head{align-items:flex-start;flex-direction:column}.school-web-answers{grid-template-columns:repeat(3,minmax(0,1fr))}}

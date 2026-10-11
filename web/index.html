@@ -87,6 +87,17 @@
             </div>
             <p class="feedback" id="feedback" role="status" aria-live="polite">Sua amiguinha está explorando o mundo. Espere ela precisar de algo e ajude!</p>
             <div class="growth-line"><div><strong id="growth-label">Próxima fase: Bebê curiosa</strong><small id="growth-detail">Tempo e carinho desbloqueiam novas fases</small></div><progress id="growth-progress" max="100" value="0">0%</progress></div>
+            <section class="school-web" id="school-web" aria-labelledby="school-web-title" hidden>
+              <div class="school-web-head"><div><span class="mission-eyebrow">✦ NOVA AVENTURA</span><h3 id="school-web-title">🏫 Hora de aprender!</h3><p>Leitura, números e artes para sua pequena estudante.</p></div><span id="school-web-stats">0 aulas</span></div>
+              <button type="button" id="school-web-open" class="school-web-open" aria-expanded="false">Começar uma aula →</button>
+              <div id="school-web-lesson" class="school-web-lesson" hidden>
+                <label for="school-web-subject">O que vamos descobrir?</label>
+                <select id="school-web-subject"><option value="reading">📚 Leitura</option><option value="numbers">🔢 Números</option><option value="arts">🎨 Artes</option></select>
+                <p id="school-web-question" aria-live="polite">Preparada para aprender?</p>
+                <div id="school-web-answers" class="school-web-answers" role="group" aria-label="Respostas da aula"></div>
+                <button type="button" id="school-web-close" class="school-web-close">Encerrar aula</button>
+              </div>
+            </section>
             <section class="missions-panel" aria-labelledby="missions-title">
               <div class="missions-heading"><div><span class="mission-eyebrow">✦ AVENTURAS DO DIA A DIA</span><h3 id="missions-title">Pequenas conquistas</h3></div><span class="missions-count" id="missions-count">0/6 concluídas</span></div>
               <div id="missions-list" class="missions-list"><p>Carregando suas missões...</p></div>

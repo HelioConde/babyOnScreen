@@ -217,6 +217,16 @@ async function drag(page, source, target) {
     assert.ok(chips.some(x => x.includes('Criamos um desenho juntas!') && x.includes('×18')),
       'accumulated count must appear in the album');
     await page.screenshot({ path: path.join(OUT, 'desktop-child.png'), fullPage: true, animations: 'disabled' });
+    // School is available in the Web child stage as well as Windows.
+    assert.equal(await page.locator('#school-web').isVisible(), true);
+    await page.locator('#school-web-open').click();
+    await page.locator('#school-web-subject').selectOption('numbers');
+    const quiz = await page.locator('#school-web-question').textContent();
+    const answer = /6 - 2/.test(quiz) ? '4' : '5';
+    await page.locator('#school-web-answers button').filter({ hasText: answer }).click();
+    assert.match(await page.locator('#school-web-stats').textContent(), /1 aula concluída/);
+    assert.match(await page.locator('#feedback').textContent(), /Aula concluída/);
+    await page.screenshot({ path: path.join(OUT, 'desktop-school.png'), fullPage: true, animations: 'disabled' });
     const childEntry = await page.evaluate(() => window.BabySpriteManifest.child.walk.right);
     assert.ok(childEntry.files.includes('element_030.png'), 'child phase uses the pink-bow sprite pack');
     await page.locator('#baby-sprite').waitFor({ state: 'visible', timeout: 15000 });
