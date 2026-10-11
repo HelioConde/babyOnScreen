@@ -71,3 +71,5 @@ Desenvolvido por Hélio Conde.
 - Tamanhos de textos e destaque visual da personagem revisados para facilitar as interações.
 
 O catálogo tem 565 PNGs e um atlas WebP, mas apenas quadros revisados estão vinculados às ações. Os minijogos avançados, o cenário navegável da escola e a revisão final no Windows ainda são etapas futuras.
+
+As recompensas também podem ser resgatadas no painel da versão Windows, em **Missões e recompensas**. Na Web, as primeiras recompensas de brincadeira e desenho também personalizam detalhes do quarto.

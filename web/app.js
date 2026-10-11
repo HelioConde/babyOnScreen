@@ -439,6 +439,13 @@
     lastMilestoneSignature = signature;
     const list = $('missions-list');
     const finished = goals.filter(m => m.claimed).length;
+    const claimed = new Set(goals.filter(m => m.claimed).map(m => m.id));
+    stage.classList.toggle('room-unlocked-drawing', claimed.has('first-drawing'));
+    stage.classList.toggle('room-unlocked-toy', claimed.has('first-toy'));
+    const drawingFrame = stage.querySelector('.room-frame');
+    const plush = stage.querySelector('.room-shelf span');
+    if (drawingFrame?.firstChild) drawingFrame.firstChild.nodeValue = claimed.has('first-drawing') ? '🎨' : '♥';
+    if (plush) plush.textContent = claimed.has('first-toy') ? '🧸' : '★';
     $('missions-count').textContent = finished + '/' + goals.length + ' resgatadas';
     list.replaceChildren();
     // Prioritize rewards that can already be claimed; then show upcoming objectives.

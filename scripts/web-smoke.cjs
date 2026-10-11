@@ -171,6 +171,24 @@ async function drag(page, source, target) {
     await page.locator('#sound').click();
     assert.equal(await sceneSound.getAttribute('aria-pressed'), 'false');
     await page.locator('.tools-settings summary').click();
+    // A real player must be able to switch the nursery light and collect a milestone.
+    await page.locator('#scene-light').click();
+    assert.equal(await page.locator('#scene-light').getAttribute('aria-pressed'), 'true');
+    assert.ok(await page.locator('#stage').evaluate(el => el.classList.contains('night-mode')));
+    await page.screenshot({ path: path.join(OUT, 'desktop-night-room.png'), fullPage: true, animations: 'disabled' });
+    await page.locator('#scene-light').click();
+    assert.equal(await page.locator('#scene-light').getAttribute('aria-pressed'), 'false');
+    assert.ok(await page.locator('[data-claim-milestone]').count() > 0, 'playing earns a collectable quest reward');
+    await page.locator('[data-claim-milestone]').first().click();
+    assert.match(await page.locator('#feedback').textContent(), /Missão concluída/);
+    assert.ok(await page.locator('#missions-count').textContent().then(x => x.startsWith('1/')),
+      'claimed goals are counted exactly once');
+    const earned = await page.evaluate(() => {
+      const save = JSON.parse(localStorage.getItem('baby-on-screen-web-v1'));
+      return save.claimedMilestones;
+    });
+    assert.equal(earned.length, 1, 'the claimed milestone is persisted in browser storage');
+    await page.screenshot({ path: path.join(OUT, 'desktop-missions.png'), fullPage: true, animations: 'disabled' });
     const unloaded = await page.locator('.inventory img').evaluateAll(imgs => imgs.filter(img => !img.complete || img.naturalWidth === 0).map(img => img.src));
     assert.equal(unloaded.length, 0, 'missing icon images: ' + unloaded.join(', '));
     await page.screenshot({ path: path.join(OUT, 'desktop-newborn.png'), fullPage: true, animations: 'disabled' });

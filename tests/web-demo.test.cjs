@@ -44,3 +44,11 @@ test('quarto interativo e missões continuam acessíveis sem bloquear os cuidado
   assert.match(script, /E\.claimMilestone\(game, button\.dataset\.claimMilestone\)/);
   assert.match(script, /syncLight\(\)/);
 });
+
+test('missões também são oferecidas no painel do Windows', () => {
+  const windowsHTML = fs.readFileSync(path.join(root, 'app', 'index.html'), 'utf8');
+  const windowsJS = fs.readFileSync(path.join(root, 'app', 'renderer.js'), 'utf8');
+  assert.match(windowsHTML, /id="desktop-missions-list"/);
+  assert.match(windowsJS, /E\.claimMilestone\(game, button\.dataset\.claimMilestone\)/);
+  assert.match(windowsJS, /renderMissions\(\)/);
+});
