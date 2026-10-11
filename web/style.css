@@ -103,3 +103,70 @@ background:#fff;color:#82609d;font-size:11px;font-weight:800;cursor:pointer}
 .desktop-illustration img{width:142px;height:142px;object-fit:contain;image-rendering:auto}
 
 .speed-label output{font-size:11px;min-width:25px;font-weight:900;color:#76529e;text-align:right}.tools-settings .speed-note{font-size:10px;color:#9d86a6;margin:0 0 3px 2px;line-height:1.4}
+
+
+/* Baby On Screen — quartinho acolhedor, estados de dia/noite e progressão visível. */
+.game-stage{background:linear-gradient(180deg,#f9edff 0%,#f9f0ff 54%,#f5deea 55%,#f8e3ee 100%)}
+.game-stage::before{content:"";position:absolute;left:0;right:0;top:55%;height:3px;background:#e6cbe5;pointer-events:none}
+.game-stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:44%;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(12% - 1px),#d8bace4d 12%);opacity:.35;pointer-events:none;z-index:0}
+.game-stage .grid-texture{opacity:.4}
+.room-furniture{position:absolute;inset:0;z-index:1;pointer-events:none}
+.room-frame{position:absolute;top:111px;left:13%;width:126px;height:87px;border:9px solid #fff6e7;border-bottom-width:13px;background:#f8d9de;color:#d9809c;text-align:center;padding:9px 0;font-size:27px;border-radius:8px;box-shadow:0 8px 0 #d5b7cc,0 13px 16px #bda1c044;transform:rotate(-5deg)}
+.room-frame span{display:block;font-size:9px;color:#9d7195;font-weight:900}
+.room-shelf{position:absolute;left:7%;bottom:58px;width:125px;height:72px;background:linear-gradient(90deg,#f9ddba,#fce8d1);border:6px solid #f5cea8;border-radius:10px;box-shadow:0 8px 0 #d8b99a;display:flex;align-items:flex-end;justify-content:center;gap:9px;padding:12px 9px}
+.room-shelf i{width:16px;height:39px;background:#b7a0e2;border-radius:3px;box-shadow:inset -4px 0 #9b82c7;transform:rotate(-6deg)}
+.room-shelf i:nth-child(2){height:34px;background:#e7a1aa;box-shadow:inset -4px 0 #c9808e;transform:rotate(3deg)}
+.room-shelf i:nth-child(3){height:43px;background:#a2cdb7;box-shadow:inset -4px 0 #86b69f;transform:rotate(-2deg)}
+.room-shelf span{font-size:21px;color:#dfa761}
+.room-crib{position:absolute;right:9%;bottom:39px;width:178px;height:97px;background:linear-gradient(#fff6e6 16%,#f9e7dc 16% 64%,#f2cdd6 64%);border:9px solid #fdf0d9;border-radius:24px 24px 11px 11px;box-shadow:0 10px 0 #ccabbd}
+.room-crib::before{content:"";position:absolute;left:3px;right:3px;bottom:9px;height:33px;background:repeating-linear-gradient(90deg,#fff0dc 0 9px,#ddb9bc 9px 12px);border:4px solid #fff2e7;border-radius:6px}
+.room-crib::after{content:"";position:absolute;left:15px;right:15px;top:10px;height:23px;background:#e5bdd2;border-radius:55%}
+.crib-pillows{position:absolute;left:29px;top:16px;width:36px;height:17px;background:#fff;border-radius:50%;z-index:1;box-shadow:45px 1px #fff}
+.room-plant{position:absolute;left:calc(7% + 130px);bottom:45px;width:35px;height:39px;background:linear-gradient(#f8c6b3,#e6a28d);border-radius:4px 4px 13px 13px;box-shadow:0 5px 0 #c9a6a7}
+.room-plant::before,.room-plant::after{content:"";position:absolute;bottom:25px;background:#82c4a5;border-radius:90% 0 90% 10%;width:25px;height:43px}
+.room-plant::before{left:-12px;transform:rotate(-28deg)}.room-plant::after{right:-10px;transform:rotate(42deg);background:#6bb89a}
+.room-plant span{position:absolute;left:13px;bottom:30px;width:11px;height:55px;background:#75bba0;border-radius:10px}
+.room-stars{display:none;position:absolute;top:118px;right:20%;color:#fff0bb;letter-spacing:10px;font-size:24px}
+.game-stage .rug{z-index:2;bottom:25px;background:#e5c4dd;box-shadow:inset 0 -12px #d1acd0,0 11px 20px #ba90bc20}
+.game-stage .ground{z-index:1;background:#dec3d5;opacity:.8}
+.game-stage .baby{z-index:4;filter:drop-shadow(0 8px 5px #73527445)}
+.game-stage .baby #baby-sprite{transform:scale(1.17);transform-origin:50% 82%}
+.game-stage .baby:not(.sprite-ready)::after{transform:scale(1.17);transform-origin:50% 82%}
+.baby .baby-shadow{position:absolute;left:24px;right:24px;bottom:9px;height:14px;background:#916b8555;filter:blur(5px);border-radius:50%;pointer-events:none}
+.game-stage .speech-bubble{z-index:6}
+.game-stage .stage-title,.game-stage .cry-indicator,.game-stage .scene-sound,.game-stage .scene-light{z-index:7}
+.scene-light{position:absolute;top:15px;right:67px;width:42px;height:42px;background:#fffdfaf0;border:1px solid #e4cfe8;border-radius:15px;color:#8966a0;font-size:23px;box-shadow:0 6px 14px #9f82ad20;cursor:pointer}
+.scene-light:hover{background:#f9edff}
+.game-stage.night-mode{background:linear-gradient(180deg,#554a81 0%,#74658e 55%,#bba4bf 56%,#d3b3c5 100%)}
+.game-stage.night-mode .window-decor{background:linear-gradient(#393864 55%,#677b83)}
+.game-stage.night-mode .window-sun{font-size:0;right:21px;top:14px}
+.game-stage.night-mode .window-sun::after{content:"☾";font-size:41px;color:#fff2bb}
+.game-stage.night-mode .window-hill{background:#406e73}
+.game-stage.night-mode .room-stars{display:block}
+.game-stage.night-mode .grid-texture{opacity:.14}
+.game-stage.night-mode .room-furniture{filter:brightness(.84)}
+.game-stage.night-mode .stage-title,.game-stage.night-mode .cry-indicator{background:#fff9ffe8}
+.missions-panel{margin:13px 0 2px;padding:16px 17px 15px;background:linear-gradient(120deg,#fbf7ff,#fffaf8);border:1px solid #ebddec;border-radius:17px}
+.missions-heading{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:12px}
+.mission-eyebrow{color:#a67dbe;font-size:10px;font-weight:900;letter-spacing:.055em}
+.missions-heading h3{margin:3px 0 0;color:#513d62;font:900 16px Nunito,sans-serif}
+.missions-count{font-size:11px;background:#eee0fa;color:#785c9c;padding:6px 9px;border-radius:20px;white-space:nowrap;font-weight:900}
+.missions-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mission-card{padding:12px;border:1px solid #e7deee;border-radius:13px;background:#fff;display:flex;flex-direction:column;gap:7px;min-width:0}
+.mission-card-top{display:flex;gap:10px;justify-content:space-between;align-items:flex-start}
+.mission-card strong{font-size:12px;color:#604871;line-height:1.4}
+.mission-card-top span{font-size:11px;font-weight:900;color:#9c87a8;white-space:nowrap}
+.mission-card p{font-size:11px;color:#846f8e;margin:0;line-height:1.4;flex:1}
+.mission-card-bottom{display:flex;align-items:center;gap:9px}
+.mission-card-bottom progress{width:100%;height:7px;accent-color:#9d76ce}
+.mission-card-bottom span{font-size:10px;font-weight:900;color:#9672ba;white-space:nowrap}
+.mission-ready{border-color:#97cbb2;background:#f6fffa}
+.mission-claim{border:0;border-radius:9px;background:#8c65bf;color:#fff;padding:8px;font-size:11px;font-weight:900;cursor:pointer}
+.mission-claim:hover{background:#72519f}
+.mission-claim:focus-visible,.scene-light:focus-visible{outline:3px solid #7551b6;outline-offset:2px}
+.missions-finished{grid-column:1/-1;color:#64876f;font-weight:900;font-size:12px;margin:0}
+.need-label,.item strong{font-size:max(12px,1em)}
+.item small,.need output{font-size:11px}
+@media(max-width:900px){.room-crib{right:5%;transform:scale(.8);transform-origin:bottom right}.room-shelf{left:4%;transform:scale(.88);transform-origin:bottom left}.room-plant{left:calc(4% + 112px)}.room-frame{left:11%}}
+@media(max-width:630px){.game-stage{min-height:415px}.room-frame{left:7%;top:129px;transform:rotate(-5deg) scale(.7);transform-origin:top left}.room-shelf{left:2%;bottom:50px;transform:scale(.63);transform-origin:bottom left}.room-plant{display:none}.room-crib{right:2%;bottom:43px;transform:scale(.58);transform-origin:bottom right}.game-stage .stage-tip{display:none}.scene-light{right:61px}.missions-list{grid-template-columns:1fr}.missions-panel{padding:13px 11px}.missions-heading h3{font-size:15px}.mission-card{padding:10px}.need-label{font-size:12px}.item strong{font-size:11px}.item small{font-size:10px}.missions-count{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.room-furniture,.baby .baby-shadow{animation:none}.game-stage .baby #baby-sprite,.game-stage .baby:not(.sprite-ready)::after{transition:none}}

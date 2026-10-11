@@ -27,6 +27,14 @@
     letter: { label: 'Cartinha', cooldown: 105, happiness: 10, skill: 'bond' },
     drawing: { label: 'Desenho', cooldown: 92, happiness: 11, skill: 'creativity' }
   });
+  const milestones = Object.freeze([
+    { id: 'first-care', title: 'Primeiro carinho', detail: 'Faça seu primeiro cuidado', target: 1, xp: 20 },
+    { id: 'first-toy', title: 'Hora de brincar', detail: 'Brinque com o ursinho', target: 1, xp: 25 },
+    { id: 'first-letter', title: 'Uma cartinha especial', detail: 'Entregue uma cartinha', target: 1, xp: 25 },
+    { id: 'first-drawing', title: 'Pequena artista', detail: 'Crie um desenho juntas', target: 1, xp: 25 },
+    { id: 'five-cares', title: 'Muito bem cuidada', detail: 'Complete cinco cuidados', target: 5, xp: 35 },
+    { id: 'baby-stage', title: 'Primeiras descobertas', detail: 'Chegue à fase Bebê curiosa', target: 1, xp: 45 }
+  ]);
   const schoolSubjects = Object.freeze({
     reading: { label: 'Leitura', skill: 'reading' },
     numbers: { label: 'Números', skill: 'numbers' },
@@ -92,7 +100,7 @@
       schemaVersion: VERSION, needs: { ...defaults }, happiness: 80, xp: 0, careCount: 0,
       interactions: 0, lastCare: '', lifeSeconds: 0, activeSeconds: 0,
       skills: { play: 0, bond: 0, creativity: 0, reading: 0, numbers: 0, arts: 0 },
-      schoolVisits: 0, memories: [], memoryCounts: {}, cooldowns: {}, achievements: [], lastSpoken: '',
+      schoolVisits: 0, memories: [], memoryCounts: {}, cooldowns: {}, achievements: [], claimedMilestones: [], lastSpoken: '',
       savedAt: finite(now, Date.now(), 0, 9999999999999)
     };
   }
@@ -137,6 +145,7 @@
       skills, schoolVisits: Math.floor(finite(v.schoolVisits, 0, 0, 100000)),
       memories, memoryCounts,
       cooldowns, achievements: cleanStrings(v.achievements, 30, 64),
+      claimedMilestones: cleanStrings(v.claimedMilestones, milestones.length, 50).filter(id => milestones.some(m => m.id === id)),
       lastSpoken: typeof v.lastSpoken === 'string' ? v.lastSpoken.slice(0, 120) : '',
       savedAt: finite(v.savedAt, Date.now(), 0, 9999999999999)
     };
@@ -292,6 +301,34 @@
     addMemory(s, 'Aprendi ' + lesson.label.toLowerCase() + ' na escola!');
     return { state: s, applied: true, reason: 'ok', achievements: unlock(s) };
   }
+  function milestoneStatus(input) {
+    const s = sanitize(input);
+    const counters = {
+      'first-care': s.careCount,
+      'first-toy': s.skills.play,
+      'first-letter': s.memoryCounts['Ganhei uma cartinha carinhosa!'] || 0,
+      'first-drawing': s.memoryCounts['Criamos um desenho juntas!'] || 0,
+      'five-cares': s.careCount,
+      'baby-stage': ageStage(s).id !== 'newborn' ? 1 : 0
+    };
+    return milestones.map(m => ({
+      ...m,
+      progress: Math.min(m.target, Math.max(0, counters[m.id] || 0)),
+      complete: (counters[m.id] || 0) >= m.target,
+      claimed: s.claimedMilestones.includes(m.id)
+    }));
+  }
+  function claimMilestone(input, id) {
+    const s = sanitize(input), goal = milestoneStatus(s).find(m => m.id === id);
+    if (!goal) return { state: s, claimed: false, reason: 'unknown' };
+    if (goal.claimed) return { state: s, claimed: false, reason: 'already-claimed' };
+    if (!goal.complete) return { state: s, claimed: false, reason: 'incomplete' };
+    s.claimedMilestones.push(id);
+    s.xp = clamp(s.xp + goal.xp, 0, 1000000);
+    s.happiness = clamp(s.happiness + 8, 0, 100);
+    addMemory(s, 'Missão concluída: ' + goal.title);
+    return { state: s, claimed: true, xp: goal.xp, title: goal.title, achievements: unlock(s) };
+  }
   function speak(input, context, random) {
     const s = sanitize(input), bank = speech[ageStage(s).id], urgent = urgency(s);
     let key = typeof context === 'string' ? context : 'idle';
@@ -316,8 +353,8 @@
     return sanitize(parsed.progress);
   }
   return Object.freeze({
-    VERSION, defaults, stages, actions, activities, schoolSubjects, speech,
+    VERSION, defaults, stages, actions, activities, schoolSubjects, milestones, speech,
     initial, sanitize, tick, advanceClock, care, interact, school, ageStage, ageDays, level, concern, urgency,
-    speak, ready, exportSave, importSave, memorySummary, clamp
+    speak, ready, exportSave, importSave, memorySummary, milestoneStatus, claimMilestone, clamp
   });
 });

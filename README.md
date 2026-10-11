@@ -64,3 +64,10 @@ O formato compartilhado (versão 2) registra tempo ativo, necessidades, estágio
 **Antes da release estável:** validar manualmente clique-through e DPI no Windows, interação móvel, importação em ambas as direções e funcionamento dos instaladores.
 
 Desenvolvido por Hélio Conde.
+
+## Novidades de experiência (outubro de 2026)
+- Quarto da Web mais completo, com móveis decorativos responsivos e iluminação dia/noite ajustável, sem impacto no consumo das necessidades.
+- Seis pequenas missões de cuidado, brincadeira, cartinha, desenho e crescimento. Recompensas de XP e felicidade podem ser resgatadas uma vez e acompanham os saves Web/Windows.
+- Tamanhos de textos e destaque visual da personagem revisados para facilitar as interações.
+
+O catálogo tem 565 PNGs e um atlas WebP, mas apenas quadros revisados estão vinculados às ações. Os minijogos avançados, o cenário navegável da escola e a revisão final no Windows ainda são etapas futuras.

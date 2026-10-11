@@ -65,7 +65,8 @@
   let options = {
     sound: oldOptions.sound === true,
     paused: oldOptions.paused === true,
-    speed: E.clamp(Number(oldOptions.speed) || 1, .5, 2)
+    speed: E.clamp(Number(oldOptions.speed) || 1, .5, 2),
+    night: oldOptions.night === true
   };
   const startedAt = Date.now();
   const storedGame = E.sanitize(read(stateKey, newWebGame()));
@@ -82,7 +83,7 @@
   let lastFrameAt = 0, lastTime = performance.now(), lastUIAt = 0;
   let nextTurn = 0, nextSpeech = 10000, lastCry = 0, busyUntil = 0, crySince = 0;
   let frameIndex = 1, animationStage = E.ageStage(game).id, memoryCount = -1;
-  let lastUrgency = 'calm', toastTimer = null;
+  let lastUrgency = 'calm', toastTimer = null, lastMilestoneSignature = '';
   let careAction = 'idle', spriteState = '', spriteRefreshAt = 0;
   let lastHorizontalDirection = vx >= 0 ? 'right' : 'left';
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -431,6 +432,72 @@
       parent.append(more);
     }
   }
+  function renderMissions() {
+    const goals = E.milestoneStatus(game);
+    const signature = goals.map(m => [m.id, m.progress, m.claimed].join(':')).join('|');
+    if (signature === lastMilestoneSignature) return;
+    lastMilestoneSignature = signature;
+    const list = $('missions-list');
+    const finished = goals.filter(m => m.claimed).length;
+    $('missions-count').textContent = finished + '/' + goals.length + ' resgatadas';
+    list.replaceChildren();
+    // Prioritize rewards that can already be claimed; then show upcoming objectives.
+    const pending = goals.filter(m => !m.claimed)
+      .sort((a, b) => Number(b.complete) - Number(a.complete));
+    const visible = pending.slice(0, 3);
+    if (!visible.length) {
+      const msg = document.createElement('p');
+      msg.className = 'missions-finished';
+      msg.textContent = '🎉 Você conquistou todas as missões! Continue criando memórias.';
+      list.append(msg);
+      return;
+    }
+    for (const mission of visible) {
+      const card = document.createElement('article');
+      card.className = 'mission-card' + (mission.complete ? ' mission-ready' : '');
+      const top = document.createElement('div');
+      top.className = 'mission-card-top';
+      const name = document.createElement('strong');
+      name.textContent = mission.title;
+      const counter = document.createElement('span');
+      counter.textContent = mission.progress + '/' + mission.target;
+      top.append(name, counter);
+      const detail = document.createElement('p');
+      detail.textContent = mission.detail;
+      const bottom = document.createElement('div');
+      bottom.className = 'mission-card-bottom';
+      const bar = document.createElement('progress');
+      bar.max = mission.target;
+      bar.value = mission.progress;
+      bar.setAttribute('aria-label', mission.title + ': ' + mission.progress + ' de ' + mission.target);
+      const reward = document.createElement('span');
+      reward.textContent = '+' + mission.xp + ' XP';
+      bottom.append(bar, reward);
+      card.append(top, detail, bottom);
+      if (mission.complete) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'mission-claim';
+        button.dataset.claimMilestone = mission.id;
+        button.textContent = 'Resgatar recompensa';
+        card.append(button);
+      }
+      list.append(card);
+    }
+  }
+  $('missions-list').addEventListener('click', event => {
+    const button = event.target.closest('button[data-claim-milestone]');
+    if (!button) return;
+    const result = E.claimMilestone(game, button.dataset.claimMilestone);
+    if (!result.claimed) return;
+    game = result.state;
+    lastMilestoneSignature = '';
+    toast(result.title + ' · +' + result.xp + ' XP');
+    setFeedback('Missão concluída! ' + result.title + ': +' + result.xp + ' XP e alegria extra. 💕');
+    speak('happy');
+    updateUI();
+    save();
+  });
   function updateUI() {
     updateStage();
     for (const key of Object.keys(E.defaults)) {
@@ -465,6 +532,7 @@
     $('cry-indicator').textContent = urgent.level === 'crying' ? '😢 Chorando: precisa de ' + names[urgent.need] :
       urgent.level === 'asking' ? '💭 Precisa de ' + names[urgent.need] : '💗 Tudo tranquilo';
     renderMemories();
+    renderMissions();
   }
 
   function syncSoundControls() {
@@ -486,6 +554,19 @@
     if (options.sound) play('rindo');
     save();
   }
+  function syncLight() {
+    $('stage').classList.toggle('night-mode', options.night);
+    $('scene-light').textContent = options.night ? '☀' : '☾';
+    $('scene-light').setAttribute('aria-pressed', String(options.night));
+    $('scene-light').setAttribute('aria-label', options.night ? 'Alternar para modo dia' : 'Alternar para modo noite');
+  }
+  $('scene-light').addEventListener('click', () => {
+    options.night = !options.night;
+    syncLight();
+    setFeedback(options.night ? 'A noite chegou ao quartinho. Bons sonhos! 🌙' : 'O sol voltou ao quartinho! ☀️');
+    save();
+  });
+  syncLight();
   $('sound').addEventListener('click', toggleSound);
   $('scene-sound').addEventListener('click', toggleSound);
   syncSoundControls();

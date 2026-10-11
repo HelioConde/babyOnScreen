@@ -36,3 +36,11 @@ test('o controle de velocidade explica e aplica a redução das necessidades', (
   assert.match(script, /E\.advanceClock\(game, elapsed, \{ speed: options\.speed \}\)/);
   assert.match(script, /syncClock\(\); \/\/ Settle the previous elapsed time at the previous speed/);
 });
+
+test('quarto interativo e missões continuam acessíveis sem bloquear os cuidados', () => {
+  for (const selector of ['id="scene-light"', 'id="missions-list"', 'id="missions-count"', 'class="room-furniture"']) {
+    assert.ok(html.includes(selector), selector);
+  }
+  assert.match(script, /E\.claimMilestone\(game, button\.dataset\.claimMilestone\)/);
+  assert.match(script, /syncLight\(\)/);
+});

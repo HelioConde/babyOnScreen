@@ -181,3 +181,33 @@ test('retorno de uma ausência longa respeita a velocidade mesmo com limite de d
   assert.equal(slow.activeSeconds, 10800);
   assert.equal(fast.activeSeconds, 43200);
 });
+
+test('missões podem ser resgatadas uma vez e persistem em saves antigos', () => {
+  let game = E.initial(1000);
+  assert.equal(E.milestoneStatus(game).length, 6);
+  assert.deepEqual(game.claimedMilestones, []);
+  assert.equal(E.claimMilestone(game, 'first-care').reason, 'incomplete');
+  assert.equal(E.claimMilestone(game, 'does-not-exist').reason, 'unknown');
+  game.needs.food = 30;
+  game = E.care(game, 'feed', 1000000).state;
+  const claimed = E.claimMilestone(game, 'first-care');
+  assert.equal(claimed.claimed, true);
+  assert.equal(claimed.state.xp, game.xp + 20);
+  assert.equal(claimed.state.happiness, Math.min(100, game.happiness + 8));
+  assert.equal(E.claimMilestone(claimed.state, 'first-care').reason, 'already-claimed');
+  assert.equal(E.claimMilestone(claimed.state, 'first-care').state.xp, claimed.state.xp);
+  const restored = E.importSave(E.exportSave(claimed.state));
+  assert.equal(E.milestoneStatus(restored).find(m => m.id === 'first-care').claimed, true);
+  assert.deepEqual(E.sanitize({ claimedMilestones: ['invalid','first-care'] }).claimedMilestones, ['first-care']);
+});
+test('missões de brincar, cartinha e desenho usam ações reais do jogo', () => {
+  let s = E.initial(1000);
+  s = E.interact(s, 'toy', 1000000).state;
+  s = E.interact(s, 'letter', 1000000).state;
+  s = E.interact(s, 'drawing', 1000000).state;
+  const status = E.milestoneStatus(s);
+  for (const id of ['first-toy', 'first-letter', 'first-drawing']) {
+    assert.equal(status.find(m => m.id === id).complete, true, id);
+  }
+  assert.equal(status.find(m => m.id === 'baby-stage').complete, false);
+});
