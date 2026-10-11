@@ -24,6 +24,13 @@ async function drag(page, source, target) {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, acceptDownloads: true });
     const page = await context.newPage();
     page.on('pageerror', error => errors.push(error.message));
+    // QA fixture: new players now start comfortably fed. Set only this test
+    // save to 69% so the feeding interaction remains testable immediately.
+    await page.addInitScript(() => {
+      localStorage.setItem('baby-on-screen-web-v1', JSON.stringify({
+        needs:{food:69,energy:85,hygiene:85,health:95},savedAt:Date.now()
+      }));
+    });
     await page.goto(BASE, { waitUntil: 'domcontentloaded' });
     await page.locator('#baby').waitFor();
     assert.match(await page.title(), /Baby On Screen/);
@@ -195,12 +202,13 @@ async function drag(page, source, target) {
     assert.equal(await sceneSound.getAttribute('aria-pressed'), 'false');
     await page.locator('.tools-settings summary').click();
     // A real player must be able to switch the nursery light and collect a milestone.
+    const wasNight = await page.locator('#scene-light').getAttribute('aria-pressed') === 'true';
     await page.locator('#scene-light').click();
-    assert.equal(await page.locator('#scene-light').getAttribute('aria-pressed'), 'true');
-    assert.ok(await page.locator('#stage').evaluate(el => el.classList.contains('night-mode')));
+    assert.equal(await page.locator('#scene-light').getAttribute('aria-pressed'), String(!wasNight));
+    assert.equal(await page.locator('#stage').evaluate(el => el.classList.contains('night-mode')),!wasNight);
     await page.screenshot({ path: path.join(OUT, 'desktop-night-room.png'), fullPage: true, animations: 'disabled' });
     await page.locator('#scene-light').click();
-    assert.equal(await page.locator('#scene-light').getAttribute('aria-pressed'), 'false');
+    assert.equal(await page.locator('#scene-light').getAttribute('aria-pressed'), String(wasNight));
     assert.ok(await page.locator('[data-claim-milestone]').count() > 0, 'playing earns a collectable quest reward');
     await page.locator('[data-claim-milestone]').first().click();
     assert.match(await page.locator('#feedback').textContent(), /Missão concluída/);
