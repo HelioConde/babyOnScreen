@@ -1,5 +1,12 @@
 # Histórico de versões
 
+## [0.0.7] — 11/10/2026
+
+- Corrigida a superfície nativa do overlay Windows para restringir o desenho da janela transparente à bebê, balão, botão e painel, reduzindo risco de desfoque/oclusão de vídeos reproduzidos atrás do jogo.
+- Clique-through permanece independente da região visual; o balão pode ser desenhado sem capturar o mouse.
+- Arrastar expande temporariamente a superfície para evitar cortes do personagem durante a movimentação.
+- Novas verificações de limites e região nativa no Windows real. A qualidade de vídeo ao fundo exige confirmação física em diferentes GPUs.
+
 ## [0.0.6] — 11/10/2026
 
 - Seleção nativa do monitor da janela Electron, evitando o problema da janela transparente gigante.

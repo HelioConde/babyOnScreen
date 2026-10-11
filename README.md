@@ -11,7 +11,13 @@
 
 **Estes endereços não mudam entre as versões**: por exemplo, da 0.0.3 para a 0.0.4 ou posteriores. Cada release manterá tanto o nome versionado para histórico quanto o nome fixo para download direto. Links permanentes apontam para a **última release estável**; betas ainda precisam ser baixadas pela página específica da beta.
 
-## 0.0.6 — monitor 2, nome no tutorial e atualização sem reinstalar
+## 0.0.7 — compatibilidade do overlay com vídeos em segundo plano
+
+A versão Windows passou a usar **regiões nativas limitadas** para a janela transparente do Electron. Antes, mesmo sem pixels visíveis, o overlay se estendia por todo o monitor e podia ser considerado uma janela oclusiva pelo compositor de vídeo do Chrome/Windows. Agora, só a área visível da bebê, balão, botão e painel participa da superfície nativa, preservando a passagem de mouse do restante. Durante um arrasto a região é ampliada temporariamente para que o cursor não seja cortado.
+
+A mudança foi testada no Electron Windows empacotado: os elementos foram desenhados, as regiões foram aplicadas (quatro regiões, aproximadamente 36,5% do monitor virtual de teste) e os testes de movimentação e painel passaram. **A reprodução de vídeos por GPU no seu computador ainda precisa de teste manual**: não é possível garantir uma correção universal para todos os drivers de vídeo sem reproduzir o problema na sua máquina. Se persistir, informe a versão do Windows, navegador e placa de vídeo.
+
+ monitor 2, nome no tutorial e atualização sem reinstalar
 
 **Trocar de monitor no PC:** no painel, escolha **Monitor 1** ou **Monitor 2**. A janela transparente do Windows é movida fisicamente para a tela selecionada (antes os personagens apenas mudavam de coordenadas dentro de uma janela virtual enorme). A seleção é lembrada ao iniciar. Como alternativa, use o ícone do jogo ao lado do relógio do Windows → **Mover para monitor**. Escolher o monitor atual também traz a bebê e a caixa para o centro da tela. Se somente um monitor aparecer, confirme que o Windows está em **Estender estes vídeos** nas configurações de Tela.
 

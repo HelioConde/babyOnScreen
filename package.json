@@ -1,6 +1,6 @@
 {
   "name": "baby-on-screen",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "private": true,
   "description": "A virtual desktop baby companion with gentle care, a four-period daily cycle and automatic Windows updates.",
   "main": "app/main.cjs",
