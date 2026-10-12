@@ -11,6 +11,16 @@
 
 **Estes endereços não mudam entre as versões**: por exemplo, da 0.0.3 para a 0.0.4 ou posteriores. Cada release manterá tanto o nome versionado para histórico quanto o nome fixo para download direto. Links permanentes apontam para a **última release estável**; betas ainda precisam ser baixadas pela página específica da beta.
 
+## Baby On Screen 0.0.11 — escolha definitiva do nome da bebê
+
+Na primeira abertura do jogo para Windows, se a bebê **ainda não tiver um nome**, aparece automaticamente uma tela integrada ao próprio HUD e ao tutorial, com a animação da personagem. Digite o nome desejado (até 20 caracteres) e clique em **Confirmar nome 💕**. Antes de confirmar, é possível corrigir a escrita; depois disso, o nome fica definitivo.
+
+**Jogadores existentes:** se o progresso já contém um nome, nada muda e a tela não aparece. Se você já jogou mas nunca deu um nome, a atualização apresenta **somente a etapa de nomeação** — sem repetir o tutorial e sem apagar seu progresso, nível, conquistas ou cuidados. A etapa não pode ser pulada nem encerrada sem confirmar.
+
+Após a escolha, o nome aparece como **Nome definitivo da bebê** nas Preferências, apenas para consulta. Reabrir o tutorial ou importar outro salvamento **não muda o nome escolhido**. A identidade é mantida também em um registro local separado do save do jogo.
+
+**Atualização:** quem usa o Setup pode abrir **Atualizações → Verificar agora** e aguardar o botão **Reiniciar e atualizar**. Os links fixos de Setup/Portable acima sempre apontam para a última versão estável.
+
 ## Baby On Screen 0.0.10 — HUD organizado e cabeçalho sempre visível
 
 Na versão Windows, o painel agora usa um **cabeçalho fixo independente** e uma área de rolagem interna: o nome da bebê, a alça para arrastar o painel e o **X para fechar nunca desaparecem** nem cobrem os cuidados enquanto você rola. O conteúdo mantém a posição da caixa mesmo quando Preferências, Monitor ou Atualizações são abertos.

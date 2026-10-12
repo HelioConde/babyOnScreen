@@ -1,5 +1,15 @@
 # Histórico de versões
 
+## [0.0.11] — 12/10/2026
+
+- Tela obrigatória de escolha do nome na primeira abertura da versão Windows quando a bebê ainda não foi nomeada; visual integrado ao HUD, sprites reais e confirmação explícita.
+- Saves existentes com nome preservam automaticamente a identidade e não exibem a etapa novamente.
+- Jogadores antigos sem nome recebem apenas a nomeação, sem repetir o tutorial nem perder o progresso.
+- Nome definitivo: campo somente leitura nas Preferências; impossibilidade de alterar pelo tutorial, ao importar outro save ou ao pular a etapa inicial.
+- Nome agora é salvo somente após confirmar, e uma cópia local da identidade impede que outro arquivo importado renomeie a bebê.
+- Testes de regras, tutorial real no Electron, confirmação, tentativas de renomear, importação e migração de saves anteriores.
+- Mantidos atualizador automático, Setup, Portable, sprites, HUD e tempos de cuidados.
+
 ## [0.0.10] — 12/10/2026
 
 - Novo cabeçalho da janela Windows separado do conteúdo: X de fechar, nome e alça de movimentação permanecem estáticos.
