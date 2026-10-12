@@ -368,10 +368,13 @@ async function main() {
   console.log('Legacy named player:',JSON.stringify(adopted.result?.value));
   assert.equal(adopted.result.value.locked,'Estrelinha');
   assert.equal(adopted.result.value.tourHidden,true);
-  await cdp.request('Runtime.evaluate',{
-    expression:'(() => {const save=JSON.parse(localStorage.getItem("baby-on-screen-v1"));' +
+  // beforeunload saves the previous in-memory baby. Inject the legacy
+  // unnamed save at document_start of the next load, before renderer.js.
+  await cdp.request('Page.addScriptToEvaluateOnNewDocument',{
+    source:'(() => {const key="baby-on-screen-v1";' +
+      'const save=JSON.parse(localStorage.getItem(key));' +
       'save.babyName="";save.careCount=17;save.xp=124;' +
-      'localStorage.setItem("baby-on-screen-v1",JSON.stringify(save));' +
+      'localStorage.setItem(key,JSON.stringify(save));' +
       'localStorage.setItem("baby-on-screen-guide-v1","completed");' +
       'localStorage.removeItem("baby-on-screen-name-locked-v1");})()'
   });
