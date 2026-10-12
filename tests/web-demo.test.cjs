@@ -219,7 +219,7 @@ test('Windows mostra ações principais antes dos estados e mantém X fixo no to
   assert.ok(actions[0]<actions[1]&&actions[1]<actions[2]);
   assert.ok(html.indexOf('data-item="feed"')<html.indexOf('<h2>Como estou</h2>'));
   assert.ok(html.indexOf('class="panel-header"')<html.indexOf('id="welcome-tour"'));
-  assert.ok(css.includes('position:sticky;top:-19px'));
+  assert.ok(css.includes('position:sticky;top:0'));
   assert.ok(css.includes('#close-panel{'));
 });
 test('PC usa metade dos intervalos e não exibe mais ferramentas de teste',()=>{
@@ -236,4 +236,12 @@ test('PC usa metade dos intervalos e não exibe mais ferramentas de teste',()=>{
     assert.ok(html.includes('id="'+id+'"'));
   }
   assert.match(js,/paused: false, speed: 1/);
+});
+
+test('o PC converte uma única vez tempos pendentes da 0.0.7 sem apagar progresso',()=>{
+ const js=fs.readFileSync(path.join(root,'app/renderer.js'),'utf8');
+ assert.match(js,/baby-on-screen-pc-half-cooldowns-v1/);
+ assert.match(js,/game\.cooldowns\[name\] = Math\.max\(now, expiry - full \/ 2\)/);
+ assert.match(js,/game = E\.sanitize\(read\(gameKey, E\.initial\(\)\)\)/);
+ assert.match(js,/name === 'sleep' \? 1600 : 800/);
 });

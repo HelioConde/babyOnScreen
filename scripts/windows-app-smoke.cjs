@@ -295,6 +295,29 @@ async function main() {
     assert.ok(Math.abs(test.height-stableBox.first.height)<2,'details cannot resize panel');
   }
   assert.ok(stableBox.scrollHeight>=stableBox.clientHeight,'expanded content scrolls inside panel');
+  const quality=await cdp.request('Runtime.evaluate',{
+    expression:'(() => {const panel=document.getElementById("panel");' +
+      'const close=document.getElementById("close-panel");' +
+      'panel.scrollTop=0;const first=close.getBoundingClientRect();' +
+      'const firstCare=panel.querySelector(".objects [data-item]")?.dataset.item;' +
+      'const care=panel.querySelector(".objects").getBoundingClientRect();' +
+      'const status=panel.querySelector(".needs").getBoundingClientRect();' +
+      'panel.scrollTop=panel.scrollHeight;const scrolled=close.getBoundingClientRect();' +
+      'const outer=panel.getBoundingClientRect();const html=panel.innerHTML;' +
+      'const out={first:Math.round(first.top),scrolled:Math.round(scrolled.top),' +
+      'inView:scrolled.top>=outer.top-1&&scrolled.bottom<=outer.bottom+1,' +
+      'firstCare,careBeforeNeeds:care.top<status.top,scroll:panel.scrollTop,' +
+      'debugControls:["pause","speed","reset"].filter(id=>!!document.getElementById(id))};' +
+      'panel.scrollTop=0;return out;})()',
+    returnByValue:true
+  });
+  const qualityCheck=quality.result?.value;
+  console.log('Distribution-ready Windows HUD:',JSON.stringify(qualityCheck));
+  assert.equal(qualityCheck.inView,true,'Close X must remain visible while scrolling');
+  assert.equal(qualityCheck.firstCare,'feed');
+  assert.equal(qualityCheck.careBeforeNeeds,true);
+  assert.deepEqual(qualityCheck.debugControls,[]);
+  assert.ok(qualityCheck.scroll>0,'HUD scrolling must be exercised');
   const panelShot = await cdp.request('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
   const panelPng=Buffer.from(panelShot.data,'base64');
   assert.equal(panelPng.toString('hex',0,8),'89504e470d0a1a0a');

@@ -61,6 +61,27 @@
   const options = { sound: stored.sound !== false, paused: false, speed: 1 };
   const PC_ACTION_OPTIONS = Object.freeze({ cooldownFactor: .5 });
   let game = E.sanitize(read(gameKey, E.initial()));
+  // One-time, backwards-compatible conversion for already-running PC
+  // cooldowns created by 0.0.7 (25m essential cares).
+  // The Web default remains untouched.
+  try {
+    const migrationKey = 'baby-on-screen-pc-half-cooldowns-v1';
+    if (localStorage.getItem(migrationKey) !== 'done') {
+      const now = Date.now();
+      for (const [name, expiry] of Object.entries(game.cooldowns)) {
+        const originalSeconds = name === 'school' ? 360 :
+          (E.actions[name] || E.activities[name])?.cooldown;
+        if (!originalSeconds || !Number.isFinite(expiry)) continue;
+        const full = originalSeconds * 1000;
+        // Ignore old expired timers and nonstandard timestamps.
+        if (expiry > now && expiry <= now + full) {
+          game.cooldowns[name] = Math.max(now, expiry - full / 2);
+        }
+      }
+      localStorage.setItem(migrationKey, 'done');
+      localStorage.setItem(gameKey, JSON.stringify(game));
+    }
+  } catch { /* Existing saves remain usable even if storage is unavailable. */ }
   // A closed/paused app does not burn through needs; resume at the chosen speed.
   if (!options.paused) {
     const offlineSeconds = Math.min(180, Math.max(0, (Date.now() - game.savedAt) / 1000));
@@ -492,7 +513,7 @@
       return;
     }
     const previous = E.ageStage(game).id;
-    game = result.state; busyUntil = performance.now() + (name === 'sleep' ? 3200 : 1600);
+    game = result.state; busyUntil = performance.now() + (name === 'sleep' ? 1600 : 800);
     careAction = name;
     baby.classList.remove('sleeping', 'eating');
     if (name === 'sleep') baby.classList.add('sleeping');
