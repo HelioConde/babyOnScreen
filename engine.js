@@ -321,7 +321,13 @@
     const s = sanitize(input);
     return finite(now, Date.now(), 0, 9999999999999) >= (s.cooldowns[key] || 0);
   }
-  function care(input, name, now) {
+  // Desktop can use shorter waits without changing the 25-minute Web rhythm.
+  // Optional modifiers are applied only at the moment an action succeeds.
+  function actionCooldownMs(item, opts = {}) {
+    const factor = opts && opts.cooldownFactor === .5 ? .5 : 1;
+    return Math.round(item.cooldown * 1000 * factor);
+  }
+  function care(input, name, now, opts) {
     const s = sanitize(input), item = actions[name], time = finite(now, Date.now(), 0, 9999999999999);
     if (!item) return { state: s, applied: false, reason: 'unknown' };
     if (!ready(s, name, time)) return { state: s, applied: false, reason: 'cooldown' };
@@ -334,12 +340,12 @@
     s.xp = clamp(s.xp + 10, 0, 1000000);
     s.careCount++; s.lastCare = name;
     s.skills.bond = clamp(s.skills.bond + 1, 0, 10000);
-    s.cooldowns[name] = time + item.cooldown * 1000;
+    s.cooldowns[name] = time + actionCooldownMs(item, opts);
     s.savedAt = time;
     const achievements = unlock(s);
     return { state: s, applied: true, reason: 'ok', achievements };
   }
-  function interact(input, name, now) {
+  function interact(input, name, now, opts) {
     const s = sanitize(input), item = activities[name], time = finite(now, Date.now(), 0, 9999999999999);
     if (!item) return { state: s, applied: false, reason: 'unknown' };
     if (!ready(s, name, time)) return { state: s, applied: false, reason: 'cooldown' };
@@ -349,7 +355,7 @@
     s.happiness = clamp(s.happiness + item.happiness, 0, 100);
     s.skills[item.skill] = clamp(s.skills[item.skill] + 1, 0, 10000);
     s.interactions++; s.xp = clamp(s.xp + 7, 0, 1000000);
-    s.cooldowns[name] = time + item.cooldown * 1000;
+    s.cooldowns[name] = time + actionCooldownMs(item, opts);
     const notes = {
       toy: 'Brincamos com um brinquedo!',
       letter: 'Ganhei uma cartinha carinhosa!',
