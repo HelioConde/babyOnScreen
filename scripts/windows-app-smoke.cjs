@@ -106,15 +106,26 @@ async function main() {
   const tutorialNaming = await cdp.request('Runtime.evaluate',{
     expression:'(() => {const input=document.getElementById("welcome-baby-name");' +
       'if (!input || document.getElementById("welcome-name-field").hidden) return null;' +
+      'document.getElementById("close-panel").click();' +
+      'const blocked=!document.getElementById("panel").hidden;' +
+      'document.getElementById("welcome-skip").click();' +
+      'const before=JSON.parse(localStorage.getItem("baby-on-screen-v1")).babyName;' +
       'input.value="Estrelinha";input.dispatchEvent(new Event("input",{bubbles:true}));' +
-      'return {stored:JSON.parse(localStorage.getItem("baby-on-screen-v1")).babyName,' +
+      'const afterTyping=JSON.parse(localStorage.getItem("baby-on-screen-v1")).babyName;' +
+      'document.getElementById("welcome-next").click();' +
+      'return {blocked,before,afterTyping,' +
+      'stored:JSON.parse(localStorage.getItem("baby-on-screen-v1")).babyName,' +
+      'locked:localStorage.getItem("baby-on-screen-name-locked-v1"),' +
       'settings:document.getElementById("desktop-name-input").value,' +
-      'label:document.getElementById("desktop-name-label").textContent};})()',
+      'label:document.getElementById("desktop-name-label").textContent,' +
+      'nextStep:document.getElementById("welcome-count").textContent};})()',
     returnByValue:true
   });
   assert.deepEqual(tutorialNaming.result?.value,{
-    stored:'Estrelinha',settings:'Estrelinha',label:'Estrelinha'
-  },'The name entered in the very first tutorial screen must persist');
+    blocked:true,before:'',afterTyping:'',
+    stored:'Estrelinha',locked:'Estrelinha',settings:'Estrelinha',
+    label:'Estrelinha',nextStep:'Passo 2 de 5'
+  },'Name must be explicitly confirmed, saved once and impossible to bypass');
   let previewCheck;
   for (let attempt=0;attempt<25;attempt++) {
     previewCheck=await cdp.request('Runtime.evaluate',{
@@ -135,7 +146,7 @@ async function main() {
   const shotIntro = await cdp.request('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
   fs.writeFileSync(path.join(root,'dist','windows-onboarding-smoke.png'),Buffer.from(shotIntro.data,'base64'));
   const checked = await cdp.request('Runtime.evaluate', {
-    expression:'(() => {const steps=[];for(let i=0;i<4;i++){' +
+    expression:'(() => {const steps=[];for(let i=0;i<3;i++){' +
       'document.getElementById("welcome-next").click();steps.push(document.getElementById("welcome-count").textContent);}' +
       'const finalLabel=document.getElementById("welcome-next").textContent;' +
       'document.getElementById("welcome-next").click();' +
@@ -149,7 +160,7 @@ async function main() {
   });
   const guide=checked.result?.value;
   console.log('Tour navigation:',JSON.stringify(guide));
-  assert.equal(guide?.steps?.join('|'),'Passo 2 de 5|Passo 3 de 5|Passo 4 de 5|Passo 5 de 5');
+  assert.equal(guide?.steps?.join('|'),'Passo 3 de 5|Passo 4 de 5|Passo 5 de 5');
   assert.match(guide.finalLabel,/Começar a cuidar/);
   assert.equal(guide.persisted,'completed');
   assert.equal(guide.dismissed,true);
@@ -189,17 +200,19 @@ async function main() {
     expression: '(() => {' +
       'if(document.getElementById("panel").hidden) document.getElementById("launcher").click();' +
       'const input=document.getElementById("desktop-name-input");' +
+      'const readonly=input.readOnly;' +
       'input.value="Luna"; input.dispatchEvent(new Event("input",{bubbles:true}));' +
       'const panel=document.getElementById("panel"); const r=panel.getBoundingClientRect();' +
       'const save=JSON.parse(localStorage.getItem("baby-on-screen-v1"));' +
-      'return {open:!panel.hidden,name:save.babyName,label:document.getElementById("desktop-name-label").textContent,' +
+      'return {open:!panel.hidden,readonly,name:save.babyName,label:document.getElementById("desktop-name-label").textContent,' +
       'right:r.right,bottom:r.bottom,width:innerWidth,height:innerHeight};' +
     '})()',
     returnByValue:true
   });
   const p=panelCheck.result?.value;
   console.log('Windows UI panel check:',JSON.stringify(p));
-  assert.ok(p?.open && p?.name==='Luna' && p?.label==='Luna');
+  assert.ok(p?.open && p?.readonly && p?.name==='Estrelinha' && p?.label==='Estrelinha',
+    'Settings must not change the permanent baby name');
   assert.ok(p.right<=p.width+2 && p.bottom<=p.height+2, 'The panel must fit on screen');
   const monitorState = await cdp.request('Runtime.evaluate',{
     expression:'(async () => {const info=await window.babyDesktop.desktopLayout();' +

@@ -79,14 +79,16 @@ test('rotina diária e felicidade também aparecem no painel Windows', () => {
   assert.match(jsPC, /E\.claimDaily\(game, button\.dataset\.claimDaily\)/);
 });
 
-test('nome da bebê pode ser alterado em Web e Windows e salvo no motor compartilhado', () => {
+test('Web mantém seu editor e no Windows o nome é definitivo após confirmação', () => {
   const pc = fs.readFileSync(path.join(root,'app','index.html'),'utf8');
   const desktop = fs.readFileSync(path.join(root,'app','renderer.js'),'utf8');
   assert.match(html, /id="baby-name-input"/);
   assert.match(html, /id="baby-name-label"/);
   assert.match(pc, /id="desktop-name-input"/);
   assert.match(script, /E\.renameBaby\(game, e\.target\.value\)/);
-  assert.match(desktop, /E\.renameBaby\(game, event\.target\.value\)/);
+  assert.ok(desktop.includes("E.nameBabyOnce(game, $('welcome-baby-name').value)"));
+  assert.ok(!desktop.includes('E.renameBaby('));
+  assert.match(pc,/id="desktop-name-input"[^>]+readonly/);
 });
 
 test('Web e Windows mostram o MESMO sprite sem escala ou atlas divergente', () => {
@@ -190,7 +192,9 @@ test('nome da bebê faz parte do tutorial e é salvo no progresso compartilhado'
   const desktop=fs.readFileSync(path.join(root,'app/renderer.js'),'utf8');
   assert.match(htmlPC,/id="welcome-baby-name"/);
   assert.match(htmlPC,/id="welcome-name-field"/);
-  assert.match(desktop,/game = E.renameBaby\(game, event.target.value\)/);
+  assert.ok(desktop.includes('function commitBabyName()'));
+  assert.ok(desktop.includes('localStorage.setItem(nameLockKey, result.name)'));
+  assert.ok(desktop.includes("if (!game.babyName) openWelcome({ onlyName: guideCompleted })"));
   assert.match(desktop,/\$\('desktop-name-input'\)\.value = game\.babyName/);
   assert.match(desktop,/\$\('welcome-name-field'\)\.hidden = welcomeIndex !== 0/);
 });
@@ -281,4 +285,15 @@ test('o cabeçalho fica fora da área rolável; o X e a alça não somem ao rola
   assert.match(css,/\.panel-scroll\{[\s\S]*?overflow-y:auto/);
   assert.match(js,/panelScroll\.scrollTop = 0/);
   for(const id of ['pause','speed','reset']) assert.ok(!html.includes('id="'+id+'"'));
+});
+
+test('nome definitivo não pode ser pulado ou alterado depois, nem pela importação',()=>{
+  const htmlPC=fs.readFileSync(path.join(root,'app/index.html'),'utf8');
+  const desktop=fs.readFileSync(path.join(root,'app/renderer.js'),'utf8');
+  assert.ok(htmlPC.includes('id="welcome-name-error"'));
+  assert.ok(htmlPC.includes('depois de confirmar, o nome será definitivo'));
+  assert.match(htmlPC,/id="desktop-name-input"[^>]+readonly/);
+  assert.ok(desktop.includes('if (!game.babyName) return; // The name cannot be dismissed or skipped.'));
+  assert.ok(desktop.includes('if (fixedBabyName) incoming.babyName = fixedBabyName'));
+  assert.ok(!desktop.includes("$('desktop-name-input').addEventListener('input'"));
 });
