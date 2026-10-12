@@ -415,6 +415,16 @@
     s.babyName = normalizeBabyName(name);
     return s;
   }
+  // Windows first-run: a baby may receive its name only once. Web's
+  // existing renameBaby API remains available for older Web saves.
+  function nameBabyOnce(input, candidate) {
+    const state = sanitize(input);
+    if (state.babyName) return { state, applied: false, reason: 'already-named' };
+    const name = normalizeBabyName(candidate);
+    if (!name) return { state, applied: false, reason: 'empty-name' };
+    state.babyName = name;
+    return { state, applied: true, name };
+  }
   function dailyStatus(input, now = Date.now()) {
     const s = sanitize(input), today = dayKey(now);
     const record = s.daily.date === today ? s.daily : emptyDaily(today);
@@ -466,6 +476,6 @@
   return Object.freeze({
     VERSION, defaults, rates, MIN_CARE_INTERVAL_MS, dayPeriods, timePeriod, waitLabel, stages, actions, activities, schoolSubjects, schoolQuestions, milestones, dailyGoals, speech,
     initial, sanitize, tick, advanceClock, care, interact, school, ageStage, ageDays, level, concern, urgency,
-    speak, ready, exportSave, importSave, memorySummary, milestoneStatus, claimMilestone, dailyStatus, claimDaily, renameBaby, clamp
+    speak, ready, exportSave, importSave, memorySummary, milestoneStatus, claimMilestone, dailyStatus, claimDaily, renameBaby, nameBabyOnce, clamp
   });
 });

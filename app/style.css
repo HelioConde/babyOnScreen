@@ -238,3 +238,12 @@ h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#765c82;ma
   .panel-header{position:relative;top:auto;margin:0;padding:10px 12px}
   .panel-scroll{padding:9px 12px 12px}
 }
+
+/* Naming is an irreversible first-run decision in the installed game. */
+.welcome-name-error{color:#b04463;font-size:11px;font-weight:800;margin:0}
+.welcome-name-error[hidden]{display:none}
+.welcome-name-field input:focus-visible{outline:3px solid #b98ee4;outline-offset:2px}
+.welcome-next:disabled{opacity:.55;cursor:not-allowed}
+.welcome-controls button[hidden]{display:none}
+#desktop-name-input[readonly]{background:#f6f0fa;color:#745888;border-color:#e4d4eb;cursor:default}
+.name-locked-note{display:block;margin:0 0 9px;font-size:10px;color:#846e95}

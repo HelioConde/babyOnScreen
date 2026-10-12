@@ -20,7 +20,8 @@
     <div class="welcome-name-field" id="welcome-name-field">
       <label for="welcome-baby-name">Como vai se chamar sua bebê?</label>
       <input id="welcome-baby-name" type="text" maxlength="20" autocomplete="off" placeholder="Escolha um nome carinhoso">
-      <small>É opcional. Você pode mudar o nome depois nas Preferências.</small>
+      <small>Escolha com carinho: depois de confirmar, o nome será definitivo.</small>
+      <p id="welcome-name-error" class="welcome-name-error" role="alert" hidden>Digite um nome antes de continuar.</p>
     </div>
     <div id="welcome-hint" class="welcome-hint">As necessidades ficam pausadas durante o guia.</div>
     <div id="welcome-progress" class="welcome-progress" role="progressbar" aria-label="Progresso do tutorial" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1"><span></span></div>
@@ -91,7 +92,8 @@
     <summary>⚙️ Preferências e salvamento</summary>
     <label><input type="checkbox" id="sound"> Ativar sons</label>
 
-    <label>Nome da bebê <input id="desktop-name-input" type="text" maxlength="20" autocomplete="off" placeholder="Um nome especial"></label>
+    <label>Nome definitivo da bebê <input id="desktop-name-input" type="text" maxlength="20" readonly aria-readonly="true" title="O nome é escolhido uma única vez no primeiro acesso"></label>
+    <small class="name-locked-note">🔒 Definido no primeiro acesso. Não pode ser alterado.</small>
     <div class="utility-buttons"><button id="export" type="button">↓ Exportar progresso</button><label class="import-label" for="import-file">↑ Importar progresso<input type="file" accept=".json,application/json" id="import-file"></label></div>
   </details>
   <details class="extras" id="desktop-display-settings">

@@ -325,3 +325,19 @@ test('Windows reduz pela metade cooldowns de cuidado e atividade sem alterar a W
   assert.equal(webSchool.state.cooldowns.school-now, 360000);
   assert.equal(pcSchool.state.cooldowns.school-now, 180000);
 });
+
+test('o nome pode ser escolhido uma vez, preservado pelo save e nunca substituído pela segunda tentativa',()=>{
+  const first=E.initial(1000);
+  assert.equal(E.nameBabyOnce(first,'   ').reason,'empty-name');
+  assert.equal(first.babyName,'');
+  const result=E.nameBabyOnce(first,'  Estrelinha   do  céu  ');
+  assert.equal(result.applied,true);
+  assert.equal(result.name,'Estrelinha do céu');
+  assert.equal(first.babyName,'','não altera estado original');
+  const attempt=E.nameBabyOnce(result.state,'Outro nome');
+  assert.equal(attempt.applied,false);
+  assert.equal(attempt.reason,'already-named');
+  assert.equal(attempt.state.babyName,'Estrelinha do céu');
+  assert.equal(E.importSave(E.exportSave(result.state)).babyName,'Estrelinha do céu');
+  assert.equal(E.nameBabyOnce(E.sanitize({needs:{food:61}}),'Mimi').applied,true);
+});
