@@ -11,6 +11,16 @@
 
 **Estes endereços não mudam entre as versões**: por exemplo, da 0.0.3 para a 0.0.4 ou posteriores. Cada release manterá tanto o nome versionado para histórico quanto o nome fixo para download direto. Links permanentes apontam para a **última release estável**; betas ainda precisam ser baixadas pela página específica da beta.
 
+## Baby On Screen 0.0.10 — HUD organizado e cabeçalho sempre visível
+
+Na versão Windows, o painel agora usa um **cabeçalho fixo independente** e uma área de rolagem interna: o nome da bebê, a alça para arrastar o painel e o **X para fechar nunca desaparecem** nem cobrem os cuidados enquanto você rola. O conteúdo mantém a posição da caixa mesmo quando Preferências, Monitor ou Atualizações são abertos.
+
+O jogo continua mostrando primeiro **Mamadeira → Fralda → Berço**, seguidos pelos outros cuidados; depois aparecem relógio do dia, necessidades, evolução, missões e rotina. **Configurações e atualizações ficam somente no final**, recolhidas inicialmente.
+
+Os tempos das ações da versão Windows seguem **50% menores**, incluindo mamadeira, berço e fralda a **12min30s**, sem mudar os 25 minutos da Web. Controles de testes (velocidade, pausa e reset) permanecem fora do HUD. Saves e preferências do jogador são preservados.
+
+A estrutura, a rolagem e a posição fixa do X foram verificadas no Electron Windows empacotado. A página [itch.io](docs/ITCH_IO_STORE.md) continua como preparação para uma futura publicação gratuita com apoio voluntário; pagamentos ainda não estão ativos.
+
 ## Baby On Screen 0.0.9 — cuidados na frente, configurações no final
 
 O painel da edição **Windows** agora abre diretamente com as opções de cuidado: **Mamadeira → Fralda → Berço**, seguidas de remédio, brinquedo, cartinha e desenho. Depois aparecem o ciclo do dia, bem-estar, evolução, escola, memórias, missões e rotina.

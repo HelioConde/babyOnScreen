@@ -1,5 +1,14 @@
 # Histórico de versões
 
+## [0.0.10] — 12/10/2026
+
+- Novo cabeçalho da janela Windows separado do conteúdo: X de fechar, nome e alça de movimentação permanecem estáticos.
+- Apenas a área abaixo do cabeçalho tem rolagem própria, evitando que a caixinha de cuidados desapareça atrás do título.
+- Confirmada a prioridade: mamadeira, fralda, berço e demais ações antes das informações; configurações e atualizações no final.
+- Mantidos os tempos da versão PC pela metade, sem controles de velocidade, pausa ou reinício de teste.
+- Teste real do Electron valida rolagem completa, estabilidade do X, painel estável com opções expandidas e ausência de comandos de teste.
+- Preservados os saves, o atualizador automático, os downloads Setup e Portable, e a versão Web.
+
 ## [0.0.9] — 12/10/2026
 
 - HUD Windows reorganizado para abrir com a caixinha de cuidados imediatamente abaixo do cabeçalho, antes do ciclo do dia e das estatísticas.
