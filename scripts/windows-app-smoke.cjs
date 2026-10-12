@@ -307,6 +307,11 @@ async function main() {
       'const out={first:Math.round(first.top),scrolled:Math.round(scrolled.top),' +
       'inView:scrolled.top>=outer.top-1&&scrolled.bottom<=outer.bottom+1,' +
       'firstCare,careBeforeNeeds:care.top<status.top,scroll:panel.scrollTop,' +
+      'careBeforeClock:panel.querySelector("#hud-care").getBoundingClientRect().top < ' +
+      'panel.querySelector("#day-period").getBoundingClientRect().top,' +
+      'settingsBelowCare:panel.querySelector("#hud-settings").offsetTop > panel.querySelector("#hud-care").offsetTop,' +
+      'monitorInSettings:!!document.querySelector("#desktop-display-settings .monitor-controls"),' +
+      'settingsCollapsed:!document.getElementById("desktop-display-settings").open,' +
       'debugControls:["pause","speed","reset"].filter(id=>!!document.getElementById(id))};' +
       'panel.scrollTop=0;return out;})()',
     returnByValue:true
@@ -316,6 +321,10 @@ async function main() {
   assert.equal(qualityCheck.inView,true,'Close X must remain visible while scrolling');
   assert.equal(qualityCheck.firstCare,'feed');
   assert.equal(qualityCheck.careBeforeNeeds,true);
+  assert.equal(qualityCheck.careBeforeClock,true,'care actions must be the first major section');
+  assert.equal(qualityCheck.settingsBelowCare,true,'settings must be below gameplay');
+  assert.equal(qualityCheck.monitorInSettings,true,'monitor selector must be inside bottom settings');
+  assert.equal(qualityCheck.settingsCollapsed,true,'advanced monitor settings should start collapsed');
   assert.deepEqual(qualityCheck.debugControls,[]);
   assert.ok(qualityCheck.scroll>0,'HUD scrolling must be exercised');
   const panelShot = await cdp.request('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});

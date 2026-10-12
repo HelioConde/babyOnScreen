@@ -199,3 +199,15 @@ h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#765c82;ma
 .objects .item:nth-child(-n+3){border-color:#d7b8e7;background:#fff9f3}
 .objects .item:nth-child(-n+3) img{width:30px;height:30px}
 .objects .item{min-height:70px}
+
+/* Player-first PC HUD (0.0.9): care actions precede stats, clock and settings.
+   Keep secondary preferences below gameplay and collapsed by default. */
+.hud-care{margin-top:4px}
+.hud-care h2{margin-top:12px}
+.hud-care .objects{margin-bottom:3px}
+.hud-settings{margin-top:17px;padding-top:5px;border-top:1px solid #eee0ef}
+.hud-settings .settings-heading{margin:10px 0 5px;letter-spacing:.09em}
+.hud-settings .extras{margin:0;padding:12px 0}
+#desktop-display-settings .monitor-controls{margin-top:10px;margin-bottom:4px}
+#desktop-display-settings .monitor-controls small{line-height:1.45}
+#desktop-display-settings .update-quick{margin-top:1px}

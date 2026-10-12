@@ -30,9 +30,8 @@
     </div>
   </section>
 
-  <div class="monitor-controls"><label for="monitor-select">🖥️ Monitor</label><select id="monitor-select" aria-label="Mover bebê e painel para outro monitor"><option value="">Monitor principal</option></select><small>Escolha o monitor para mover a janela do jogo. Arraste a caixa pelo topo.</small><button id="update-quick" type="button" class="update-quick">↻ Atualizações automáticas</button></div>
-  <div class="day-period" id="day-period" data-period="manha"><span id="day-period-icon">☀️</span><div><strong id="day-period-label">Manhã</strong><small id="day-period-activity">Acordar, brincar e aprender</small></div><span class="day-period-hint">Ciclo do dia</span></div>
-  <h2>Caixinha de cuidados <small>Arraste até ela</small></h2>
+  <section id="hud-care" aria-label="Cuidados da bebê" class="hud-care">
+    <h2>Caixinha de cuidados <small>Arraste até ela</small></h2>
   <div class="objects">
     <button type="button" data-item="feed" class="item" aria-label="Arrastar mamadeira"><img src="../assets/icons/bottle.svg" alt=""><span>Mamadeira</span><small data-wait="feed"></small></button>
     <button type="button" data-item="diaper" class="item" aria-label="Arrastar fralda"><img src="../assets/icons/diaper.svg" alt=""><span>Fralda</span><small data-wait="diaper"></small></button>
@@ -43,6 +42,8 @@
     <button type="button" data-item="drawing" class="item" aria-label="Arrastar desenho"><img src="../assets/icons/drawing.svg" alt=""><span>Desenho</span><small data-wait="drawing"></small></button>
   </div>
   <p id="feedback" class="feedback" role="status" aria-live="polite">Quando ela precisar de algo, arraste um item até a personagem.</p>
+  </section>
+  <div class="day-period" id="day-period" data-period="manha"><span id="day-period-icon">☀️</span><div><strong id="day-period-label">Manhã</strong><small id="day-period-activity">Acordar, brincar e aprender</small></div><span class="day-period-hint">Ciclo do dia</span></div>
   <div class="level-row"><span id="life-day">Dia 1</span><strong id="level">Nível 1</strong><span id="care-count">0 cuidados</span></div>
   <div class="mood" id="mood"><span id="mood-icon">🥰</span><div><strong id="mood-title">Estou feliz!</strong><small id="mood-description">Obrigada por cuidar de mim</small></div></div>
   <div class="desktop-happiness"><span>💕 Felicidade</span><progress id="desktop-happiness" max="100" value="80">80%</progress><output id="desktop-happiness-value" for="desktop-happiness">80%</output></div>
@@ -83,12 +84,18 @@
     <p>Novos desafios de cuidados, brincadeiras e criatividade todos os dias.</p>
     <div id="desktop-daily-list" class="desktop-daily-list"></div>
   </details>
+  <section class="hud-settings" id="hud-settings" aria-label="Configurações e ajustes">
+    <h2 class="settings-heading">⚙️ Configurações</h2>
   <details class="extras">
     <summary>⚙️ Preferências e salvamento</summary>
     <label><input type="checkbox" id="sound"> Ativar sons</label>
 
     <label>Nome da bebê <input id="desktop-name-input" type="text" maxlength="20" autocomplete="off" placeholder="Um nome especial"></label>
     <div class="utility-buttons"><button id="export" type="button">↓ Exportar progresso</button><label class="import-label" for="import-file">↑ Importar progresso<input type="file" accept=".json,application/json" id="import-file"></label></div>
+  </details>
+  <details class="extras" id="desktop-display-settings">
+    <summary>🖥️ Monitor e aplicativo</summary>
+  <div class="monitor-controls"><label for="monitor-select">🖥️ Monitor</label><select id="monitor-select" aria-label="Mover bebê e painel para outro monitor"><option value="">Monitor principal</option></select><small>Escolha o monitor para mover a janela do jogo. Arraste a caixa pelo topo.</small><button id="update-quick" type="button" class="update-quick">↻ Atualizações automáticas</button></div>
   </details>
   <details class="extras update-panel" id="desktop-updates">
     <summary>🔄 Atualizações <span id="update-chip">Disponibilidade</span></summary>
@@ -100,6 +107,7 @@
       <button id="update-release" type="button" hidden>Baixar no GitHub</button>
     </div>
   </details>
+  </section>
   <footer class="panel-footer"><small id="version">Baby On Screen</small><button type="button" id="welcome-reopen" class="welcome-reopen">? Como jogar</button><button type="button" id="hide">Ocultar personagem</button></footer>
 </aside>
 <div id="drag-ghost" class="drag-ghost" hidden><img id="drag-icon" alt="" src="../assets/icons/bottle.svg"></div>

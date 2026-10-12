@@ -245,3 +245,21 @@ test('o PC converte uma única vez tempos pendentes da 0.0.7 sem apagar progress
  assert.match(js,/game = E\.sanitize\(read\(gameKey, E\.initial\(\)\)\)/);
  assert.match(js,/name === 'sleep' \? 1600 : 800/);
 });
+
+test('PC inicia pelos cuidados; configurações e monitor ficam no final do HUD',()=>{
+  const html=fs.readFileSync(path.join(root,'app/index.html'),'utf8');
+  const css=fs.readFileSync(path.join(root,'app/style.css'),'utf8');
+  const where=value=>html.indexOf(value);
+  assert.ok(where('id="hud-care"')>where('id="welcome-tour"'));
+  assert.ok(where('data-item="feed"')>where('id="hud-care"'));
+  assert.ok(where('data-item="feed"')<where('id="day-period"'));
+  assert.ok(where('id="day-period"')<where('id="life-day"'));
+  assert.ok(where('id="hud-settings"')>where('id="desktop-daily"'));
+  assert.ok(where('id="desktop-display-settings"')>where('id="hud-settings"'));
+  assert.ok(where('class="monitor-controls"')>where('id="hud-settings"'));
+  assert.ok(where('id="desktop-updates"')>where('id="desktop-display-settings"'));
+  assert.ok(where('id="desktop-updates"')<where('class="panel-footer"'));
+  assert.match(html,/<details class="extras" id="desktop-display-settings">/);
+  assert.match(css,/\.panel-header\{\s*position:sticky;top:0/);
+  assert.match(css,/\.hud-settings\{margin-top:/);
+});
