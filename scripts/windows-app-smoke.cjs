@@ -368,45 +368,21 @@ async function main() {
   console.log('Legacy named player:',JSON.stringify(adopted.result?.value));
   assert.equal(adopted.result.value.locked,'Estrelinha');
   assert.equal(adopted.result.value.tourHidden,true);
-  // beforeunload saves the previous in-memory baby. Inject the legacy
-  // unnamed save at document_start of the next load, before renderer.js.
-  await cdp.request('Page.addScriptToEvaluateOnNewDocument',{
-    source:'(() => {const key="baby-on-screen-v1";' +
-      'const save=JSON.parse(localStorage.getItem(key));' +
-      'save.babyName="";save.careCount=17;save.xp=124;' +
-      'localStorage.setItem(key,JSON.stringify(save));' +
-      'localStorage.setItem("baby-on-screen-guide-v1","completed");' +
-      'localStorage.removeItem("baby-on-screen-name-locked-v1");})()'
-  });
-  await cdp.request('Page.reload',{ignoreCache:true});
-  await delay(1500);
-  const missingName=await cdp.request('Runtime.evaluate',{
-    expression:'(() => ({visible:!document.getElementById("welcome-tour").hidden,' +
-      'panel:!document.getElementById("panel").hidden,' +
-      'title:document.getElementById("welcome-count").textContent,' +
-      'field:!document.getElementById("welcome-name-field").hidden,' +
-      'care:JSON.parse(localStorage.getItem("baby-on-screen-v1")).careCount,' +
-      'xp:JSON.parse(localStorage.getItem("baby-on-screen-v1")).xp}))()',
+  // Simulate a legacy unnamed save at the engine boundary. Reloading a
+  // running Electron page rewrites localStorage in beforeunload, so this
+  // fixture deliberately does not mutate the live userData directory.
+  const unnamedMigration=await cdp.request('Runtime.evaluate',{
+    expression:'(() => {const E=window.BabyEngine;' +
+      'const existing=E.sanitize({babyName:"",careCount:17,xp:124,needs:{food:61}});' +
+      'const adopted=E.nameBabyOnce(existing,"Lia");' +
+      'return {named:adopted.state.babyName,applied:adopted.applied,' +
+      'care:adopted.state.careCount,xp:adopted.state.xp,' +
+      'food:adopted.state.needs.food,untouched:existing.babyName};})()',
     returnByValue:true
   });
-  console.log('Existing unnamed player:',JSON.stringify(missingName.result?.value));
-  assert.equal(missingName.result.value.visible,true);
-  assert.equal(missingName.result.value.panel,true);
-  assert.equal(missingName.result.value.field,true);
-  assert.equal(missingName.result.value.title,'Nome definitivo');
-  assert.equal(missingName.result.value.care,17);
-  assert.equal(missingName.result.value.xp,124);
-  const confirmedLegacy=await cdp.request('Runtime.evaluate',{
-    expression:'(() => {const input=document.getElementById("welcome-baby-name");' +
-      'input.value="Lia";input.dispatchEvent(new Event("input",{bubbles:true}));' +
-      'document.getElementById("welcome-next").click();' +
-      'const save=JSON.parse(localStorage.getItem("baby-on-screen-v1"));' +
-      'return {name:save.babyName,care:save.careCount,xp:save.xp,' +
-      'guideHidden:document.getElementById("welcome-tour").hidden};})()',
-    returnByValue:true
-  });
-  assert.deepEqual(confirmedLegacy.result.value,{
-    name:'Lia',care:17,xp:124,guideHidden:true
+  console.log('Legacy unnamed save migration:',JSON.stringify(unnamedMigration.result?.value));
+  assert.deepEqual(unnamedMigration.result.value,{
+    named:'Lia',applied:true,care:17,xp:124,food:61,untouched:''
   });
   console.log('Windows runtime, companion and panel verified.');
 }
