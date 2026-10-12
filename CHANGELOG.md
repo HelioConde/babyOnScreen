@@ -1,5 +1,14 @@
 # Histórico de versões
 
+## [0.0.8] — 12/10/2026
+
+- Intervalos das ações no Windows reduzidos em 50% sem alterar os tempos da Web.
+- Temporizadores ativos criados por versões anteriores ajustados na primeira abertura após a atualização.
+- Mamadeira, fralda e berço em destaque antes das barras de necessidades.
+- Botão de fechar e cabeçalho fixos enquanto o painel rola.
+- Removidas da interface Windows as opções de desenvolvimento de velocidade, pausa e recomeçar; opções essenciais e salvamentos preservados.
+- Preparados textos e checklist para publicação gratuita com contribuições voluntárias na itch.io.
+
 ## [0.0.7] — 11/10/2026
 
 - Corrigida a superfície nativa do overlay Windows para restringir o desenho da janela transparente à bebê, balão, botão e painel, reduzindo risco de desfoque/oclusão de vídeos reproduzidos atrás do jogo.

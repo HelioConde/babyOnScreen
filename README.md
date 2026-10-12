@@ -11,13 +11,26 @@
 
 **Estes endereços não mudam entre as versões**: por exemplo, da 0.0.3 para a 0.0.4 ou posteriores. Cada release manterá tanto o nome versionado para histórico quanto o nome fixo para download direto. Links permanentes apontam para a **última release estável**; betas ainda precisam ser baixadas pela página específica da beta.
 
+## Baby On Screen 0.0.8 — painel pronto para jogadores e distribuição
+
+Na versão **Windows**, as ações e cuidados agora aguardam **metade do tempo anterior**: mamadeira, fralda e berço passam de 25 min para **12 min e 30 s**. Brinquedo, cartinha, desenho, remédio e escola também usam metade dos intervalos anteriores. As animações de uso da mamadeira e de descanso foram encurtadas. A **versão Web continua com as regras anteriores de 25 minutos**.
+
+A **Caixinha de cuidados** aparece antes das barras de necessidades, destacando **mamadeira, fralda e berço**. O cabeçalho acompanha a rolagem: o botão **X** para fechar continua visível. Removidos da edição Windows os controles de desenvolvimento de velocidade, pausa e recomeçar. Permanecem som, nome, exportação/importação do progresso e atualizações automáticas. Preferências antigas de pausa/velocidade são ignoradas na versão Windows; o save da bebê é mantido.
+
+### Preparação para itch.io e apoio voluntário
+
+- [Rascunho completo da página de divulgação e descrição do jogo](docs/ITCH_IO_STORE.md)
+- [Checklist de lançamento, direitos autorais e testes](docs/ITCH_IO_CHECKLIST.md)
+
+**Publicação e pagamentos ainda dependem da criação/configuração da página na itch.io e da verificação de licenças de imagens, sprites, músicas e fontes.** Não há ligação de pagamento ativa dentro do jogo.
+
 ## 0.0.7 — compatibilidade do overlay com vídeos em segundo plano
 
 A versão Windows passou a usar **regiões nativas limitadas** para a janela transparente do Electron. Antes, mesmo sem pixels visíveis, o overlay se estendia por todo o monitor e podia ser considerado uma janela oclusiva pelo compositor de vídeo do Chrome/Windows. Agora, só a área visível da bebê, balão, botão e painel participa da superfície nativa, preservando a passagem de mouse do restante. Durante um arrasto a região é ampliada temporariamente para que o cursor não seja cortado.
 
 A mudança foi testada no Electron Windows empacotado: os elementos foram desenhados, as regiões foram aplicadas (quatro regiões, aproximadamente 36,5% do monitor virtual de teste) e os testes de movimentação e painel passaram. **A reprodução de vídeos por GPU no seu computador ainda precisa de teste manual**: não é possível garantir uma correção universal para todos os drivers de vídeo sem reproduzir o problema na sua máquina. Se persistir, informe a versão do Windows, navegador e placa de vídeo.
 
- monitor 2, nome no tutorial e atualização sem reinstalar
+## 0.0.6 — monitor 2, nome no tutorial e atualização sem reinstalar
 
 **Trocar de monitor no PC:** no painel, escolha **Monitor 1** ou **Monitor 2**. A janela transparente do Windows é movida fisicamente para a tela selecionada (antes os personagens apenas mudavam de coordenadas dentro de uma janela virtual enorme). A seleção é lembrada ao iniciar. Como alternativa, use o ícone do jogo ao lado do relógio do Windows → **Mover para monitor**. Escolher o monitor atual também traz a bebê e a caixa para o centro da tela. Se somente um monitor aparecer, confirme que o Windows está em **Estender estes vídeos** nas configurações de Tela.
 
