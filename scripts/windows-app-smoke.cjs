@@ -284,7 +284,8 @@ async function main() {
       'const afterClose=panel.getBoundingClientRect();' +
       'return {first,afterOpen:{x:afterOpen.left,y:afterOpen.top,height:afterOpen.height},' +
       'afterClose:{x:afterClose.left,y:afterClose.top,height:afterClose.height},' +
-      'scrollHeight:panel.scrollHeight,clientHeight:panel.clientHeight};})()',
+      'scrollHeight:document.getElementById("panel-scroll").scrollHeight,' +
+      'clientHeight:document.getElementById("panel-scroll").clientHeight};})()',
     returnByValue:true
   });
   const stableBox=stable.result?.value;
@@ -298,27 +299,30 @@ async function main() {
   const quality=await cdp.request('Runtime.evaluate',{
     expression:'(() => {const panel=document.getElementById("panel");' +
       'const close=document.getElementById("close-panel");' +
-      'panel.scrollTop=0;const first=close.getBoundingClientRect();' +
+      'const scroller=document.getElementById("panel-scroll");' +
+      'scroller.scrollTop=0;const first=close.getBoundingClientRect();' +
       'const firstCare=panel.querySelector(".objects [data-item]")?.dataset.item;' +
       'const care=panel.querySelector(".objects").getBoundingClientRect();' +
       'const status=panel.querySelector(".needs").getBoundingClientRect();' +
-      'panel.scrollTop=panel.scrollHeight;const scrolled=close.getBoundingClientRect();' +
+      'scroller.scrollTop=scroller.scrollHeight;const scrolled=close.getBoundingClientRect();' +
       'const outer=panel.getBoundingClientRect();const html=panel.innerHTML;' +
       'const out={first:Math.round(first.top),scrolled:Math.round(scrolled.top),' +
       'inView:scrolled.top>=outer.top-1&&scrolled.bottom<=outer.bottom+1,' +
-      'firstCare,careBeforeNeeds:care.top<status.top,scroll:panel.scrollTop,' +
+      'firstCare,careBeforeNeeds:care.top<status.top,scroll:scroller.scrollTop,' +
       'careBeforeClock:panel.querySelector("#hud-care").getBoundingClientRect().top < ' +
       'panel.querySelector("#day-period").getBoundingClientRect().top,' +
       'settingsBelowCare:panel.querySelector("#hud-settings").offsetTop > panel.querySelector("#hud-care").offsetTop,' +
       'monitorInSettings:!!document.querySelector("#desktop-display-settings .monitor-controls"),' +
       'settingsCollapsed:!document.getElementById("desktop-display-settings").open,' +
       'debugControls:["pause","speed","reset"].filter(id=>!!document.getElementById(id))};' +
-      'panel.scrollTop=0;return out;})()',
+      'scroller.scrollTop=0;return out;})()',
     returnByValue:true
   });
   const qualityCheck=quality.result?.value;
   console.log('Distribution-ready Windows HUD:',JSON.stringify(qualityCheck));
   assert.equal(qualityCheck.inView,true,'Close X must remain visible while scrolling');
+  assert.ok(Math.abs(qualityCheck.first-qualityCheck.scrolled)<2,
+    'Close button must stay pinned to the same screen coordinate');
   assert.equal(qualityCheck.firstCare,'feed');
   assert.equal(qualityCheck.careBeforeNeeds,true);
   assert.equal(qualityCheck.careBeforeClock,true,'care actions must be the first major section');

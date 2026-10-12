@@ -211,3 +211,30 @@ h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:#765c82;ma
 #desktop-display-settings .monitor-controls{margin-top:10px;margin-bottom:4px}
 #desktop-display-settings .monitor-controls small{line-height:1.45}
 #desktop-display-settings .update-quick{margin-top:1px}
+
+/* 0.0.10: permanently visible header with its OWN independent scroll viewport.
+   Scroll content never slides beneath the close X or the draggable title. */
+.panel{display:flex;flex-direction:column;overflow:hidden;padding:0;scrollbar-gutter:auto}
+.panel[hidden]{display:none}
+.panel-header{
+  position:relative;top:auto;left:auto;right:auto;z-index:25;
+  flex:0 0 auto;margin:0;padding:14px 15px 12px;
+  border-radius:19px 19px 0 0;border-bottom:1px solid #eadced;
+  background:#fffcfa;backdrop-filter:none;
+}
+.panel-scroll{
+  flex:1 1 auto;min-height:0;min-width:0;overflow-y:auto;overflow-x:hidden;
+  overscroll-behavior:contain;scrollbar-width:thin;scrollbar-gutter:stable;
+  scroll-behavior:auto;overflow-anchor:none;scroll-padding-top:10px;
+  padding:12px 15px 16px;
+}
+.panel-scroll:focus{outline:none}
+.panel-scroll .hud-care{margin-top:0}
+.panel-scroll .hud-care h2{margin-top:7px}
+.panel-scroll .hud-settings{margin-top:18px}
+.panel-scroll .panel-footer{margin-top:4px}
+@media(max-height:550px){
+  .panel{padding:0}
+  .panel-header{position:relative;top:auto;margin:0;padding:10px 12px}
+  .panel-scroll{padding:9px 12px 12px}
+}

@@ -4,7 +4,7 @@
   const E = window.BabyEngine, desktop = window.babyDesktop;
   if (!E || !desktop) return;
   const $ = id => document.getElementById(id);
-  const baby = $('baby'), thought = $('thought'), panel = $('panel');
+  const baby = $('baby'), thought = $('thought'), panel = $('panel'), panelScroll = $('panel-scroll');
   const spriteLayer = window.BabySpriteIntegration?.attachBabySprites({
     baby, canvas: $('baby-sprite'), manifest: window.BabySpriteManifest, base: '..'
   }) || null;
@@ -178,7 +178,7 @@
     updateWelcome();
     welcome.hidden = false;
     panelVisible(true);
-    panel.scrollTop = 0;
+    panelScroll.scrollTop = 0;
     $('welcome-next').focus({ preventScroll: true });
   }
   function panelVisible(on) {
@@ -199,12 +199,12 @@
     }
     welcomeIndex++;
     updateWelcome();
-    panel.scrollTop = 0;
+    panelScroll.scrollTop = 0;
   });
   $('welcome-prev').addEventListener('click', () => {
     welcomeIndex = Math.max(0, welcomeIndex - 1);
     updateWelcome();
-    panel.scrollTop = 0;
+    panelScroll.scrollTop = 0;
   });
   $('welcome-skip').addEventListener('click', () => {
     closeWelcome(); $('welcome-reopen').focus();

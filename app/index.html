@@ -11,6 +11,7 @@
 <button id="launcher" class="launcher" type="button" aria-label="Abrir o painel do bebê"><img src="../assets/icons/heart.svg" width="25" height="25" alt=""> <span>Minha amiguinha</span></button>
 <aside id="panel" class="panel" aria-label="Painel do Baby On Screen" hidden>
   <header class="panel-header" id="panel-move-header" title="Segure e arraste para mover o painel"><button type="button" id="panel-move-handle" class="panel-move-handle" aria-label="Mover painel: arraste ou use as teclas de seta" title="Arrastar painel">⠿</button><div class="avatar">👶</div><div class="panel-title"><small id="desktop-name-label">MINHA AMIGUINHA</small><h1>Baby On Screen</h1><p id="phase-name">Recém-nascida</p></div><button type="button" class="round" id="close-panel" aria-label="Fechar painel">×</button></header>
+  <div class="panel-scroll" id="panel-scroll" tabindex="-1" aria-label="Conteúdo do painel">
   <section id="welcome-tour" class="welcome-tour" role="region" aria-labelledby="welcome-title" hidden>
     <div class="welcome-top"><span class="welcome-kicker">✦ GUIA DA SUA AMIGUINHA</span><span id="welcome-count" class="welcome-count" aria-live="polite">Passo 1 de 5</span></div>
     <div class="welcome-scene" aria-hidden="true"><canvas id="welcome-preview" width="128" height="128"></canvas><span id="welcome-scene-icon" class="welcome-scene-icon">👶</span><span class="welcome-scene-sparkles">✦ · ♡ · ✦</span></div>
@@ -109,6 +110,7 @@
   </details>
   </section>
   <footer class="panel-footer"><small id="version">Baby On Screen</small><button type="button" id="welcome-reopen" class="welcome-reopen">? Como jogar</button><button type="button" id="hide">Ocultar personagem</button></footer>
+  </div>
 </aside>
 <div id="drag-ghost" class="drag-ghost" hidden><img id="drag-icon" alt="" src="../assets/icons/bottle.svg"></div>
 </body></html>

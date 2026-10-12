@@ -219,7 +219,8 @@ test('Windows mostra ações principais antes dos estados e mantém X fixo no to
   assert.ok(actions[0]<actions[1]&&actions[1]<actions[2]);
   assert.ok(html.indexOf('data-item="feed"')<html.indexOf('<h2>Como estou</h2>'));
   assert.ok(html.indexOf('class="panel-header"')<html.indexOf('id="welcome-tour"'));
-  assert.ok(css.includes('position:sticky;top:0'));
+  assert.match(css,/\.panel-header\{[\s\S]*?position:relative;top:auto/);
+  assert.ok(html.includes('id="panel-scroll"'));
   assert.ok(css.includes('#close-panel{'));
 });
 test('PC usa metade dos intervalos e não exibe mais ferramentas de teste',()=>{
@@ -260,6 +261,24 @@ test('PC inicia pelos cuidados; configurações e monitor ficam no final do HUD'
   assert.ok(where('id="desktop-updates"')>where('id="desktop-display-settings"'));
   assert.ok(where('id="desktop-updates"')<where('class="panel-footer"'));
   assert.match(html,/<details class="extras" id="desktop-display-settings">/);
-  assert.match(css,/\.panel-header\{\s*position:sticky;top:0/);
+  assert.match(css,/\.panel-scroll\{[\s\S]*?overflow-y:auto/);
+  assert.match(css,/\.panel-header\{[\s\S]*?position:relative;top:auto/);
   assert.match(css,/\.hud-settings\{margin-top:/);
+});
+
+test('o cabeçalho fica fora da área rolável; o X e a alça não somem ao rolar',()=>{
+  const html=fs.readFileSync(path.join(root,'app/index.html'),'utf8');
+  const js=fs.readFileSync(path.join(root,'app/renderer.js'),'utf8');
+  const css=fs.readFileSync(path.join(root,'app/style.css'),'utf8');
+  const start=html.indexOf('id="panel-scroll"');
+  const header=html.indexOf('id="panel-move-header"');
+  const firstCare=html.indexOf('id="hud-care"');
+  const bottom=html.indexOf('id="hud-settings"');
+  const footer=html.indexOf('class="panel-footer"');
+  assert.ok(header>=0 && header<start && start<firstCare);
+  assert.ok(firstCare<bottom && bottom<footer);
+  assert.match(css,/\.panel\{display:flex;flex-direction:column;overflow:hidden/);
+  assert.match(css,/\.panel-scroll\{[\s\S]*?overflow-y:auto/);
+  assert.match(js,/panelScroll\.scrollTop = 0/);
+  for(const id of ['pause','speed','reset']) assert.ok(!html.includes('id="'+id+'"'));
 });
