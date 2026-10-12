@@ -348,6 +348,63 @@ async function main() {
   const panelPng=Buffer.from(panelShot.data,'base64');
   assert.equal(panelPng.toString('hex',0,8),'89504e470d0a1a0a');
   fs.writeFileSync(path.join(root,'dist','windows-panel-smoke.png'),panelPng);
+  // Upgrade scenarios: a named legacy player must never be prompted again,
+  // and a previously played baby with no name must keep her progress and
+  // receive ONLY the mandatory name screen (no repeated five-step tutorial).
+  const legacyNamed=await cdp.request('Runtime.evaluate',{
+    expression:'(() => {localStorage.removeItem("baby-on-screen-name-locked-v1");' +
+      'return JSON.parse(localStorage.getItem("baby-on-screen-v1")).babyName;})()',
+    returnByValue:true
+  });
+  assert.equal(legacyNamed.result.value,'Estrelinha');
+  await cdp.request('Page.reload',{ignoreCache:true});
+  await delay(1500);
+  const adopted=await cdp.request('Runtime.evaluate',{
+    expression:'(() => ({locked:localStorage.getItem("baby-on-screen-name-locked-v1"),' +
+      'name:JSON.parse(localStorage.getItem("baby-on-screen-v1")).babyName,' +
+      'tourHidden:document.getElementById("welcome-tour").hidden}))()',
+    returnByValue:true
+  });
+  console.log('Legacy named player:',JSON.stringify(adopted.result?.value));
+  assert.equal(adopted.result.value.locked,'Estrelinha');
+  assert.equal(adopted.result.value.tourHidden,true);
+  await cdp.request('Runtime.evaluate',{
+    expression:'(() => {const save=JSON.parse(localStorage.getItem("baby-on-screen-v1"));' +
+      'save.babyName="";save.careCount=17;save.xp=124;' +
+      'localStorage.setItem("baby-on-screen-v1",JSON.stringify(save));' +
+      'localStorage.setItem("baby-on-screen-guide-v1","completed");' +
+      'localStorage.removeItem("baby-on-screen-name-locked-v1");})()'
+  });
+  await cdp.request('Page.reload',{ignoreCache:true});
+  await delay(1500);
+  const missingName=await cdp.request('Runtime.evaluate',{
+    expression:'(() => ({visible:!document.getElementById("welcome-tour").hidden,' +
+      'panel:!document.getElementById("panel").hidden,' +
+      'title:document.getElementById("welcome-count").textContent,' +
+      'field:!document.getElementById("welcome-name-field").hidden,' +
+      'care:JSON.parse(localStorage.getItem("baby-on-screen-v1")).careCount,' +
+      'xp:JSON.parse(localStorage.getItem("baby-on-screen-v1")).xp}))()',
+    returnByValue:true
+  });
+  console.log('Existing unnamed player:',JSON.stringify(missingName.result?.value));
+  assert.equal(missingName.result.value.visible,true);
+  assert.equal(missingName.result.value.panel,true);
+  assert.equal(missingName.result.value.field,true);
+  assert.equal(missingName.result.value.title,'Nome definitivo');
+  assert.equal(missingName.result.value.care,17);
+  assert.equal(missingName.result.value.xp,124);
+  const confirmedLegacy=await cdp.request('Runtime.evaluate',{
+    expression:'(() => {const input=document.getElementById("welcome-baby-name");' +
+      'input.value="Lia";input.dispatchEvent(new Event("input",{bubbles:true}));' +
+      'document.getElementById("welcome-next").click();' +
+      'const save=JSON.parse(localStorage.getItem("baby-on-screen-v1"));' +
+      'return {name:save.babyName,care:save.careCount,xp:save.xp,' +
+      'guideHidden:document.getElementById("welcome-tour").hidden};})()',
+    returnByValue:true
+  });
+  assert.deepEqual(confirmedLegacy.result.value,{
+    name:'Lia',care:17,xp:124,guideHidden:true
+  });
   console.log('Windows runtime, companion and panel verified.');
 }
 main().catch(e=>{console.error('Windows runtime smoke failed:',e);process.exitCode=1;})
