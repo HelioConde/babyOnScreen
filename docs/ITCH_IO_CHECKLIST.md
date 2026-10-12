@@ -4,9 +4,9 @@
 - [x] Downloads Setup/Portable e links fixos de release no GitHub.
 - [x] Atualização automática para a edição Setup, com manifesto `latest.yml`.
 - [x] Tutorial inicial, nome da personagem e salvamento/exportação.
-- [x] Interface prioritária para cuidados e botão de fechar acessível ao rolar (0.0.8, sujeito aos testes do build).
+- [x] HUD prioritário para cuidados, configurações recolhidas no final e X sempre visível ao rolar (validado no build Windows da 0.0.9).
 - [ ] Teste manual da versão mais recente em Windows 10 e 11 (100% e 125% de DPI).
-- [ ] Teste real com dois monitores, YouTube ao fundo, painel rolando e atualização 0.0.7 → 0.0.8.
+- [ ] Teste real com dois monitores, YouTube ao fundo, painel rolando e atualização 0.0.8 → 0.0.9.
 - [ ] Inspecionar executáveis finais e checar antivírus/SmartScreen (não contornar avisos).
 - [ ] Considerar assinatura digital Authenticode para distribuição ampla.
 

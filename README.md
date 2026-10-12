@@ -11,6 +11,14 @@
 
 **Estes endereços não mudam entre as versões**: por exemplo, da 0.0.3 para a 0.0.4 ou posteriores. Cada release manterá tanto o nome versionado para histórico quanto o nome fixo para download direto. Links permanentes apontam para a **última release estável**; betas ainda precisam ser baixadas pela página específica da beta.
 
+## Baby On Screen 0.0.9 — cuidados na frente, configurações no final
+
+O painel da edição **Windows** agora abre diretamente com as opções de cuidado: **Mamadeira → Fralda → Berço**, seguidas de remédio, brinquedo, cartinha e desenho. Depois aparecem o ciclo do dia, bem-estar, evolução, escola, memórias, missões e rotina.
+
+**Todas as configurações estão reunidas na parte inferior do HUD**. Para escolher outro monitor, abra **⚙️ Configurações → 🖥️ Monitor e aplicativo**. O painel já inicia com essa seção recolhida. **Preferências e salvamento** e **Atualizações** também ficam no final. O botão X acompanha a rolagem no topo, sem alterar a posição da janela.
+
+A edição Windows preserva os intervalos **50% menores** lançados na 0.0.8 (mamadeira, fralda e berço: **12min30s**). Velocidade, pausa e reinício de testes não reaparecem. A Web permanece inalterada.
+
 ## Baby On Screen 0.0.8 — painel pronto para jogadores e distribuição
 
 Na versão **Windows**, as ações e cuidados agora aguardam **metade do tempo anterior**: mamadeira, fralda e berço passam de 25 min para **12 min e 30 s**. Brinquedo, cartinha, desenho, remédio e escola também usam metade dos intervalos anteriores. As animações de uso da mamadeira e de descanso foram encurtadas. A **versão Web continua com as regras anteriores de 25 minutos**.

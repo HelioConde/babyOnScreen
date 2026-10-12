@@ -1,5 +1,13 @@
 # Histórico de versões
 
+## [0.0.9] — 12/10/2026
+
+- HUD Windows reorganizado para abrir com a caixinha de cuidados imediatamente abaixo do cabeçalho, antes do ciclo do dia e das estatísticas.
+- Seletor de monitor e atalho de atualização rápida movidos para **Configurações → Monitor e aplicativo**, recolhido por padrão.
+- Preferências e salvamento, monitor e atualizações agrupados no final do painel, reduzindo a poluição visual durante o jogo.
+- Mantidos tempos de ação reduzidos no PC, opções de jogo sem controles de teste, cabeçalho fixo com X e salvamentos anteriores.
+- Teste Windows empacotado verifica ordem das seções, configurações no final e X visível ao rolar.
+
 ## [0.0.8] — 12/10/2026
 
 - Intervalos das ações no Windows reduzidos em 50% sem alterar os tempos da Web.
