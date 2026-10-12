@@ -16,13 +16,14 @@
   let pendingMonitorId = null;
   let lastDayPeriod = '';
   const tourKey = 'baby-on-screen-guide-v1';
+  const nameLockKey = 'baby-on-screen-name-locked-v1';
   const welcome = $('welcome-tour');
   const preview = $('welcome-preview'), previewContext = preview.getContext('2d');
   let lastWelcomeDraw = 0;
   const welcomeSteps = Object.freeze([
     {title:'Sua amiguinha chegou! 💕',icon:'👶',
-      description:'Antes de começar, escolha como você quer chamar sua amiguinha. Ela vai brincar e fazer companhia na área de trabalho.',
-      hint:'O nome é opcional e o guia pausa as necessidades enquanto você aprende.'},
+      description:'Uma amiguinha para cuidar com carinho, descobrir novas fases e fazer companhia enquanto você usa o computador.',
+      hint:'Seus cuidados ficam pausados durante a apresentação.'},
     {title:'Pegue, mova e faça carinho',icon:'🖱️',
       description:'Segure o botão esquerdo sobre a bebê e arraste para outro lugar. Um clique rápido faz carinho e abre o painel.',
       hint:'Experimente levá-la até outro monitor. O painel também pode ser arrastado pelo topo.'},
@@ -36,7 +37,12 @@
       description:'Cuidados e brincadeiras rendem experiência, missões e novas fases. O progresso é salvo automaticamente e pode ser exportado nas preferências.',
       hint:'Seu progresso é salvo automaticamente. Cuide dela sem precisar acelerar o tempo!'}
   ]);
-  let welcomeIndex = 0;
+  const namingStep = Object.freeze({
+    title:'Sua amiguinha chegou! 💕',icon:'👶',
+    description:'Antes de começarem a aventura, escolha o nome que vai acompanhar sua bebê por toda a vida.',
+    hint:'O nome é obrigatório e definitivo. Os cuidados ficam pausados até você confirmar.'
+  });
+  let welcomeIndex = 0, namingOnly = false;
   const names = { food: 'alimentação', energy: 'energia', hygiene: 'higiene', health: 'saúde' };
   const source = document.currentScript ? document.currentScript.src : window.location.href;
   const lessons = E.schoolQuestions;
@@ -61,6 +67,18 @@
   const options = { sound: stored.sound !== false, paused: false, speed: 1 };
   const PC_ACTION_OPTIONS = Object.freeze({ cooldownFactor: .5 });
   let game = E.sanitize(read(gameKey, E.initial()));
+  // Migrate legacy PC saves: an existing name is already final. Keep the
+  // identity outside the progress JSON so importing another save cannot
+  // silently rename an already named baby.
+  let fixedBabyName = game.babyName;
+  try {
+    const locked = E.sanitize({ babyName: localStorage.getItem(nameLockKey) }).babyName;
+    if (locked) fixedBabyName = locked;
+    if (fixedBabyName) {
+      game.babyName = fixedBabyName;
+      localStorage.setItem(nameLockKey, fixedBabyName);
+    }
+  } catch { /* An older saved name still remains in the game's progress. */ }
   // One-time, backwards-compatible conversion for already-running PC
   // cooldowns created by 0.0.7 (25m essential cares).
   // The Web default remains untouched.
@@ -150,39 +168,86 @@
     thought.textContent = text; game.lastSpoken = text;
     nextSpeech = performance.now() + (E.urgency(game).level === 'crying' ? 8000 : 13000 + Math.random() * 9000);
   }
+  function showNameError(message = 'Digite um nome para continuar.') {
+    const error = $('welcome-name-error');
+    error.textContent = message;
+    error.hidden = false;
+    $('welcome-baby-name').focus({ preventScroll: true });
+  }
   function updateWelcome() {
-    const step = welcomeSteps[welcomeIndex];
+    const chooseName = welcomeIndex === 0 && !game.babyName;
+    const step = chooseName ? namingStep : welcomeSteps[welcomeIndex];
     $('welcome-title').textContent = step.title;
     $('welcome-description').textContent = step.description;
     $('welcome-hint').textContent = step.hint;
     $('welcome-scene-icon').textContent = step.icon;
-    $('welcome-count').textContent = 'Passo ' + (welcomeIndex + 1) + ' de ' + welcomeSteps.length;
-    $('welcome-name-field').hidden = welcomeIndex !== 0;
+    $('welcome-kicker').textContent = chooseName ? '✦ O NOME DA SUA BEBÊ' : '✦ GUIA DA SUA AMIGUINHA';
+    $('welcome-count').textContent = namingOnly ? 'Nome definitivo' :
+      'Passo ' + (welcomeIndex + 1) + ' de ' + welcomeSteps.length;
+    $('welcome-name-field').hidden = !chooseName;
+    $('welcome-name-error').hidden = true;
+    $('welcome-progress').hidden = namingOnly;
     $('welcome-progress').setAttribute('aria-valuenow', String(welcomeIndex + 1));
     $('welcome-progress').firstElementChild.style.width =
       ((welcomeIndex + 1) / welcomeSteps.length * 100) + '%';
+    $('welcome-prev').hidden = namingOnly;
     $('welcome-prev').disabled = welcomeIndex === 0;
-    $('welcome-next').textContent = welcomeIndex === welcomeSteps.length - 1
-      ? 'Começar a cuidar 💕' : 'Próximo →';
+    $('welcome-skip').hidden = chooseName;
+    $('welcome-next').textContent = chooseName ? 'Confirmar nome 💕' :
+      (welcomeIndex === welcomeSteps.length - 1 ? 'Começar a cuidar 💕' : 'Próximo →');
+    $('welcome-next').disabled = chooseName &&
+      !$('welcome-baby-name').value.replace(/\s+/g, ' ').trim();
+  }
+  function commitBabyName() {
+    if (game.babyName) return true;
+    const result = E.nameBabyOnce(game, $('welcome-baby-name').value);
+    if (!result.applied) {
+      showNameError('Escolha um nome antes de confirmar.');
+      return false;
+    }
+    // The identity must be persisted before leaving the mandatory step.
+    try {
+      localStorage.setItem(nameLockKey, result.name);
+      fixedBabyName = result.name;
+      game = result.state;
+      save();
+    } catch {
+      showNameError('Não foi possível salvar o nome. Verifique o armazenamento e tente novamente.');
+      return false;
+    }
+    $('desktop-name-input').value = fixedBabyName;
+    $('desktop-name-label').textContent = fixedBabyName;
+    render();
+    return true;
   }
   function closeWelcome() {
     if (welcome.hidden) return;
+    if (!game.babyName) {
+      showNameError();
+      return;
+    }
     welcome.hidden = true;
+    namingOnly = false;
     try { localStorage.setItem(tourKey, 'completed'); }
     catch { /* A presentation preference must not block playing. */ }
     publishRegions();
   }
-  function openWelcome() {
+  function openWelcome({ onlyName = false } = {}) {
+    namingOnly = onlyName && !game.babyName;
     welcomeIndex = 0;
-    $('welcome-baby-name').value = game.babyName;
+    $('welcome-baby-name').value = '';
     updateWelcome();
     welcome.hidden = false;
     panelVisible(true);
     panelScroll.scrollTop = 0;
-    $('welcome-next').focus({ preventScroll: true });
+    (game.babyName ? $('welcome-next') : $('welcome-baby-name'))
+      .focus({ preventScroll: true });
   }
   function panelVisible(on) {
-    if (!on && !welcome.hidden) closeWelcome();
+    if (!on && !welcome.hidden) {
+      if (!game.babyName) return; // The name cannot be dismissed or skipped.
+      closeWelcome();
+    }
     if (on && panel.style.left === '') {
       const hidden=panel.hidden;
       if(hidden){panel.hidden=false;panel.style.visibility='hidden';}
@@ -194,6 +259,10 @@
     publishRegions();
   }
   $('welcome-next').addEventListener('click', () => {
+    if (!game.babyName && welcomeIndex === 0) {
+      if (!commitBabyName()) return;
+      if (namingOnly) { closeWelcome(); return; }
+    }
     if (welcomeIndex === welcomeSteps.length - 1) {
       closeWelcome(); $('welcome-reopen').focus(); return;
     }
@@ -207,20 +276,31 @@
     panelScroll.scrollTop = 0;
   });
   $('welcome-skip').addEventListener('click', () => {
+    if (!game.babyName) { showNameError(); return; }
     closeWelcome(); $('welcome-reopen').focus();
   });
-  $('welcome-reopen').addEventListener('click', openWelcome);
-  $('welcome-baby-name').addEventListener('input', event => {
-    game = E.renameBaby(game, event.target.value);
-    $('desktop-name-input').value = game.babyName;
-    $('desktop-name-label').textContent = game.babyName || 'MINHA AMIGUINHA';
-    save();
+  $('welcome-reopen').addEventListener('click', () => openWelcome());
+  $('welcome-baby-name').addEventListener('input', () => {
+    $('welcome-name-error').hidden = true;
+    $('welcome-next').disabled = !$('welcome-baby-name').value.replace(/\s+/g, ' ').trim();
+  });
+  $('welcome-baby-name').addEventListener('keydown', event => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      $('welcome-next').click();
+    }
   });
   welcome.addEventListener('keydown', event => {
     if (event.target.closest('input')) return;
-    if (event.key === 'Escape') { event.preventDefault(); closeWelcome(); $('welcome-reopen').focus(); }
-    else if (event.key === 'ArrowRight') { event.preventDefault(); $('welcome-next').click(); }
-    else if (event.key === 'ArrowLeft') { event.preventDefault(); $('welcome-prev').click(); }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      if (game.babyName) { closeWelcome(); $('welcome-reopen').focus(); }
+      else showNameError();
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault(); $('welcome-next').click();
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault(); $('welcome-prev').click();
+    }
   });
   function displayedMonitors() {
     return Array.isArray(desktopLayout?.displays) ? desktopLayout.displays : [];
@@ -666,11 +746,7 @@
   });
   $('sound').checked = options.sound;
   $('desktop-name-input').value = game.babyName;
-  $('desktop-name-input').addEventListener('input', event => {
-    game = E.renameBaby(game, event.target.value);
-    $('desktop-name-label').textContent = game.babyName || 'MINHA AMIGUINHA';
-    save();
-  });
+  // Read-only by design. No settings event can rename the baby.
   $('sound').addEventListener('change', e => { options.sound = e.target.checked; save(); });
   $('export').addEventListener('click', () => {
     save();
@@ -689,10 +765,12 @@
     try {
       const incoming = E.importSave(await file.text());
       if (!window.confirm('Substituir seu progresso atual por este arquivo?')) return;
+      // Importing a different save must not replace an already chosen name.
+      if (fixedBabyName) incoming.babyName = fixedBabyName;
       game = incoming; lastStage = ''; lastMemoryCount = -1;
       $('desktop-name-input').value = game.babyName;
       render(); speak('return'); save();
-      feedback('Progresso importado! Bem-vinda de volta, amiguinha.');
+      feedback('Progresso importado! O nome definitivo da bebê foi preservado.');
     } catch (error) { feedback('Erro ao importar: ' + error.message); }
   });
   function renderMissions() {
@@ -995,7 +1073,10 @@
     requestAnimationFrame(animate);
   }
   render(); bounds(); place(); panelVisible(false); speak('return');
-  try { if (localStorage.getItem(tourKey) !== 'completed') openWelcome(); }
-  catch { openWelcome(); }
+  try {
+    const guideCompleted = localStorage.getItem(tourKey) === 'completed';
+    if (!game.babyName) openWelcome({ onlyName: guideCompleted });
+    else if (!guideCompleted) openWelcome();
+  } catch { if (!game.babyName) openWelcome(); }
   requestAnimationFrame(animate);
 })();
