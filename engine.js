@@ -365,7 +365,7 @@
     s.savedAt = time;
     return { state: s, applied: true, reason: 'ok', achievements: unlock(s) };
   }
-  function school(input, subject, now) {
+  function school(input, subject, now, opts) {
     const s = sanitize(input), lesson = schoolSubjects[subject], time = finite(now, Date.now(), 0, 9999999999999);
     if (!lesson) return { state: s, applied: false, reason: 'unknown' };
     if (ageStage(s).id !== 'child') return { state: s, applied: false, reason: 'too-young' };
@@ -378,7 +378,7 @@
     s.needs.energy = clamp(s.needs.energy - 12, 0, 100);
     s.needs.food = clamp(s.needs.food - 8, 0, 100);
     s.happiness = clamp(s.happiness + 8, 0, 100);
-    s.cooldowns.school = time + 360 * 1000; s.savedAt = time;
+    s.cooldowns.school = time + (opts?.cooldownFactor === .5 ? 180 : 360) * 1000; s.savedAt = time;
     addMemory(s, 'Aprendi ' + lesson.label.toLowerCase() + ' na escola!');
     return { state: s, applied: true, reason: 'ok', achievements: unlock(s) };
   }

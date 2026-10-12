@@ -291,3 +291,37 @@ test('cuidados essenciais duram 25 minutos reais e não exigem repetição antec
     assert.ok(after.needs[need]>74,id+' must stay comfortable for 25min at 2x web speed');
   }
 });
+
+test('Windows reduz pela metade cooldowns de cuidado e atividade sem alterar a Web', () => {
+  const now = 2000000000000;
+  for (const name of ['feed', 'diaper', 'sleep', 'medicine']) {
+    const need = E.actions[name].need;
+    const original = E.initial(now);
+    original.needs[need] = 30;
+    const web = E.care(original, name, now);
+    const pc = E.care(original, name, now, { cooldownFactor: .5 });
+    assert.equal(web.applied, true);
+    assert.equal(pc.applied, true);
+    assert.equal(web.state.cooldowns[name] - now, E.actions[name].cooldown * 1000);
+    assert.equal(pc.state.cooldowns[name] - now, E.actions[name].cooldown * 500);
+    if (['feed','sleep','diaper'].includes(name))
+      assert.equal(pc.state.cooldowns[name] - now, 12.5 * 60 * 1000);
+  }
+  for (const name of ['toy','letter','drawing']) {
+    const s = E.initial(now);
+    const web = E.interact(s, name, now);
+    const pc = E.interact(s, name, now, { cooldownFactor: .5 });
+    assert.equal(web.applied, true);
+    assert.equal(pc.applied, true);
+    assert.equal(web.state.cooldowns[name]-now, E.activities[name].cooldown*1000);
+    assert.equal(pc.state.cooldowns[name]-now, E.activities[name].cooldown*500);
+  }
+  const s = E.initial(now);
+  s.activeSeconds = 5400; s.careCount = 65;
+  const webSchool = E.school(s, 'reading', now);
+  const pcSchool = E.school(s, 'reading', now, { cooldownFactor: .5 });
+  assert.equal(webSchool.applied, true);
+  assert.equal(pcSchool.applied, true);
+  assert.equal(webSchool.state.cooldowns.school-now, 360000);
+  assert.equal(pcSchool.state.cooldowns.school-now, 180000);
+});
