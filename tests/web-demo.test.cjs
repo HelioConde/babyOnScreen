@@ -196,7 +196,7 @@ test('nome da bebê faz parte do tutorial e é salvo no progresso compartilhado'
   assert.ok(desktop.includes('localStorage.setItem(nameLockKey, result.name)'));
   assert.ok(desktop.includes("if (!game.babyName) openWelcome({ onlyName: guideCompleted })"));
   assert.match(desktop,/\$\('desktop-name-input'\)\.value = game\.babyName/);
-  assert.match(desktop,/\$\('welcome-name-field'\)\.hidden = welcomeIndex !== 0/);
+  assert.ok(desktop.includes("$('welcome-name-field').hidden = !chooseName"));
 });
 test('o monitor é selecionado por mudança NATIVA de janela, não apenas CSS',()=>{
   const desktop=fs.readFileSync(path.join(root,'app/renderer.js'),'utf8');
