@@ -34,7 +34,7 @@
       hint:'As áreas vazias continuam transparentes aos cliques. O botão Minha amiguinha fica na mesma tela da personagem.'},
     {title:'Cresçam juntas!',icon:'🌟',
       description:'Cuidados e brincadeiras rendem experiência, missões e novas fases. O progresso é salvo automaticamente e pode ser exportado nas preferências.',
-      hint:'Você pode pausar ou reduzir a velocidade a qualquer momento. Bom jogo!'}
+      hint:'Seu progresso é salvo automaticamente. Cuide dela sem precisar acelerar o tempo!'}
   ]);
   let welcomeIndex = 0;
   const names = { food: 'alimentação', energy: 'energia', hygiene: 'higiene', health: 'saúde' };
@@ -56,10 +56,10 @@
     } catch { return fallback; }
   }
   const stored = read(optionsKey, {});
-  const options = {
-    sound: stored.sound !== false, paused: stored.paused === true,
-    speed: E.clamp(Number(stored.speed) || 1, .5, 2)
-  };
+  // Production builds keep normal time progression. Old development
+  // pause/speed preferences must not persist after removing debug controls.
+  const options = { sound: stored.sound !== false, paused: false, speed: 1 };
+  const PC_ACTION_OPTIONS = Object.freeze({ cooldownFactor: .5 });
   let game = E.sanitize(read(gameKey, E.initial()));
   // A closed/paused app does not burn through needs; resume at the chosen speed.
   if (!options.paused) {
@@ -480,7 +480,9 @@
     document.querySelectorAll('[data-item]').forEach(item => item.classList.remove('selected'));
   }
   function interact(name) {
-    const result = E.actions[name] ? E.care(game, name) : E.interact(game, name);
+    const result = E.actions[name]
+      ? E.care(game, name, Date.now(), PC_ACTION_OPTIONS)
+      : E.interact(game, name, Date.now(), PC_ACTION_OPTIONS);
     unselect();
     if (!result.applied) {
       if (result.reason === 'cooldown') feedback('Espere um pouco antes de usar esse item novamente. ⏳');
@@ -616,7 +618,7 @@
       voice('rindo2');
       return;
     }
-    const result = E.school(game, $('school-subject').value);
+    const result = E.school(game, $('school-subject').value, Date.now(), PC_ACTION_OPTIONS);
     if (!result.applied) {
       feedback(result.reason === 'cooldown' ? 'Hora de descansar depois da aula! Volte daqui a alguns minutos.' :
         result.reason === 'needs-care' ? 'Antes da escola, ela precisa comer e descansar.' :
@@ -642,29 +644,13 @@
     publishRegions();
   });
   $('sound').checked = options.sound;
-  $('pause').checked = options.paused;
-  $('speed').value = String(options.speed);
   $('desktop-name-input').value = game.babyName;
   $('desktop-name-input').addEventListener('input', event => {
     game = E.renameBaby(game, event.target.value);
     $('desktop-name-label').textContent = game.babyName || 'MINHA AMIGUINHA';
     save();
   });
-  $('speed-value').textContent = options.speed.toLocaleString('pt-BR') + '×';
   $('sound').addEventListener('change', e => { options.sound = e.target.checked; save(); });
-  $('pause').addEventListener('change', e => { options.paused = e.target.checked; save(); });
-  $('speed').addEventListener('input', e => {
-    options.speed = E.clamp(Number(e.target.value), .5, 2);
-    $('speed-value').textContent = options.speed.toLocaleString('pt-BR') + '×';
-    save();
-  });
-  $('reset').addEventListener('click', () => {
-    if (!window.confirm('Apagar o progresso e iniciar outra história?')) return;
-    game = E.initial(); lastStage = ''; lastMemoryCount = -1;
-    $('desktop-name-input').value = game.babyName;
-    unselect(); render(); speak('return'); save();
-    feedback('Sua nova história começou! Gugu! 💕');
-  });
   $('export').addEventListener('click', () => {
     save();
     const blob = new Blob([E.exportSave(game)], { type: 'application/json' });

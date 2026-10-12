@@ -210,3 +210,30 @@ test('bolhas ficam visíveis sem virar região clicável nem ocultar vídeos',()
   assert.match(renderer,/region\(ghost, 12\)/);
   assert.match(renderer,/desktop\.setHitRegions\(hit\)/);
 });
+
+test('Windows mostra ações principais antes dos estados e mantém X fixo no topo',()=>{
+  const html=fs.readFileSync(path.join(root,'app/index.html'),'utf8');
+  const css=fs.readFileSync(path.join(root,'app/style.css'),'utf8');
+  const actions=['feed','diaper','sleep'].map(x=>html.indexOf('data-item="'+x+'"'));
+  assert.ok(actions.every(x=>x>=0));
+  assert.ok(actions[0]<actions[1]&&actions[1]<actions[2]);
+  assert.ok(html.indexOf('data-item="feed"')<html.indexOf('<h2>Como estou</h2>'));
+  assert.ok(html.indexOf('class="panel-header"')<html.indexOf('id="welcome-tour"'));
+  assert.ok(css.includes('position:sticky;top:-19px'));
+  assert.ok(css.includes('#close-panel{'));
+});
+test('PC usa metade dos intervalos e não exibe mais ferramentas de teste',()=>{
+  const html=fs.readFileSync(path.join(root,'app/index.html'),'utf8');
+  const js=fs.readFileSync(path.join(root,'app/renderer.js'),'utf8');
+  assert.match(js,/PC_ACTION_OPTIONS = Object\.freeze\(\{ cooldownFactor: \.5 \}\)/);
+  assert.match(js,/E\.care\(game, name, Date\.now\(\), PC_ACTION_OPTIONS\)/);
+  assert.match(js,/E\.interact\(game, name, Date\.now\(\), PC_ACTION_OPTIONS\)/);
+  assert.match(js,/E\.school\(game, \$\('school-subject'\)\.value, Date\.now\(\), PC_ACTION_OPTIONS\)/);
+  for(const id of ['speed','speed-value','pause','reset']) {
+    assert.ok(!html.includes('id="'+id+'"'),'debug control '+id+' must not be present');
+  }
+  for(const id of ['export','import-file','sound','desktop-name-input']) {
+    assert.ok(html.includes('id="'+id+'"'));
+  }
+  assert.match(js,/paused: false, speed: 1/);
+});
