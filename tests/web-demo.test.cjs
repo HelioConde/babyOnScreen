@@ -227,10 +227,10 @@ test('Windows mostra ações principais antes dos estados e mantém X fixo no to
   assert.ok(html.includes('id="panel-scroll"'));
   assert.ok(css.includes('#close-panel{'));
 });
-test('PC usa metade dos intervalos e não exibe mais ferramentas de teste',()=>{
+test('PC usa 30% dos intervalos e não exibe mais ferramentas de teste',()=>{
   const html=fs.readFileSync(path.join(root,'app/index.html'),'utf8');
   const js=fs.readFileSync(path.join(root,'app/renderer.js'),'utf8');
-  assert.match(js,/PC_ACTION_OPTIONS = Object\.freeze\(\{ cooldownFactor: \.5 \}\)/);
+  assert.match(js,/PC_ACTION_OPTIONS = Object\.freeze\(\{ cooldownFactor: \.3 \}\)/);
   assert.match(js,/E\.care\(game, name, Date\.now\(\), PC_ACTION_OPTIONS\)/);
   assert.match(js,/E\.interact\(game, name, Date\.now\(\), PC_ACTION_OPTIONS\)/);
   assert.match(js,/E\.school\(game, \$\('school-subject'\)\.value, Date\.now\(\), PC_ACTION_OPTIONS\)/);
@@ -296,4 +296,12 @@ test('nome definitivo não pode ser pulado ou alterado depois, nem pela importa�
   assert.ok(desktop.includes('if (!game.babyName) return; // The name cannot be dismissed or skipped.'));
   assert.ok(desktop.includes('if (fixedBabyName) incoming.babyName = fixedBabyName'));
   assert.ok(!desktop.includes("$('desktop-name-input').addEventListener('input'"));
+});
+
+test('PC migra temporizadores em andamento de 50% para 30% uma só vez',()=>{
+  const js=fs.readFileSync(path.join(root,'app/renderer.js'),'utf8');
+  assert.match(js,/baby-on-screen-pc-30pct-cooldowns-v1/);
+  assert.match(js,/game\.cooldowns\[name\] = Math\.max\(now, expiry - full \* \.2\)/);
+  assert.match(js,/expiry > now && expiry <= now \+ full \* \.5/);
+  assert.match(js,/localStorage\.setItem\(migrationKey, 'done'\)/);
 });

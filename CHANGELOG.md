@@ -1,5 +1,13 @@
 # Histórico de versões
 
+## [0.0.12] — 13/10/2026
+
+- Tempos de espera da versão PC ajustados para 30% do original: 7min30s em mamadeira, fralda e berço.
+- Demais cuidados, brinquedos, cartinha, desenho e escola também seguem 30%.
+- Migração única para os temporizadores pendentes de saves anteriores, sem apagar dados.
+- Versão Web continua com tempos originais; testes de PC e Web separados.
+- Mantido o HUD organizado com ações no topo, configurações no final e sem controles de teste.
+
 ## [0.0.11] — 12/10/2026
 
 - Tela obrigatória de escolha do nome na primeira abertura da versão Windows quando a bebê ainda não foi nomeada; visual integrado ao HUD, sprites reais e confirmação explícita.

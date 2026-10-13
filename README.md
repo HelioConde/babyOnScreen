@@ -11,6 +11,12 @@
 
 **Estes endereços não mudam entre as versões**: por exemplo, da 0.0.3 para a 0.0.4 ou posteriores. Cada release manterá tanto o nome versionado para histórico quanto o nome fixo para download direto. Links permanentes apontam para a **última release estável**; betas ainda precisam ser baixadas pela página específica da beta.
 
+## Baby On Screen 0.0.12 — intervalos de 30% no Windows
+
+Os tempos de espera para ações na versão **PC** agora equivalem a **30% dos tempos originais**. Mamadeira, fralda e berço passam de 12min30s para **7min30s**; outras interações e escola também usam 30%. A edição **Web mantém seus intervalos existentes**, inclusive os 25 minutos dos cuidados principais.
+
+Se o jogador já estiver esperando a conclusão de uma ação, a atualização reduz uma única vez o temporizador pendente da versão anterior. Não reinicia o progresso, não muda o nome definitivo e mantém o painel organizado sem os controles de teste.
+
 ## Baby On Screen 0.0.11 — escolha definitiva do nome da bebê
 
 Na primeira abertura do jogo para Windows, se a bebê **ainda não tiver um nome**, aparece automaticamente uma tela integrada ao próprio HUD e ao tutorial, com a animação da personagem. Digite o nome desejado (até 20 caracteres) e clique em **Confirmar nome 💕**. Antes de confirmar, é possível corrigir a escrita; depois disso, o nome fica definitivo.

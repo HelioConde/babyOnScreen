@@ -324,7 +324,10 @@
   // Desktop can use shorter waits without changing the 25-minute Web rhythm.
   // Optional modifiers are applied only at the moment an action succeeds.
   function actionCooldownMs(item, opts = {}) {
-    const factor = opts && opts.cooldownFactor === .5 ? .5 : 1;
+    // Web keeps the full 25-minute rhythm; the Windows companion may
+    // opt into a gentler interval (30% of the original).
+    const factor = opts?.cooldownFactor === .3 ? .3 :
+      opts?.cooldownFactor === .5 ? .5 : 1;
     return Math.round(item.cooldown * 1000 * factor);
   }
   function care(input, name, now, opts) {
@@ -378,7 +381,7 @@
     s.needs.energy = clamp(s.needs.energy - 12, 0, 100);
     s.needs.food = clamp(s.needs.food - 8, 0, 100);
     s.happiness = clamp(s.happiness + 8, 0, 100);
-    s.cooldowns.school = time + (opts?.cooldownFactor === .5 ? 180 : 360) * 1000; s.savedAt = time;
+    s.cooldowns.school = time + actionCooldownMs({ cooldown: 360 }, opts); s.savedAt = time;
     addMemory(s, 'Aprendi ' + lesson.label.toLowerCase() + ' na escola!');
     return { state: s, applied: true, reason: 'ok', achievements: unlock(s) };
   }

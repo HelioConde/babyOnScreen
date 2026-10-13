@@ -65,7 +65,7 @@
   // Production builds keep normal time progression. Old development
   // pause/speed preferences must not persist after removing debug controls.
   const options = { sound: stored.sound !== false, paused: false, speed: 1 };
-  const PC_ACTION_OPTIONS = Object.freeze({ cooldownFactor: .5 });
+  const PC_ACTION_OPTIONS = Object.freeze({ cooldownFactor: .3 });
   let game = E.sanitize(read(gameKey, E.initial()));
   // Migrate legacy PC saves: an existing name is already final. Keep the
   // identity outside the progress JSON so importing another save cannot
@@ -100,6 +100,26 @@
       localStorage.setItem(gameKey, JSON.stringify(game));
     }
   } catch { /* Existing saves remain usable even if storage is unavailable. */ }
+  // Upgrade any still-running 50% PC cooldown to 30%, once per local save.
+  // Older 25-minute timers were converted to 50% by the migration above.
+  // Existing progress, name, needs and achievements are never reset.
+  try {
+    const migrationKey = 'baby-on-screen-pc-30pct-cooldowns-v1';
+    if (localStorage.getItem(migrationKey) !== 'done') {
+      const now = Date.now();
+      for (const [name, expiry] of Object.entries(game.cooldowns)) {
+        const originalSeconds = name === 'school' ? 360 :
+          (E.actions[name] || E.activities[name])?.cooldown;
+        if (!originalSeconds || !Number.isFinite(expiry)) continue;
+        const full = originalSeconds * 1000;
+        if (expiry > now && expiry <= now + full * .5) {
+          game.cooldowns[name] = Math.max(now, expiry - full * .2);
+        }
+      }
+      localStorage.setItem(migrationKey, 'done');
+      localStorage.setItem(gameKey, JSON.stringify(game));
+    }
+  } catch { /* A storage error must not discard the existing save. */ }
   // A closed/paused app does not burn through needs; resume at the chosen speed.
   if (!options.paused) {
     const offlineSeconds = Math.min(180, Math.max(0, (Date.now() - game.savedAt) / 1000));

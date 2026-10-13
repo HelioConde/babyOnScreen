@@ -341,3 +341,39 @@ test('o nome pode ser escolhido uma vez, preservado pelo save e nunca substituí
   assert.equal(E.importSave(E.exportSave(result.state)).babyName,'Estrelinha do céu');
   assert.equal(E.nameBabyOnce(E.sanitize({needs:{food:61}}),'Mimi').applied,true);
 });
+
+test('Windows 30% timers keep Web 25 minutes and reduce every activity including school', () => {
+  const now = 2000000000000;
+  for (const name of ['feed','diaper','sleep','medicine']) {
+    const initial = E.initial(now);
+    initial.needs[E.actions[name].need] = 20;
+    const desktop = E.care(initial, name, now, { cooldownFactor: .3 });
+    const web = E.care(initial, name, now);
+    assert.equal(desktop.applied, true);
+    assert.equal(desktop.state.cooldowns[name] - now,
+      Math.round(E.actions[name].cooldown * 300));
+    assert.equal(web.state.cooldowns[name] - now,
+      E.actions[name].cooldown * 1000);
+    if (['feed','diaper','sleep'].includes(name))
+      assert.equal(desktop.state.cooldowns[name] - now, 7.5 * 60 * 1000);
+  }
+  for (const name of ['toy','letter','drawing']) {
+    const initial=E.initial(now);
+    const pc=E.interact(initial,name,now,{cooldownFactor:.3});
+    const web=E.interact(initial,name,now);
+    assert.equal(pc.applied,true);
+    assert.equal(pc.state.cooldowns[name]-now,
+      Math.round(E.activities[name].cooldown*300));
+    assert.equal(web.state.cooldowns[name]-now,
+      E.activities[name].cooldown*1000);
+  }
+  const initial=E.initial(now);
+  initial.activeSeconds=5400;
+  initial.careCount=65;
+  const pc=E.school(initial,'reading',now,{cooldownFactor:.3});
+  const web=E.school(initial,'reading',now);
+  assert.equal(pc.applied,true);
+  assert.equal(web.applied,true);
+  assert.equal(pc.state.cooldowns.school-now,108000);
+  assert.equal(web.state.cooldowns.school-now,360000);
+});
