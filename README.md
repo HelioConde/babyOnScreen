@@ -1,4 +1,21 @@
-# 👶 Baby On Screen — infância, cuidados e primeiras palavras
+# Baby On Screen — seu mascote virtual na tela 👶
+
+**Cuide de um bebê virtual, acompanhe seu crescimento e descubra atividades na versão Windows ou no navegador.**
+
+[**Baixar para Windows**](https://github.com/HelioConde/babyOnScreen/releases/latest) · [**Jogar na Web**](https://helioconde.github.io/babyOnScreen/)
+
+![Electron](https://img.shields.io/badge/Electron-Windows-47848F?logo=electron&logoColor=white) ![Web](https://img.shields.io/badge/Web-navegador-1572B6) ![Status](https://img.shields.io/badge/status-em%20evolução-64748b)
+
+## Primeiros passos
+
+- **Windows:** escolha o instalador ou a versão portátil na tabela de downloads abaixo.
+- **Web:** acesse o jogo diretamente pelo navegador, sem instalação.
+- **Progresso:** consulte as seções de salvamento e transferência antes de trocar de dispositivo.
+- **Novidades:** as notas de versão abaixo detalham mudanças específicas entre Windows e Web.
+
+> Os recursos e intervalos de ações variam por edição. Confirme a versão instalada antes de comparar com as notas históricas.
+
+---
 
 ## ⬇️ Baixar Baby On Screen — sempre a versão mais recente
 
